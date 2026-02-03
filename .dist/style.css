@@ -1,0 +1,127 @@
+*{
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body{
+    background:#1c1c1c;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+
+.card{
+    background:#f8f9fb;
+    width:700px;
+    padding:30px 40px;
+    border-radius:10px;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:bold;
+    color:#2b6cb0;
+}
+
+h2{
+    text-align:center;
+    margin-top:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
+    margin-bottom:25px;
+}
+
+.row{
+    display:flex;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.row label{
+    width:45%;
+    font-size:14px;
+    color:#333;
+}
+
+.row input,
+.row select{
+    width:55%;
+    padding:10px;
+    border-radius:20px;
+    border:1px solid #ccc;
+    outline:none;
+}
+
+.gender-btns{
+    display:flex;
+    gap:10px;
+    width:55%;
+}
+
+.gender-btns button{
+    flex:1;
+    padding:10px;
+    border-radius:20px;
+    border:1px solid #ccc;
+    background:#fff;
+    cursor:pointer;
+}
+
+.gender-btns button:hover{
+    background-color: green;
+}
+
+.upload-box{
+    width:55%;
+    border:2px dashed #ccc;
+    padding:20px;
+    text-align:center;
+    border-radius:10px;
+    color:#777;
+    font-size:14px;
+}
+
+.or{
+    text-align:center;
+    color:#777;
+    margin:10px 0;
+}
+
+.avatars{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    margin:15px 0;
+}
+
+.avatar{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background:#ddd;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:30px;
+    cursor:pointer;
+}
+
+.register{
+    display:block;
+    margin:20px auto 0;
+    padding:12px 40px;
+    border:none;
+    border-radius:25px;
+    background:#ccc;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.register:hover{
+    background-color: green;
+}

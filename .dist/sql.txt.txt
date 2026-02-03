@@ -1,0 +1,73 @@
+use roomify;
+Database changed
+
+create table user(user_id int primary key,name varchar(50),DOB date,email varchar(100),occupation varchar(50),password varchar(100));
+
+
+mysql> create table finder(finder_id int primary key,foreign key(finder_id)references user(user_id));
+Query OK, 0 rows affected (0.12 sec)
+
+mysql> create table host(host_id int primary key,foreign key(host_id)references user(user_id));
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> create table room(room_id int primary key,host_id int,location varchar(100),rent int,status varchar(30),foreign key(host_id)references host(host_id));
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> create table filters(filter_id int primary key,finder_id int,age_group int,area varchar(100),gender varchar(10),budget int,habits varchar(100),foreign key(finder_id)references finder(finder_id));
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> create table connect(connect_id int primary key,finder_id int,host_id int,foreign key(finder_id)references finder(finder_id),foreign key(host_id)references host(host_id));
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> create table review(review_id int primary key,connect_id int,rating int,comment text,review_date date,foreign key(connect_id)references connect(connect_id));
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> create table plans(plan_id int primary key,plan_name varchar(30),type varchar(30),duration int,status varchar(30));
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> create table payment(payment_id int primary key,user_id int,plan_id int,method varchar(30),amount int,status varchar(20),payment_date date,start_date date,end_date date,timestamp TIMESTAMP default current_timestamp,foreign key(user_id)references user(user_id),foreign key(plan_id)references plans(plan_id));
+Query OK, 0 rows affected (0.05 sec)
+
+mysql>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

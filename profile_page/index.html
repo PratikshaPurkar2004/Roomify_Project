@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Roomify</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Roomify</div>
+  <button class="btn">Login / Register</button>
+</header>
+
+<p class="subtitle">Connect Match, Live Together.</p>
+<h3>Male & Female Roommates in India</h3>
+
+<div class="filters">
+  <button class="tab active" data-filter="all">All listing</button>
+  <button class="tab" data-filter="room">Rooms</button>
+  <button class="tab" data-filter="roommate">Roommates</button>
+  <input type="text" placeholder="India">
+  <select>
+    <option>Gender</option>
+    <option>Male</option>
+    <option>Female</option>
+  </select>
+</div>
+
+<hr>
+
+<div class="cards">
+
+  <!-- ROOM -->
+  <div class="card" data-type="room" onclick="openProfile('Viman Nagar')">
+    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2">
+    <div>
+      <h4>Viman Nagar</h4>
+      <p>Pune,Maharshtra</p>
+      <p>Rent:₹3500</p>
+      <p>Looking for: Findar</p>
+    </div>
+    <button class="chat-btn"
+      onclick="event.stopPropagation(); openChat('Viman Nagar')">💬Chat</button>
+  </div>
+
+  <!-- ROOMMATES -->
+  <div class="card" data-type="roommate" onclick="openProfile('Pratiksha')">
+    <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1">
+    <div>
+      <h4>Pratiksha</h4>
+      <p>Pune,Maharshtra</p>
+      <p>Rent:₹8000</p>
+      <p>Looking for: Any</p>
+    </div>
+    <button class="chat-btn"
+      onclick="event.stopPropagation(); openChat('Pratiksha')">💬Chat</button>
+  </div>
+  
+  <div class="card" data-type="roommate" onclick="openProfile('Shraddha')">
+    <img src="https://randomuser.me/api/portraits/women/65.jpg">
+    <div>
+      <h4>Shraddha</h4>
+      <p>Pune,Maharshtra</p>
+      <p>Rent:₹6000</p>
+      <p>Looking for: female</p>
+    </div>
+    <button class="chat-btn"
+      onclick="event.stopPropagation(); openChat('Shraddha')">💬Chat</button>
+  </div>
+
+  
+<div class="card clickable" data-type="roommate"
+     onclick="window.location.href='profile1.html?user=Shubham'">
+  <img src="https://randomuser.me/api/portraits/men/32.jpg">
+  <div>
+    <h4>Shubham</h4>
+    <p>Pune, Maharashtra</p>
+    <p>Rent: ₹5000</p>
+    <p>Looking for: Male</p>
+  </div>
+  <button class="chat-btn"
+    onclick="event.stopPropagation(); openChat('Shubham')">
+    💬 Chat
+  </button>
+</div>
+
+
+  <div class="card" data-type="roommate" onclick="openProfile('Aniket')">
+    <img src="https://randomuser.me/api/portraits/men/76.jpg">
+    <div>
+      <h4>Aniket</h4>
+      <p>Pune,Maharshtra</p>
+      <p>Rent:₹5000</p>
+      <p>Looking for: male</p>
+    </div>
+    <button class="chat-btn"
+      onclick="event.stopPropagation(); openChat('Aniket')">💬Chat</button>
+  </div>
+
+
+  <div class="card" data-type="roommate" onclick="openProfile('pratik')">
+    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267">
+
+    <div>
+      <h4>Pratik</h4>
+      <p>Pune,Maharshtra</p>
+      <p>Rent:₹5000</p>
+      <p>Looking for: male</p>
+    </div>
+    <button class="chat-btn"onclick="event.stopPropagation(); openChat('pratik')">
+  💬 Chat
+</button>
+
+  </div>
+
+</div>
+
+<!-- CHAT BOX -->
+<div id="chatBox" class="chat-box">
+  <div class="chat-header">
+    <span id="chatUser"></span>
+    <button onclick="closeChat()">✖</button>
+  </div>
+  <div id="chatBody" class="chat-body"></div>
+  <div class="chat-footer">
+    <input id="chatInput" placeholder="Type message">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<!-- SUBSCRIPTION POPUP -->
+<div id="subscribePopup" class="subscribe-popup">
+  <div class="popup-box">
+    <h3>Subscription Required</h3>
+    <p>Please subscribe to chat</p>
+    <button onclick="takeSubscription()">Subscribe</button>
+    <button onclick="closeSubscribePopup()">Cancel</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
