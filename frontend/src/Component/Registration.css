@@ -1,0 +1,76 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f2f5f9;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: white;
+  width: 360px;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.card h2 {
+  text-align: center;
+}
+
+.subtext {
+  text-align: center;
+  color: gray;
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 14px;
+  margin-top: 10px;
+  display: block;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.gender {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.gender button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
+
+.gender .active {
+  background: #4f46e5;
+  color: white;
+  border: none;
+}
+
+.register-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
