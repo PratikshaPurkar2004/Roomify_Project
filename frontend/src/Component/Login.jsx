@@ -7,6 +7,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -31,7 +32,7 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-
+       
         <button type="submit">Login</button>
 
         {message && <p className="message">{message}</p>}
