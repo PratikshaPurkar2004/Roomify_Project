@@ -1,10 +1,11 @@
+import React from "react";
+import "../styles/Footer.css";
+
 function Footer() {
   return (
-    <footer className="main-footer">
-
-      <p>© 2026 Roomify. All Rights Reserved.</p>
-
-    </footer>
+    <div className="footer">
+      © 2026 Roomify. All Rights Reserved.
+    </div>
   );
 }
 

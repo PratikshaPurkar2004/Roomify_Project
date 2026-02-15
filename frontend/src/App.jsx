@@ -14,6 +14,8 @@ import Subscription from "./pages/Subscription";
 import Header from "./Component/Header";
 import Sidebar from "./Component/Sidebar";
 import Footer from "./Component/Footer";
+import "./App.css"; 
+
 
 export default function App() {
   return (

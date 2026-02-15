@@ -1,0 +1,479 @@
+  /* ================= RESET ================= */
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+  }
+
+  body {
+    background: #f4f7fb;
+  }
+
+  /* ================= HEADER ================= */
+
+  .app-header {
+    height: 60px;
+    background: linear-gradient(to right,#020617,#0284c7);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    color: white;
+  }
+
+  .logo {
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  .user-area {
+    position: relative;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+  }
+
+  /* Dropdown */
+
+  .dropdown {
+    position: absolute;
+    right: 0;
+    top: 55px;
+    background: white;
+    border-radius: 8px;
+    width: 130px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.2);
+  }
+
+  .dropdown button {
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .dropdown button:hover {
+    background: #f1f5f9;
+  }
+
+  /* ================= LAYOUT ================= */
+
+  .layout {
+    display: flex;
+    min-height: calc(100vh - 120px);
+  }
+
+  /* ================= SIDEBAR ================= */
+
+  .sidebar {
+    width: 220px;
+    background: #081029;
+    padding: 20px;
+  }
+
+  .sidebar a {
+    display: block;
+    color: #ccc;
+    padding: 12px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    border-radius: 6px;
+  }
+
+  .sidebar a.active,
+  .sidebar a:hover {
+    background: #2563eb;
+    color: white;
+  }
+
+  /* ================= CONTENT ================= */
+
+  .content {
+    flex: 1;
+    padding: 30px;
+  }
+
+  /* ================= BUTTONS ================= */
+
+  .btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+  }
+
+  .btn:hover {
+    background: #1d4ed8;
+  }
+
+  .btn-danger {
+    background: red;
+  }
+
+  .btn.accept {
+    background: #22c55e;
+  }
+
+  .btn.reject {
+    background: #ef4444;
+  }
+
+  /* ================= SEARCH ================= */
+
+  .search-bar input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  /* ================= FILTER ================= */
+
+  .filter-bar,
+  .filter-box,
+  .modern-filter {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  .filter-bar input,
+  .filter-box input,
+  .modern-filter input,
+  .filter-bar select,
+  .filter-box select,
+  .modern-filter select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  /* ================= DASHBOARD ================= */
+
+  .stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: white;
+    padding: 25px;
+    width: 220px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    transition: .3s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .stat-card h3 {
+    margin-bottom: 8px;
+    color: #555;
+  }
+
+  .stat-card p {
+    font-size: 26px;
+    font-weight: bold;
+    color: #2563eb;
+  }
+
+  /* ================= PROFILE ================= */
+
+  .profile-wrapper,
+  .profile-wrap {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .profile-card {
+    background: white;
+    width: 280px;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  }
+
+  .profile-img,
+  .profile-card img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+
+  .profile-box,
+  .profile-edit {
+    background: white;
+    padding: 25px;
+    width: 350px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  }
+
+  .profile-box input,
+  .profile-edit input,
+  .profile-box select,
+  .profile-edit select {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  /* ================= GRID ================= */
+
+  .room-grid,
+  .roommate-grid,
+  .modern-grid,
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+    gap: 25px;
+  }
+
+  /* ================= CARDS ================= */
+
+  .room-card,
+  .roommate-card,
+  .modern-card,
+  .user-card {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,.1);
+    position: relative;
+    transition: .3s;
+    text-align: center;
+  }
+
+  .room-card:hover,
+  .roommate-card:hover,
+  .modern-card:hover,
+  .user-card:hover {
+    transform: translateY(-5px);
+  }
+
+  /* Images */
+
+  .room-img,
+  .roommate-card img,
+  .card-img-box img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+
+  /* ================= MATCH BADGE ================= */
+
+  .match-badge,
+  .room-match {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #22c55e;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+  }
+
+  /* ================= CARD BODY ================= */
+
+  .card-body {
+    padding: 15px;
+    text-align: center;
+  }
+
+  .card-body h3 {
+    margin: 5px 0;
+    font-size: 18px;
+  }
+
+  .city {
+    color: gray;
+    font-size: 14px;
+  }
+
+  .details {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    font-size: 13px;
+    margin: 12px 0;
+  }
+
+  /* ================= CARD BUTTONS ================= */
+
+  .chat-btn,
+  .request-btn,
+  .req-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: white;
+  }
+
+  .chat-btn {
+    background: #2563eb;
+  }
+
+  .request-btn,
+  .req-btn {
+    background: #10b981;
+  }
+
+  .chat-btn:hover {
+    background: #1d4ed8;
+  }
+
+  .request-btn:hover,
+  .req-btn:hover {
+    background: #059669;
+  }
+
+  /* ================= REQUEST PAGE ================= */
+
+  .requests-page {
+    padding: 30px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 25px;
+  }
+
+  .requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .request-card {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .status {
+    font-weight: bold;
+  }
+
+  .status.pending { color: orange; }
+  .status.accepted { color: green; }
+  .status.rejected { color: red; }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+  }
+
+  /* ================= SUBSCRIPTION ================= */
+
+  .sub-container,
+  .sub-page {
+    text-align: center;
+  }
+
+  .sub-text {
+    color: gray;
+    margin-bottom: 30px;
+  }
+
+  .sub-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .sub-card {
+    background: white;
+    width: 260px;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.1);
+    position: relative;
+  }
+
+  .sub-card h1,
+  .sub-card h2 {
+    color: #2563eb;
+  }
+
+  .sub-card ul {
+    text-align: left;
+    margin: 20px 0;
+  }
+
+  .sub-card li {
+    margin: 8px 0;
+  }
+
+  .sub-card button {
+    width: 100%;
+    padding: 10px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .sub-card button:hover {
+    background: #1e40af;
+  }
+
+  .popular {
+    border: 2px solid #22c55e;
+  }
+
+  .badge,
+  .tag {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: #22c55e;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+  }
+
+  /* ================= FOOTER ================= */
+
+  .main-footer {
+    background: #081029;
+    color: white;
+    text-align: center;
+    padding: 15px;
+  }

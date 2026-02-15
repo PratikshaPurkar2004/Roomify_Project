@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import "../styles/Profile.css";
 
 export default function Profile() {
 
-  // load saved profile (localStorage)
   const saved = JSON.parse(localStorage.getItem("profile")) || {};
 
   const [form, setForm] = useState({
@@ -11,138 +11,172 @@ export default function Profile() {
     area: saved.area || "",
     budget: saved.budget || "",
     gender: saved.gender || "",
-    habits: saved.habits || "",
     photo: saved.photo || "",
+    active: saved.active ?? true,
   });
 
-  // save to localStorage
+  // Save
   const saveProfile = () => {
     localStorage.setItem("profile", JSON.stringify(form));
-    alert("Saved!");
+    alert("Profile saved ✅");
   };
 
+  // Deactivate
   const deactivate = () => {
-    setForm({ ...form, active: false });
-    localStorage.setItem("profile", JSON.stringify({ ...form, active: false }));
+    const updated = { ...form, active: false };
+    setForm(updated);
+    localStorage.setItem("profile", JSON.stringify(updated));
   };
 
+  // Delete
   const deleteProfile = () => {
+
+    if (!window.confirm("Delete profile?")) return;
+
     localStorage.removeItem("profile");
+
     setForm({
-      name: "", age: "", area: "",
-      budget: "", gender: "", habits: "", photo: "",
-      active: false,
+      name: "",
+      age: "",
+      area: "",
+      budget: "",
+      gender: "",
+      photo: "",
+      active: true,
     });
   };
 
+  // Image
   const handleImage = (e) => {
+
     const file = e.target.files[0];
+    if (!file) return;
+
     const reader = new FileReader();
+
     reader.onloadend = () => {
       setForm({ ...form, photo: reader.result });
     };
+
     reader.readAsDataURL(file);
   };
 
   return (
     <div className="profile-page">
 
-      <h1>My Profile</h1>
+      <h1 className="profile-title">Profile</h1>
 
-      <div className="profile-wrap">
+      <div className="profile-box">
 
-        {/* Photo Card */}
-        <div className="profile-card">
+        {/* Left */}
+        <div className="profile-left">
 
           {form.photo ? (
-            <img src={form.photo} alt="Photo" className="profile-img" />
+            <img src={form.photo} alt="User" />
           ) : (
-            <div className="profile-img placeholder">U</div>
+            <div className="avatar">
+              {form.name ? form.name[0] : "U"}
+            </div>
           )}
 
-          <h2>{form.name || "No Name"}</h2>
+          <h2>{form.name || "User Name"}</h2>
 
-          {form.age && <p><b>Age:</b> {form.age}</p>}
-          {form.area && <p><b>Area:</b> {form.area}</p>}
-          {form.budget && <p><b>Budget:</b> ₹{form.budget}</p>}
-          {form.gender && <p><b>Gender:</b> {form.gender}</p>}
-          {form.habits && <p><b>Habits:</b> {form.habits}</p>}
-
-          {form.active === false && (
-            <p className="deactivated">Deactivated</p>
+          {!form.active && (
+            <span className="badge">Deactivated</span>
           )}
 
         </div>
 
-        {/* Edit Form */}
-        <div className="profile-edit">
+        {/* Right */}
+        <div className="profile-right">
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImage}
-          />
+          <div className="form-group">
+            <label>Name</label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) =>
+                setForm({ ...form, name: e.target.value })
+              }
+            />
+          </div>
 
-          <input
-            type="text"
-            placeholder="Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
+          <div className="form-group">
+            <label>Age</label>
+            <input
+              type="number"
+              value={form.age}
+              onChange={(e) =>
+                setForm({ ...form, age: e.target.value })
+              }
+            />
+          </div>
 
-          <input
-            type="number"
-            placeholder="Age"
-            value={form.age}
-            onChange={(e) => setForm({ ...form, age: e.target.value })}
-          />
+          <div className="form-group">
+            <label>Area</label>
+            <input
+              type="text"
+              value={form.area}
+              onChange={(e) =>
+                setForm({ ...form, area: e.target.value })
+              }
+            />
+          </div>
 
-          <input
-            type="text"
-            placeholder="Area"
-            value={form.area}
-            onChange={(e) => setForm({ ...form, area: e.target.value })}
-          />
+          <div className="form-group">
+            <label>Budget</label>
+            <input
+              type="number"
+              value={form.budget}
+              onChange={(e) =>
+                setForm({ ...form, budget: e.target.value })
+              }
+            />
+          </div>
 
-          <input
-            type="number"
-            placeholder="Budget"
-            value={form.budget}
-            onChange={(e) => setForm({ ...form, budget: e.target.value })}
-          />
+          <div className="form-group">
+            <label>Gender</label>
+            <select
+              value={form.gender}
+              onChange={(e) =>
+                setForm({ ...form, gender: e.target.value })
+              }
+            >
+              <option value="">Select</option>
+              <option>Male</option>
+              <option>Female</option>
+            </select>
+          </div>
 
-          <select
-            value={form.gender}
-            onChange={(e) => setForm({ ...form, gender: e.target.value })}
-          >
-            <option value="">Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
+          <div className="form-group">
+            <label>Photo</label>
+            <input type="file" onChange={handleImage} />
+          </div>
 
-          <select
-            value={form.habits}
-            onChange={(e) => setForm({ ...form, habits: e.target.value })}
-          >
-            <option value="">Habits</option>
-            <option value="Smoker">Smoker</option>
-            <option value="Non-Smoker">Non-Smoker</option>
-            <option value="Veg">Veg</option>
-            <option value="Non-Veg">Non-Veg</option>
-          </select>
+          {/* Buttons */}
+          <div className="actions">
 
-          <div className="profile-btns">
-            <button className="btn save" onClick={saveProfile}>
+            <button
+              className="btn-primary"
+              onClick={saveProfile}
+            >
               Save
             </button>
 
-            <button className="btn deactivate" onClick={deactivate}>
+            <button
+              className="btn-secondary"
+              onClick={deactivate}
+            >
               Deactivate
             </button>
 
-            <button className="btn delete" onClick={deleteProfile}>
+            <button
+              className="btn-danger"
+              onClick={deleteProfile}
+            >
               Delete
             </button>
+
           </div>
 
         </div>

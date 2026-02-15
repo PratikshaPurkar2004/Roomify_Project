@@ -1,0 +1,79 @@
+/* Sidebar Container */
+
+.sidebar {
+  position: fixed;
+  top: 60px; /* Below header */
+  left: 0;
+
+  width: 220px;
+  height: calc(100vh - 60px);
+
+  background: linear-gradient(180deg, #020024, #090979, #000428);
+
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+
+  padding-top: 25px;
+
+  box-shadow: 3px 0 12px rgba(0,0,0,0.3);
+
+  z-index: 999;
+}
+
+/* Logo */
+
+.sidebar-logo {
+  text-align: center;
+
+  font-size: 22px;
+  font-weight: 600;
+
+  padding-bottom: 20px;
+
+  margin-bottom: 20px;
+
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Menu */
+
+.sidebar-menu {
+  flex: 1;
+}
+
+/* Menu Items */
+
+.menu-item {
+  display: block;
+
+  padding: 14px 22px;
+  margin: 8px 15px;
+
+  color: white;
+  text-decoration: none;
+
+  font-size: 15px;
+
+  border-radius: 10px;
+
+  transition: all 0.3s ease;
+}
+
+/* Hover Effect */
+
+.menu-item:hover {
+  background: rgba(255,255,255,0.15);
+  padding-left: 30px;
+}
+
+/* Active Item */
+
+.menu-item.active {
+  background: #2563eb;
+
+  font-weight: 600;
+
+  box-shadow: 0 4px 10px rgba(37,99,235,0.5);
+}
