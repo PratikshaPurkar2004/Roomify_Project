@@ -7,7 +7,8 @@ import Registration from "./Component/Registration";
 
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import FindRoommate from "./pages/FindRoommate";
+import FindRoommates from "./pages/FindRoommates";
+
 import Requests from "./pages/Requests";
 import Subscription from "./pages/Subscription";
 
@@ -51,13 +52,13 @@ export default function App() {
         </>
       } />
 
-      <Route path="/find" element={
+      <Route path="/Find" element={
         <>
           <Header />
           <div className="layout">
             <Sidebar />
             <div className="content">
-              <FindRoommate />
+              <FindRoommates />
             </div>
           </div>
           <Footer />
