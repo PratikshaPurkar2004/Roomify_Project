@@ -1,0 +1,19 @@
+.footer {
+  width: 100%;
+
+  text-align: center;
+
+  padding: 15px 0;
+
+  background: #020024;
+
+  color: white;
+
+  font-size: 14px;
+
+  position: fixed;
+  bottom: 0;
+  left: 0;
+
+  z-index: 1000;
+}

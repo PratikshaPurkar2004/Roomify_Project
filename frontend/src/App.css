@@ -1,0 +1,14 @@
+.content {
+  margin-left: 220px;
+  margin-top: 60px;
+
+  padding: 30px;
+
+  width: calc(100% - 220px);
+
+  min-height: calc(100vh - 60px);
+
+  background: #f4f6f9;
+
+  box-sizing: border-box;
+}
