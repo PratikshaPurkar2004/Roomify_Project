@@ -1,46 +1,64 @@
 import React, { useState } from "react";
+import axios from "axios";
 import "./Login.css";
 import { Link } from "react-router-dom";
 
-const Login = () => {
-  const [username, setUsername] = useState("");
+const Login = ({ onClose }) => {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (username === "admin" && password === "12345") {
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password
+        }
+      );
+
       alert("✅ Login Successful");
-    } else {
-      alert("❌ Invalid Username or Password");
+      console.log(res.data);
+
+      onClose();  // close popup after login
+
+    } catch (err) {
+      alert("❌ Invalid Email or Password");
+      console.log(err);
     }
   };
 
   return (
-    <div className="login-container">
-      <form className="login-box" onSubmit={handleSubmit}>
-        <h2>Login</h2>
+    <div className="modal-overlay">
+      <div className="login-modal">
+        <button className="close-btn" onClick={onClose}>×</button>
 
-        <input  type="text" placeholder="Username" value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
+        <form onSubmit={handleSubmit}>
+          <h2>Welcome Back 👋</h2>
 
-        <input  type="password"  placeholder="Password"  value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-       
-        <button type="submit">Login</button>
+          <input
+            type="email"
+            placeholder="Enter Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-        {message && <p className="message">{message}</p>}
+          <input
+            type="password"
+            placeholder="Enter Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-        <h4 className="text">
-          Don't have an account? <span><Link to="/signup">Signup</Link></span>
-        </h4>
-      </form>
+          <button type="submit" className="login-btn">Login</button>
+
+          
+        </form>
+      </div>
     </div>
   );
 };
