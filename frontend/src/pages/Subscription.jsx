@@ -1,8 +1,11 @@
+import React from "react";
+import "../styles/Subscription.css";
+
 function Subscription() {
   return (
     <div className="sub-container">
 
-      <h1>Choose Your Plan</h1>
+      <h1 className="sub-title">Choose Your Plan</h1>
 
       <p className="sub-text">
         Unlock unlimited chat with roommates
@@ -18,12 +21,14 @@ function Subscription() {
           <h2>₹199</h2>
 
           <ul>
-            <li>✔ Unlimited Chat</li>
-            <li>✔ Verified Profiles</li>
-            <li>✔ Email Support</li>
+            <li>Unlimited Chat</li>
+            <li>Verified Profiles</li>
+            <li>Email Support</li>
           </ul>
 
-          <button>Subscribe Now</button>
+          <button className="sub-btn">
+            Subscribe Now
+          </button>
 
         </div>
 
@@ -37,12 +42,14 @@ function Subscription() {
           <h2>₹1999</h2>
 
           <ul>
-            <li>✔ Unlimited Chat</li>
-            <li>✔ Verified Profiles</li>
-            <li>✔ Priority Support</li>
+            <li>Unlimited Chat</li>
+            <li>Verified Profiles</li>
+            <li>Priority Support</li>
           </ul>
 
-          <button>Subscribe Now</button>
+          <button className="sub-btn">
+            Subscribe Now
+          </button>
 
         </div>
 

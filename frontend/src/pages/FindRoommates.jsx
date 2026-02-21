@@ -6,7 +6,7 @@ export default function FindRoommates() {
 
   const navigate = useNavigate();
 
-  // Roommates Data (6 Cards)
+  // Roommates Data
   const roommates = [
     {
       id: 1,
@@ -15,7 +15,7 @@ export default function FindRoommates() {
       rent: 9000,
       gender: "Female",
       lookingFor: "Female",
-      type: "Room",
+      match: 92,
       img: "https://randomuser.me/api/portraits/women/44.jpg",
     },
     {
@@ -25,7 +25,7 @@ export default function FindRoommates() {
       rent: 7000,
       gender: "Male",
       lookingFor: "Male",
-      type: "Room",
+      match: 85,
       img: "https://randomuser.me/api/portraits/men/32.jpg",
     },
     {
@@ -35,7 +35,7 @@ export default function FindRoommates() {
       rent: 6000,
       gender: "Male",
       lookingFor: "Any",
-      type: "Room",
+      match: 78,
       img: "https://randomuser.me/api/portraits/men/55.jpg",
     },
     {
@@ -45,7 +45,7 @@ export default function FindRoommates() {
       rent: 8500,
       gender: "Female",
       lookingFor: "Female",
-      type: "Room",
+      match: 88,
       img: "https://randomuser.me/api/portraits/women/65.jpg",
     },
     {
@@ -55,7 +55,7 @@ export default function FindRoommates() {
       rent: 7500,
       gender: "Male",
       lookingFor: "Any",
-      type: "Room",
+      match: 80,
       img: "https://randomuser.me/api/portraits/men/71.jpg",
     },
     {
@@ -65,7 +65,7 @@ export default function FindRoommates() {
       rent: 8200,
       gender: "Female",
       lookingFor: "Female",
-      type: "Room",
+      match: 90,
       img: "https://randomuser.me/api/portraits/women/72.jpg",
     },
   ];
@@ -74,25 +74,36 @@ export default function FindRoommates() {
   const [city, setCity] = useState("");
   const [budget, setBudget] = useState("");
   const [gender, setGender] = useState("");
+  const [looking, setLooking] = useState("");
+  const [results, setResults] = useState(roommates);
 
-  // Filter Logic
-  const filtered = roommates.filter((u) => {
-    return (
-      (city === "" ||
-        u.city.toLowerCase().includes(city.toLowerCase())) &&
+  // Search Function
+  const handleSearch = () => {
+    const filteredData = roommates.filter((u) => {
+      return (
+        (city === "" ||
+          u.city.toLowerCase().includes(city.toLowerCase())) &&
 
-      (budget === "" || u.rent <= budget) &&
+        (budget === "" || u.rent <= Number(budget)) &&
 
-      (gender === "" || u.gender === gender)
-    );
-  });
+        (gender === "" || u.gender === gender) &&
+
+        (looking === "" || u.lookingFor === looking)
+      );
+    });
+
+    setResults(filteredData);
+  };
+
+  // Request Success Alert
+  const handleRequest = (name) => {
+    alert(`✅ Request sent successfully to ${name}!\nThey will contact you soon.`);
+  };
 
   return (
     <div className="clean-page">
 
-      <h2 className="clean-title">
-        Find Roommates
-      </h2>
+      <h2 className="clean-title">Find Roommates</h2>
 
       {/* Search Bar */}
       <div className="clean-search">
@@ -120,16 +131,35 @@ export default function FindRoommates() {
           <option value="Female">Female</option>
         </select>
 
-        <button>Search</button>
+        <select
+          value={looking}
+          onChange={(e) => setLooking(e.target.value)}
+        >
+          <option value="">Looking For</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Any">Any</option>
+        </select>
+
+        <button onClick={handleSearch}>Search</button>
 
       </div>
 
       {/* Cards */}
       <div className="clean-grid">
 
-        {filtered.map((user) => (
+        {results.length === 0 && (
+          <p>No roommates found 😔</p>
+        )}
+
+        {results.map((user) => (
 
           <div className="clean-card" key={user.id}>
+
+            {/* Match Badge */}
+            <div className="match-badge">
+              {user.match}% Match
+            </div>
 
             <img src={user.img} alt={user.name} />
 
@@ -137,24 +167,13 @@ export default function FindRoommates() {
 
               <h3>{user.name}</h3>
 
-              <p className="city">
-                📍 City: {user.city}
-              </p>
-
-              <div className="clean-details">
-
-                <span>💰 ₹{user.rent}</span>
-
-                <span>
-                  👤 Looking: {user.lookingFor}
-                </span>
-
-                <span>
-                  🏠 {user.type}
-                </span>
-
+              <div className="card-info-box">
+                <p><b>City:</b> {user.city}</p>
+                <p><b>Budget:</b> ₹{user.rent}</p>
+                <p><b>Looking:</b> {user.lookingFor}</p>
               </div>
 
+              {/* Buttons */}
               <div className="clean-btns">
 
                 <button
@@ -164,7 +183,10 @@ export default function FindRoommates() {
                   Chat
                 </button>
 
-                <button className="request">
+                <button
+                  className="request"
+                  onClick={() => handleRequest(user.name)}
+                >
                   Request
                 </button>
 

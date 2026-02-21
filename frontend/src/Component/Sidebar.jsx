@@ -22,7 +22,8 @@ function Sidebar() {
         Requests
       </NavLink>
 
-      <NavLink to="/chat" className="menu-item">
+      
+      <NavLink to="/Subscribe" className="menu-item">
         Chat
       </NavLink>
 
