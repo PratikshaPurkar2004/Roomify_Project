@@ -28,11 +28,6 @@ const Welcome = () => {
             Roomify helps you connect safely and easily.
           </p>
 
-<<<<<<< HEAD
-          <Link to="/login" className="hero-btn">
-            Login
-          </Link>
-=======
           <div className="btn-group">
             <Link to="/Login" className="hero-btn">
               Login
@@ -40,7 +35,6 @@ const Welcome = () => {
            
             <Link to="/signup" className="hero-btn secondary">Signup</Link>
           </div>
->>>>>>> 86ab62e674e0df28f6e6155d24bc36f5b9d10bc3
 
         </div>
       </div>
