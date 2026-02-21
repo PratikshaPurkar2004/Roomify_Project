@@ -1,64 +1,90 @@
-body{
-  background-color: transparent;
-}
-
-.login-container {
-  height: 100vh;
+/* Background blur overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(8px);
+  background: linear-gradient(to right, #020024, #090979, #00d4ff);
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f4f6f8;
 }
 
-.login-box {
+/* Popup box */
+.login-modal {
   background: white;
-  padding: 30px;
-  width: 300px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 35px;
+  border-radius: 15px;
+  width: 350px;
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.3);
+  animation: popup 0.3s ease-in-out;
+  position: relative;
 }
 
-.login-box h2 {
+/* Animation */
+@keyframes popup {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Close button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Heading */
+.login-modal h2 {
   text-align: center;
   margin-bottom: 20px;
+  color: #333;
 }
 
-.login-box input {
+/* Input fields */
+.login-modal input {
   width: 100%;
   padding: 10px;
-  margin-bottom: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  outline: none;
+  transition: 0.3s;
 }
 
-.login-box button {
+.login-modal input:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px #4a90e2;
+}
+
+/* Login button */
+.login-btn {
   width: 100%;
   padding: 10px;
-  background: #2563eb;
-  color: white;
   border: none;
-  border-radius: 5px;
+  background: linear-gradient(45deg, #4e73df, #224abe);
+  color: white;
+  border-radius: 8px;
+  font-size: 16px;
   cursor: pointer;
-}
-
-.login-box button:hover {
-  background: #1e40af;
-}
-
-.text {
-  text-align: center;
-  margin-top: 15px;
-  font-size: 14px;
-}
-
-.text span {
-  color: #2563eb;
-  cursor: pointer;
-}
-
-.message{
   margin-top: 10px;
-  text-align: center;
-  font-weight: bold;
-  color: red;
+  transition: 0.3s;
 }
+
+.login-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+

@@ -1,16 +1,18 @@
 import React, { useState } from "react";
+import axios from "axios";
 import "../pages/Registration.css";
-
 
 const Registration = () => {
   const [formData, setFormData] = useState({
     name: "",
-    role: "",
-    gender: "",
-    city: "",
+    //DOB: "",
     email: "",
+    occupation: "",
     password: "",
-  });
+    user_type: "",
+    area: "",
+    gender: "",
+   });
 
   const handleChange = (e) => {
     setFormData({
@@ -30,56 +32,72 @@ const Registration = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5000/api/register", formData);
-      alert("User Registered Successfully!");
+      const res = await axios.post(
+      "http://localhost:5000/api/auth/register",
+      formData
+);
+
+    
+      alert("✅ User Registered Successfully!");
       console.log(res.data);
     } catch (err) {
-      alert("Error registering user");
+      alert("❌ Error registering user");
       console.log(err);
     }
   };
 
   return (
-    <div className="container">
+    <div className="overlay">
       <div className="card">
-        <h2>You are Almost Done!</h2>
-        <p className="subtext">Please fill below details to continue.</p>
+        <h2>Create Account </h2>
+        <p className="subtext">Please fill details to continue</p>
 
         <form onSubmit={handleSubmit}>
-          <label>Your Name*</label>
           <input
             type="text"
             name="name"
-            placeholder="Please enter your name"
+            placeholder="Your Name"
             onChange={handleChange}
+            required
           />
 
-          <label>Email*</label>
           <input
             type="email"
             name="email"
-            placeholder="Enter email"
+            placeholder="Email Address"
             onChange={handleChange}
+            required
           />
 
-          <label>Password*</label>
           <input
             type="password"
             name="password"
-            placeholder="Enter password"
+            placeholder="Password"
             onChange={handleChange}
+            required
           />
 
-          <label>Who You Are*</label>
-          <select name="role" onChange={handleChange} defaultValue="">
-            <option value="" disabled>
-              Select Role
-            </option>
+          {/* <input
+            type="date"
+            name="DOB"
+            onChange={handleChange}
+            required
+          /> */}
+
+          <input
+            type="text"
+            name="occupation"
+            placeholder="Your Occupation"
+            onChange={handleChange}
+            required
+          />
+
+          <select name="user_type" onChange={handleChange} defaultValue="" required>
+            <option value="" disabled>Select Role</option>
             <option value="Host">Host</option>
             <option value="Finder">Finder</option>
           </select>
 
-          <label>Your Gender*</label>
           <div className="gender">
             <button
               type="button"
@@ -88,6 +106,7 @@ const Registration = () => {
             >
               Male
             </button>
+
             <button
               type="button"
               className={formData.gender === "Female" ? "active" : ""}
@@ -97,11 +116,8 @@ const Registration = () => {
             </button>
           </div>
 
-          <label>Select City*</label>
-          <select name="city" onChange={handleChange} defaultValue="">
-            <option value="" disabled>
-              Select City
-            </option>
+          <select name="area" onChange={handleChange} defaultValue="" required>
+            <option value="" disabled>Select City</option>
             <option>Pune</option>
             <option>Mumbai</option>
             <option>Nagpur</option>
