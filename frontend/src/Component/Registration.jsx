@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+
+
 import "../pages/Registration.css";
 
 const Registration = () => {
@@ -29,15 +31,12 @@ const Registration = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    //e.preventDefault();
 
     try {
       const res = await axios.post(
       "http://localhost:5000/api/auth/register",
-      formData
-);
-
-    
+      formData);
       alert("✅ User Registered Successfully!");
       console.log(res.data);
     } catch (err) {
@@ -53,27 +52,15 @@ const Registration = () => {
         <p className="subtext">Please fill details to continue</p>
 
         <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="name"
-            placeholder="Your Name"
-            onChange={handleChange}
+          <input type="text" name="name" placeholder="Your Name" onChange={handleChange}
             required
           />
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            onChange={handleChange}
+          <input type="email" name="email" placeholder="Email Address" onChange={handleChange}
             required
           />
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            onChange={handleChange}
+          <input type="password" name="password" placeholder="Password" onChange={handleChange}
             required
           />
 
@@ -84,11 +71,7 @@ const Registration = () => {
             required
           /> */}
 
-          <input
-            type="text"
-            name="occupation"
-            placeholder="Your Occupation"
-            onChange={handleChange}
+          <input type="text" name="occupation" placeholder="Your Occupation"onChange={handleChange}
             required
           />
 
@@ -100,20 +83,15 @@ const Registration = () => {
 
           <div className="gender">
             <button
-              type="button"
-              className={formData.gender === "Male" ? "active" : ""}
+              type="button" className={formData.gender === "Male" ? "active" : ""}
               onClick={() => handleGender("Male")}
-            >
-              Male
-            </button>
+            > Male</button>
 
             <button
               type="button"
               className={formData.gender === "Female" ? "active" : ""}
               onClick={() => handleGender("Female")}
-            >
-              Female
-            </button>
+            >Female</button>
           </div>
 
           <select name="area" onChange={handleChange} defaultValue="" required>
