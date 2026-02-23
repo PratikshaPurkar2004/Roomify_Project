@@ -18,7 +18,7 @@ const Welcome = () => {
           </p>
 
           <div className="btn-group">
-            <Link to="/Login" className="hero-btn">
+            <Link to="/login" className="hero-btn">
               Login
             </Link>
            
