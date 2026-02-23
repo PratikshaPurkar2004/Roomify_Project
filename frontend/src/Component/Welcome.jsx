@@ -7,6 +7,7 @@ const Welcome = () => {
     <div className="hero">
       <div className="hero-overlay">
         <div className="hero-content">
+
           <h1>
             Welcome to <span className="brand">Roomify</span>
           </h1>
