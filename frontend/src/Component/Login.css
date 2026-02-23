@@ -100,3 +100,21 @@
   background: linear-gradient(to right, #764ba2, #667eea);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
+
+/* .login-message {
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: red;
+} */
+
+.login-message {
+  text-align: center;
+  margin-bottom: 12px;
+  font-weight: bold;
+  color:green;
+}
+
+.login-message:has(:contains("❌")) {
+  color: red;
+}

@@ -106,3 +106,16 @@
   opacity: 0.9;
 }
 
+.success-msg {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.success-msg {
+  color: green;
+}
+
+
+
+
