@@ -1,100 +1,90 @@
-/* Full screen blur background */
+/* Background */
 .overlay {
-  min-height: 95vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-
-  background: linear-gradient(to right, #020024, #090979, #00d4ff);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, #07004d, #001f8f, #00bcd4);
   padding: 20px;
 }
 
-/* Card Design */
+/* Card */
 .card {
-  background: rgba(255, 255, 255, 0.95);
-  width:380px;
-  padding: 35px;
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  padding: 35px 30px;
   border-radius: 20px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-  animation: slideUp 0.6s ease;
-}
-
-/* Animation */
-@keyframes slideUp {
-  from {
-    transform: translateY(40px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-/* Heading */
-.card h2 {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
   text-align: center;
-  margin-bottom: 5px;
-  color: #333;
+}
+
+/* Title */
+.card h2 {
+  font-size: 26px;
+  margin-bottom: 6px;
+  color: #1e3c72;
 }
 
 .subtext {
-  text-align: center;
-  margin-bottom: 20px;
-  color: gray;
   font-size: 14px;
+  color: #777;
+  margin-bottom: 25px;
 }
 
-/* Inputs & Select */
+/* Inputs */
 .card input,
 .card select {
   width: 100%;
-  padding: 12px;
-  margin: 8px 0;
+  padding: 12px 14px;
+  margin-bottom: 15px;
   border-radius: 10px;
   border: 1px solid #ddd;
+  font-size: 14px;
   outline: none;
   transition: 0.3s;
 }
 
 .card input:focus,
 .card select:focus {
-  border-color: #4e73df;
-  box-shadow: 0 0 6px #4e73df;
+  border-color: #4a6cf7;
+  box-shadow: 0 0 6px rgba(74, 108, 247, 0.3);
 }
 
 /* Gender Buttons */
 .gender {
   display: flex;
-  justify-content: space-between;
-  margin: 10px 0;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
 .gender button {
-  width: 48%;
+  flex: 1;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #ccc;
-  background: white;
+  background: #f2f2f2;
   cursor: pointer;
   transition: 0.3s;
 }
 
 .gender button.active {
-  background: #4e73df;
+  background: linear-gradient(135deg, #4a6cf7, #00c6ff);
   color: white;
   border: none;
+}
+
+.gender button:hover {
+  background: #e6e6e6;
 }
 
 /* Register Button */
 .register-btn {
   width: 100%;
   padding: 12px;
-  margin-top: 15px;
+  border-radius: 12px;
   border: none;
-  border-radius: 10px;
-  background: linear-gradient(45deg, #4e73df, #224abe);
+  background: linear-gradient(135deg, #4a6cf7, #00c6ff);
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -102,20 +92,6 @@
 }
 
 .register-btn:hover {
-  transform: scale(1.05);
   opacity: 0.9;
+  transform: translateY(-2px);
 }
-
-.success-msg {
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.success-msg {
-  color: green;
-}
-
-
-
-

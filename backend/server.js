@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
+const cityRoutes = require("./routes/cityRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 
@@ -12,8 +13,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-// app.use("/api/dashboard", dashboardRoutes);
-// app.use("/api/profile", profileRoutes);
+app.use("/api/cities", cityRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend Running 🚀");
