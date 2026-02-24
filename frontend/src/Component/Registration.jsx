@@ -26,7 +26,7 @@ const Registration = () => {
   const handleGender = (value) => {
     setFormData({
       ...formData,
-      gender: value,
+      gender: value,``
     });
   };
 
