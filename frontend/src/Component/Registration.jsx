@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+
 
 import "../pages/Registration.css";
 
 const Registration = () => {
-  const [message,setMessage]=useState("");
-  const navigate=useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     //DOB: "",
@@ -33,21 +31,16 @@ const Registration = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-  
+    //e.preventDefault();
+
     try {
       const res = await axios.post(
       "http://localhost:5000/api/auth/register",
       formData);
-
-      setMessage("✅ User Registered Successfully!");
-      setTimeout(()=>{
-      navigate("/login");
-    },1500);
-    
+      alert("✅ User Registered Successfully!");
       console.log(res.data);
     } catch (err) {
-      setMessage("❌ Error registering user");
+      alert("❌ Error registering user");
       console.log(err);
     }
   };
@@ -57,7 +50,7 @@ const Registration = () => {
       <div className="card">
         <h2>Create Account </h2>
         <p className="subtext">Please fill details to continue</p>
-        {message && <p className="success-msg">{message}</p>}
+
         <form onSubmit={handleSubmit}>
           <input type="text" name="name" placeholder="Your Name" onChange={handleChange}
             required
