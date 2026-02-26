@@ -4,7 +4,7 @@ const { createUser } = require("../models/registerModel");
 const { findUserByEmail } = require("../models/loginModel");
 
 const register = async (req, res) => {
-  const { name, DOB, email, occupation, password, user_type, area, gender } = req.body;
+  const { name, DOB, email, occupation, password, user_type, city, gender } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -26,7 +26,7 @@ const register = async (req, res) => {
         hashedPassword ? occupation : occupation,
         hashedPassword,
         user_type,
-        area,
+        city,
         gender,
         (err) => {
           if (err) {

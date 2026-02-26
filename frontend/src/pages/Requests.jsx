@@ -90,7 +90,7 @@ export default function Requests() {
       id: 1,
       name: "Amit Sharma",
       age: 22,
-      area: "Nashik",
+      city: "Nashik",
       budget: 6500,
       gender: "Male",
     },
@@ -98,7 +98,7 @@ export default function Requests() {
       id: 2,
       name: "Neha Patil",
       age: 21,
-      area: "Pune",
+      city: "Pune",
       budget: 8000,
       gender: "Female",
     },
@@ -106,7 +106,7 @@ export default function Requests() {
       id: 3,
       name: "Rahul Verma",
       age: 24,
-      area: "Mumbai",
+      city: "Mumbai",
       budget: 9000,
       gender: "Male",
     },
@@ -147,7 +147,7 @@ export default function Requests() {
                 <h3>{req.name}</h3>
 
                 <p>
-                  {req.age} yrs | {req.area} | ₹{req.budget} | {req.gender}
+                  {req.age} yrs | {req.city} | ₹{req.budget} | {req.gender}
                 </p>
 
               </div>

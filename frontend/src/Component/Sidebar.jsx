@@ -1,31 +1,92 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  FaHome,
+  FaUser,
+  FaSearch,
+  FaEnvelope,
+  FaComments,
+  FaSignOutAlt,
+} from "react-icons/fa";
+
 import "../styles/Sidebar.css";
 
 function Sidebar() {
+  const navigate = useNavigate();
+
+  // Logout Function
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/"); // Go to Welcome/Login
+  };
+
   return (
     <div className="sidebar">
 
-      <NavLink to="/dashboard" className="menu-item">
-        Dashboard
-      </NavLink>
+      {/* Logo */}
+      <div className="sidebar-logo">🏠 Roomify</div>
 
-      <NavLink to="/profile" className="menu-item">
-        Profile
-      </NavLink>
+      {/* Menu */}
+      <div className="sidebar-menu">
 
-      <NavLink to="/find" className="menu-item">
-        Find Roommate
-      </NavLink>
+        {/* Dashboard */}
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) =>
+            isActive ? "menu-item active" : "menu-item"
+          }
+        >
+          <FaHome /> <span>Dashboard</span>
+        </NavLink>
 
-      <NavLink to="/requests" className="menu-item">
-        Requests
-      </NavLink>
+        {/* Profile */}
+        <NavLink
+          to="/dashboard/profile"
+          className={({ isActive }) =>
+            isActive ? "menu-item active" : "menu-item"
+          }
+        >
+          <FaUser /> <span>Profile</span>
+        </NavLink>
 
-      
-      <NavLink to="/Subscribe" className="menu-item">
-        Chat
-      </NavLink>
+        {/* Find Roommate */}
+        <NavLink
+          to="/dashboard/find-roommates"
+          className={({ isActive }) =>
+            isActive ? "menu-item active" : "menu-item"
+          }
+        >
+          <FaSearch /> <span>Find Roommate</span>
+        </NavLink>
+
+        {/* Requests */}
+        <NavLink
+          to="/dashboard/requests"
+          className={({ isActive }) =>
+            isActive ? "menu-item active" : "menu-item"
+          }
+        >
+          <FaEnvelope /> <span>Requests</span>
+        </NavLink>
+
+        {/* Chat */}
+        <NavLink
+          to="/dashboard/subscription"
+          className={({ isActive }) =>
+            isActive ? "menu-item active" : "menu-item"
+          }
+        >
+          <FaComments /> <span>Chat</span>
+        </NavLink>
+
+      </div>
+
+      {/* Logout */}
+      <div className="sidebar-footer">
+        <button className="logout-btn" onClick={handleLogout}>
+          <FaSignOutAlt /> Logout
+        </button>
+      </div>
 
     </div>
   );

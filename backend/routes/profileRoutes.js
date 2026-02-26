@@ -2,38 +2,48 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 
-// GET Profile by user ID
+// GET PROFILE
 router.get("/:id", (req, res) => {
   const userId = req.params.id;
 
   db.query(
-    "SELECT name, age, area, budget, gender, photo, active FROM users WHERE id = ?",
+    "SELECT name, age_group, city, budget, gender, preferences FROM users WHERE user_id=?",
     [userId],
     (err, result) => {
       if (err) return res.status(500).json(err);
-
-      if (result.length === 0)
-        return res.status(404).json({ message: "User not found" });
-
       res.json(result[0]);
     }
   );
 });
 
-// UPDATE Profile
+// UPDATE PROFILE
 router.put("/:id", (req, res) => {
   const userId = req.params.id;
-  const { name, age, area, budget, gender, photo, active } = req.body;
+
+  const { name, age_group, city, budget, gender, preferences } = req.body;
 
   db.query(
-    `UPDATE users 
-     SET name=?, age=?, area=?, budget=?, gender=?, photo=?, active=? 
-     WHERE id=?`,
-    [name, age, area, budget, gender, photo, active, userId],
+    `UPDATE users
+     SET name=?, age_group=?, city=?, budget=?, gender=?, preferences=?
+     WHERE user_id=?`,
+    [name, age_group, city, budget, gender, preferences, userId],
     (err) => {
       if (err) return res.status(500).json(err);
+      res.json({ message: "Updated" });
+    }
+  );
+});
 
-      res.json({ message: "Profile updated successfully" });
+// DELETE PROFILE
+router.delete("/:id", (req, res) => {
+  const userId = req.params.id;
+
+  db.query(
+    "DELETE FROM users WHERE user_id=?",
+    [userId],
+    (err) => {
+      if (err) return res.status(500).json(err);
+      res.json({ message: "Deleted" });
     }
   );
 });
