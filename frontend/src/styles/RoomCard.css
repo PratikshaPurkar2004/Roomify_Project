@@ -1,0 +1,37 @@
+.horizontal-card {
+  background: white;
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+  align-items: center;
+  transition: 0.3s ease;
+}
+
+.horizontal-card:hover {
+  transform: translateY(-5px);
+}
+
+.horizontal-card img {
+  width: 100px;
+  height: 100px;
+  border-radius: 15px;
+  object-fit: cover;
+}
+
+.card-info h3 {
+  margin: 0;
+}
+
+.card-info p {
+  color: #777;
+  margin: 5px 0;
+}
+
+.card-details {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+  color: #444;
+}

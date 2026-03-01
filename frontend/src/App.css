@@ -12,3 +12,88 @@
 
   box-sizing: border-box;
 }
+
+
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 40px;
+  background: #2563eb;
+  color: white;
+}
+
+.post-btn {
+  background: white;
+  color: #2563eb;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.hero {
+  text-align: center;
+  padding: 40px;
+  background: white;
+}
+
+.hero input {
+  padding: 10px;
+  width: 300px;
+  max-width: 90%;
+  margin-top: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.filters {
+  margin-top: 15px;
+}
+
+.filters button {
+  margin: 5px;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+}
+
+.filters .active {
+  background: #2563eb;
+  color: white;
+}
+
+.listings {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 40px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.footer {
+  text-align: center;
+  padding: 20px;
+  background: #2563eb;
+  color: white;
+}
