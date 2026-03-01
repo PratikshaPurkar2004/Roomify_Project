@@ -1,188 +1,142 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import "../styles/Profile.css";
 
 export default function Profile() {
 
-  const saved = JSON.parse(localStorage.getItem("profile")) || {};
+  const userId = localStorage.getItem("userId");
 
   const [form, setForm] = useState({
-    name: saved.name || "",
-    age: saved.age || "",
-    area: saved.area || "",
-    budget: saved.budget || "",
-    gender: saved.gender || "",
-    photo: saved.photo || "",
-    active: saved.active ?? true,
+    name: "",
+    age_group: "",
+    city: "",
+    budget: "",
+    gender: ""
   });
 
-  // Save
-  const saveProfile = () => {
-    localStorage.setItem("profile", JSON.stringify(form));
-    alert("Profile saved ✅");
-  };
+  const [msg, setMsg] = useState("");
 
-  // Deactivate
-  const deactivate = () => {
-    const updated = { ...form, active: false };
-    setForm(updated);
-    localStorage.setItem("profile", JSON.stringify(updated));
-  };
+  // ================= FETCH PROFILE =================
+  useEffect(() => {
+    if (!userId) return;
 
-  // Delete
-  const deleteProfile = () => {
+    axios
+      .get(`http://localhost:5000/api/profile/${userId}`)
+      .then((res) => {
+        if (res.data) {
+          setForm({
+            name: res.data.name || "",
+            age_group: res.data.age_group || "",
+            city: res.data.city || "",
+            budget: res.data.budget || "",
+            gender: res.data.gender || ""
+          });
+        }
+      })
+      .catch(() => {
+        setMsg("Failed to load profile ❌");
+      });
 
-    if (!window.confirm("Delete profile?")) return;
+  }, [userId]);
 
-    localStorage.removeItem("profile");
-
+  // ================= HANDLE INPUT =================
+  const handleChange = (e) => {
     setForm({
-      name: "",
-      age: "",
-      area: "",
-      budget: "",
-      gender: "",
-      photo: "",
-      active: true,
+      ...form,
+      [e.target.name]: e.target.value
     });
   };
 
-  // Image
-  const handleImage = (e) => {
+  // ================= UPDATE PROFILE =================
+  const saveProfile = () => {
+    axios
+      .put(`http://localhost:5000/api/profile/${userId}`, form)
+      .then(() => {
+        setMsg("Profile Updated Successfully ✅");
+      })
+      .catch((err) => {
+        console.log(err);
+        setMsg("Update Failed ❌");
+      });
+  };
 
-    const file = e.target.files[0];
-    if (!file) return;
+  // ================= DELETE ACCOUNT =================
+  const deleteProfile = () => {
+    if (!window.confirm("Are you sure you want to delete account?")) return;
 
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      setForm({ ...form, photo: reader.result });
-    };
-
-    reader.readAsDataURL(file);
+    axios
+      .delete(`http://localhost:5000/api/profile/${userId}`)
+      .then(() => {
+        localStorage.clear();
+        window.location.href = "/";
+      })
+      .catch(() => {
+        setMsg("Delete Failed ❌");
+      });
   };
 
   return (
     <div className="profile-page">
+      <div className="profile-card">
 
-      <h1 className="profile-title">Profile</h1>
+        <h2>My Profile</h2>
 
-      <div className="profile-box">
+        {msg && <p className="profile-msg">{msg}</p>}
 
-        {/* Left */}
-        <div className="profile-left">
+        <div className="profile-form">
 
-          {form.photo ? (
-            <img src={form.photo} alt="User" />
-          ) : (
-            <div className="avatar">
-              {form.name ? form.name[0] : "U"}
-            </div>
-          )}
+          <input
+            name="name"
+            placeholder="Full Name"
+            value={form.name}
+            onChange={handleChange}
+          />
 
-          <h2>{form.name || "User Name"}</h2>
+          <input
+            name="age_group"
+            placeholder="Age"
+            value={form.age_group}
+            onChange={handleChange}
+          />
 
-          {!form.active && (
-            <span className="badge">Deactivated</span>
-          )}
+          <input
+            name="city"
+            placeholder="City"
+            value={form.city}
+            onChange={handleChange}
+          />
+
+          <input
+            name="budget"
+            type="number"
+            placeholder="Budget"
+            value={form.budget}
+            onChange={handleChange}
+          />
+
+          <select
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
 
         </div>
 
-        {/* Right */}
-        <div className="profile-right">
+        <div className="profile-actions">
+          <button className="btn-save" onClick={saveProfile}>
+            Save / Update
+          </button>
 
-          <div className="form-group">
-            <label>Name</label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) =>
-                setForm({ ...form, name: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Age</label>
-            <input
-              type="number"
-              value={form.age}
-              onChange={(e) =>
-                setForm({ ...form, age: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Area</label>
-            <input
-              type="text"
-              value={form.area}
-              onChange={(e) =>
-                setForm({ ...form, area: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Budget</label>
-            <input
-              type="number"
-              value={form.budget}
-              onChange={(e) =>
-                setForm({ ...form, budget: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Gender</label>
-            <select
-              value={form.gender}
-              onChange={(e) =>
-                setForm({ ...form, gender: e.target.value })
-              }
-            >
-              <option value="">Select</option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Photo</label>
-            <input type="file" onChange={handleImage} />
-          </div>
-
-          {/* Buttons */}
-          <div className="actions">
-
-            <button
-              className="btn-primary"
-              onClick={saveProfile}
-            >
-              Save
-            </button>
-
-            <button
-              className="btn-secondary"
-              onClick={deactivate}
-            >
-              Deactivate
-            </button>
-
-            <button
-              className="btn-danger"
-              onClick={deleteProfile}
-            >
-              Delete
-            </button>
-
-          </div>
-
+          <button className="btn-delete" onClick={deleteProfile}>
+            Delete Account
+          </button>
         </div>
 
       </div>
-
     </div>
   );
 }

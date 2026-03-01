@@ -14,7 +14,7 @@ const Registration = () => {
     occupation: "",
     password: "",
     user_type: "",
-    area: "",
+    city: "",
     gender: "",
   });
 
@@ -142,7 +142,7 @@ const Registration = () => {
           </div>
 
          <select
-            name="area"
+            name="city"
             onChange={handleChange}
             defaultValue=""
             required

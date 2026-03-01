@@ -8,19 +8,19 @@ const createUser = (
   occupation,
   password,
   user_type,
-  area,
+  city,
   gender,
   callback
 ) => {
   const sql = `
     INSERT INTO users 
-    (name, DOB, email, occupation, password, user_type, area, gender)
+    (name, DOB, email, occupation, password, user_type, city, gender)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(
     sql,
-    [name, DOB, email, occupation, password, user_type, area, gender],
+    [name, DOB, email, occupation, password, user_type, city, gender],
     callback
   );
 };
