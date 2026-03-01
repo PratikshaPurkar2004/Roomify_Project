@@ -3,6 +3,7 @@ import axios from "axios";
 import "../styles/Profile.css";
 
 export default function Profile() {
+
   const userId = localStorage.getItem("userId");
 
   const [form, setForm] = useState({
@@ -10,49 +11,58 @@ export default function Profile() {
     age_group: "",
     city: "",
     budget: "",
-    gender: "",
-    preferences: "",
+    gender: ""
   });
 
   const [msg, setMsg] = useState("");
 
-  // ================= FETCH =================
+  // ================= FETCH PROFILE =================
   useEffect(() => {
     if (!userId) return;
 
     axios
       .get(`http://localhost:5000/api/profile/${userId}`)
       .then((res) => {
-        setForm(res.data);
+        if (res.data) {
+          setForm({
+            name: res.data.name || "",
+            age_group: res.data.age_group || "",
+            city: res.data.city || "",
+            budget: res.data.budget || "",
+            gender: res.data.gender || ""
+          });
+        }
       })
       .catch(() => {
         setMsg("Failed to load profile ❌");
       });
+
   }, [userId]);
 
-  // ================= INPUT CHANGE =================
+  // ================= HANDLE INPUT =================
   const handleChange = (e) => {
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     });
   };
 
-  // ================= SAVE =================
+  // ================= UPDATE PROFILE =================
   const saveProfile = () => {
     axios
       .put(`http://localhost:5000/api/profile/${userId}`, form)
       .then(() => {
         setMsg("Profile Updated Successfully ✅");
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         setMsg("Update Failed ❌");
       });
   };
 
-  // ================= DELETE =================
+  // ================= DELETE ACCOUNT =================
   const deleteProfile = () => {
-    if (!window.confirm("Are you sure?")) return;
+    if (!window.confirm("Are you sure you want to delete account?")) return;
 
     axios
       .delete(`http://localhost:5000/api/profile/${userId}`)
@@ -84,7 +94,7 @@ export default function Profile() {
 
           <input
             name="age_group"
-            placeholder="Age Group (18-25)"
+            placeholder="Age"
             value={form.age_group}
             onChange={handleChange}
           />
@@ -110,16 +120,9 @@ export default function Profile() {
             onChange={handleChange}
           >
             <option value="">Select Gender</option>
-            <option>Male</option>
-            <option>Female</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
           </select>
-
-          <textarea
-            name="preferences"
-            placeholder="Preferences"
-            value={form.preferences}
-            onChange={handleChange}
-          />
 
         </div>
 
