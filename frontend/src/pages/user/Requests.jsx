@@ -80,7 +80,7 @@
 //   );
 // }
 import { useState } from "react";
-import "../styles/Requests.css";
+import "../../styles/Requests.css";
 
 export default function Requests() {
 
@@ -116,14 +116,16 @@ export default function Requests() {
   const acceptRequest = (id) => {
     alert("Request Accepted ✅");
 
-    setRequests(requests.filter((r) => r.id !== id));
+    //setRequests(requests.filter((r) => r.id !== id));
+    setRequests(prev => prev.filter((r) => r.id !== id));
   };
 
   // Reject Request
   const rejectRequest = (id) => {
     alert("Request Rejected ❌");
 
-    setRequests(requests.filter((r) => r.id !== id));
+    //setRequests(requests.filter((r) => r.id !== id));
+    setRequests(prev => prev.filter((r) => r.id !== id));
   };
 
   return (

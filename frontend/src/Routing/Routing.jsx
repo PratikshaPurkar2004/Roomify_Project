@@ -25,16 +25,25 @@
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 
+<<<<<<< Updated upstream
 import Login from "../Component/Login";
 import ForgotPassword from "../Component/ForgotPassword";
 import ResetPassword from "../Component/ResetPassword";
 import Registration from "../Component/Registration";
+=======
+import Welcome from "../pages/auth/Welcome";
+import Login from "../pages/auth/Login";
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import ResetPassword from "../pages/auth/ResetPassword";
+import Registration from "../pages/auth/Registration";
+>>>>>>> Stashed changes
 
 import Header from "../Component/Header";
 import Sidebar from "../Component/Sidebar";
 import Footer from "../Component/Footer";
 
 // Pages
+<<<<<<< Updated upstream
 import Dashboard from "../pages/Dashboard";
 import Profile from "../pages/Profile";
 import Requests from "../pages/Requests";
@@ -56,6 +65,11 @@ function DashboardLayout() {
     </>
   );
 }
+=======
+import Dashboard from "../pages/user/Dashboard";
+import Profile from "../pages/user/Profile";
+import Requests from "../pages/user/Requests";
+>>>>>>> Stashed changes
 
 function Routing() {
   return (

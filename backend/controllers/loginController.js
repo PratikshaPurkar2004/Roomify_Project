@@ -32,9 +32,8 @@
 const bcrypt = require("bcryptjs");
 const { findUserByEmail } = require("../models/loginModel");
 
-const login = (req, res) => {
-  const { email, password } = req.body;
-
+const login = (req, res) => {const { email, password } = req.body;
+  
   findUserByEmail(email, async (err, result) => {
 
     if (err) {

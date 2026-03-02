@@ -6,8 +6,8 @@ router.get("/", (req, res) => {
   res.json([
     { name: "Pune" },
     { name: "Mumbai" },
-    { name: "Nagpur" },
-    { name: "Delhi" },
+    { name: "Nashik" },
+    // { name: "Delhi" },
     { name: "Bangalore" }
   ]);
 });

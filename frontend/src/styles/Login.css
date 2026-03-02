@@ -23,7 +23,7 @@
 }
 
 /* Heading */
-.login-card h2 {
+.login-card h1 {
   text-align: center;
   margin-bottom: 25px;
   color: #333;
@@ -43,7 +43,8 @@
 }
 
 .input-group input {
-  padding: 10px;
+
+  padding:10px;
   border-radius: 8px;
   border: 1px solid #ccc;
   outline: none;
@@ -58,12 +59,20 @@
 /* Password Wrapper */
 .password-wrapper {
   position: relative;
+  width: 100%;
+}
+
+.password-wrapper input{
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 40px;
 }
 
 .toggle-password {
   position: absolute;
   right: 10px;
-  top: 8px;
+  top: 15px;
+  transform: translateY(-50%);
   cursor: pointer;
 }
 

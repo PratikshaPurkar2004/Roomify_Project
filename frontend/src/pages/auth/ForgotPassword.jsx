@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import axios from "axios";
-import "./Login.css";
+import "../../styles/Login.css";
 
 
 function Forgot() {
@@ -14,14 +14,13 @@ function Forgot() {
     e.preventDefault();
     try{
       const res=await axios.post("http://localhost:5000/api/auth/forgot-password",{email});
-
       Navigate(`/reset-password/${res.data.token}`);
       setIsError(false);
       setMessage(res.data.message);
     }
     catch(err){
       setIsError(true);
-      setMessage(err.response?.data?.message || "somthing went wrong");
+      setMessage(err.response?.data?.message || "something went wrong");
     }
   };
 

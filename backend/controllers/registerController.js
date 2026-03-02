@@ -5,12 +5,12 @@ const { findUserByEmail } = require("../models/loginModel");
 
 const register = async (req, res) => {
   const { name, DOB, email, occupation, password, user_type, city, gender } = req.body;
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    findUserByEmail(email, (err, result) => {
-      if (err) {
+  console.log(req.body)
+  try 
+  {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      findUserByEmail(email, (err, result) => {
+      if (err){
         console.log("Find error:", err);
         return res.status(500).json({ message: "Database error" });
       }
@@ -19,21 +19,12 @@ const register = async (req, res) => {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      createUser(
-        name,
-        DOB,
-        email,
-        hashedPassword ? occupation : occupation,
-        hashedPassword,
-        user_type,
-        city,
-        gender,
+      createUser(name,email,hashedPassword ? occupation : occupation,hashedPassword,user_type,city,gender,
         (err) => {
           if (err) {
             console.log("Insert error:", err);
             return res.status(500).json({ message: "Registration failed" });
           }
-
           res.json({ message: "User registered successfully ✅" });
         }
       );
