@@ -1,9 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-
-
-// ✅ 1️⃣ LOGIN THUNK
+// LOGIN THUNK
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
@@ -22,9 +20,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-
-
-// ✅ 2️⃣ REGISTER THUNK
+// REGISTER THUNK
 
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
@@ -43,10 +39,8 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+// SINGLE SLICE
 
-// =============================
-// ✅ 3️⃣ SINGLE SLICE
-// =============================
 const authSlice = createSlice({
   name: "auth",
   initialState: {
