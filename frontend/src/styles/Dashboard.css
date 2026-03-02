@@ -1,35 +1,68 @@
 .dashboard {
-  padding-top: 10px;
+  padding: 60px 80px;
+  background-color: #F8FAFC;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
 }
 
-.dashboard h1 {
-  margin-bottom: 30px;
+.dashboard-header h1 {
+  font-size: 32px;
+  margin-bottom: 5px;
+  color: #1E293B;
 }
 
-/* Cards row */
+.dashboard-header p {
+  color: #64748B;
+  margin-bottom: 40px;
+}
+
 .card-row {
   display: flex;
-  justify-content: center;
   gap: 30px;
 }
 
-/* Card */
 .card {
   background: white;
-  padding: 30px;
-  width: 220px;
-
+  padding: 25px;
   border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  transition: 0.3s ease;
+}
 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  text-align: center;
+.card:hover {
+  transform: translateY(-5px);
 }
 
 .card p {
-  color: #555;
+  color: #64748B;
+  margin: 0;
+  font-size: 14px;
 }
 
 .card h2 {
-  color: #2563eb;
+  margin: 5px 0 0 0;
   font-size: 28px;
+  color: #1E293B;
+}
+
+.card-icon {
+  padding: 15px;
+  border-radius: 10px;
+  color: white;
+}
+
+.card-icon.users {
+  background-color: #4F46E5;
+}
+
+.card-icon.rooms {
+  background-color: #0EA5E9;
+}
+
+.card-icon.requests {
+  background-color: #10B981;
 }

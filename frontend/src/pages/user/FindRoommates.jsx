@@ -1,113 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../styles/FindRoommates.css";
 
 export default function FindRoommates() {
-
   const navigate = useNavigate();
 
-  // Roommates Data
-  const roommates = [
-    {
-      id: 1,
-      name: "Neha Patil",
-      city: "Pune",
-      rent: 9000,
-      gender: "Female",
-      lookingFor: "Female",
-      match: 92,
-      img: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-      id: 2,
-      name: "Rahul Sharma",
-      city: "Mumbai",
-      rent: 7000,
-      gender: "Male",
-      lookingFor: "Male",
-      match: 85,
-      img: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-    {
-      id: 3,
-      name: "Amit Patel",
-      city: "Delhi",
-      rent: 6000,
-      gender: "Male",
-      lookingFor: "Any",
-      match: 78,
-      img: "https://randomuser.me/api/portraits/men/55.jpg",
-    },
-    {
-      id: 4,
-      name: "Priya Singh",
-      city: "Bangalore",
-      rent: 8500,
-      gender: "Female",
-      lookingFor: "Female",
-      match: 88,
-      img: "https://randomuser.me/api/portraits/women/65.jpg",
-    },
-    {
-      id: 5,
-      name: "Rohan Verma",
-      city: "Delhi",
-      rent: 7500,
-      gender: "Male",
-      lookingFor: "Any",
-      match: 80,
-      img: "https://randomuser.me/api/portraits/men/71.jpg",
-    },
-    {
-      id: 6,
-      name: "Sneha Kulkarni",
-      city: "Pune",
-      rent: 8200,
-      gender: "Female",
-      lookingFor: "Female",
-      match: 90,
-      img: "https://randomuser.me/api/portraits/women/72.jpg",
-    },
-  ];
+  const [roommates, setRoommates] = useState([]);
+  const [results, setResults] = useState([]);
 
-  // Search States
   const [city, setCity] = useState("");
   const [budget, setBudget] = useState("");
   const [gender, setGender] = useState("");
   const [looking, setLooking] = useState("");
-  const [results, setResults] = useState(roommates);
 
-  // Search Function
+  // ✅ GET USER ID (because login saves userId only)
+  const userId = localStorage.getItem("userId");
+
+  // ✅ IF NO USER LOGGED IN
+  if (!userId) {
+    return <h2>Please login first 😔</h2>;
+  }
+
+  // 🔥 FETCH USERS FROM DATABASE
+  useEffect(() => {
+    axios
+      .get(`http://localhost:5000/api/users/all/${userId}`)
+      .then((res) => {
+        setRoommates(res.data);
+        setResults(res.data);
+      })
+      .catch((err) => {
+        console.log("API Error:", err);
+      });
+  }, [userId]);
+
+  // 🔎 SEARCH FUNCTION
   const handleSearch = () => {
     const filteredData = roommates.filter((u) => {
       return (
         (city === "" ||
           u.city.toLowerCase().includes(city.toLowerCase())) &&
-
-        (budget === "" || u.rent <= Number(budget)) &&
-
+        (budget === "" || u.budget <= Number(budget)) &&
         (gender === "" || u.gender === gender) &&
-
-        (looking === "" || u.lookingFor === looking)
+        (looking === "" || u.looking === looking)
       );
     });
 
     setResults(filteredData);
   };
 
-  // Request Success Alert
   const handleRequest = (name) => {
-    alert(`✅ Request sent successfully to ${name}!\nThey will contact you soon.`);
+    alert(`✅ Request sent successfully to ${name}!`);
   };
 
   return (
     <div className="clean-page">
-
       <h2 className="clean-title">Find Roommates</h2>
 
-      {/* Search Bar */}
+      {/* Search Section */}
       <div className="clean-search">
-
         <input
           type="text"
           placeholder="City"
@@ -122,19 +74,13 @@ export default function FindRoommates() {
           onChange={(e) => setBudget(e.target.value)}
         />
 
-        <select
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-        >
+        <select value={gender} onChange={(e) => setGender(e.target.value)}>
           <option value="">Gender</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
         </select>
 
-        <select
-          value={looking}
-          onChange={(e) => setLooking(e.target.value)}
-        >
+        <select value={looking} onChange={(e) => setLooking(e.target.value)}>
           <option value="">Looking For</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
@@ -142,40 +88,32 @@ export default function FindRoommates() {
         </select>
 
         <button onClick={handleSearch}>Search</button>
-
       </div>
 
       {/* Cards */}
       <div className="clean-grid">
-
-        {results.length === 0 && (
-          <p>No roommates found 😔</p>
-        )}
+        {results.length === 0 && <p>No roommates found 😔</p>}
 
         {results.map((user) => (
-
-          <div className="clean-card" key={user.id}>
-
-            {/* Match Badge */}
-            <div className="match-badge">
-              {user.match}% Match
-            </div>
-
-            <img src={user.img} alt={user.name} />
+          <div className="clean-card" key={user.user_id}>
+            <img
+              src={
+                user.profile_image ||
+                "https://randomuser.me/api/portraits/men/1.jpg"
+              }
+              alt={user.name}
+            />
 
             <div className="clean-info">
-
               <h3>{user.name}</h3>
 
               <div className="card-info-box">
                 <p><b>City:</b> {user.city}</p>
-                <p><b>Budget:</b> ₹{user.rent}</p>
-                <p><b>Looking:</b> {user.lookingFor}</p>
+                <p><b>Budget:</b> ₹{user.budget}</p>
+                <p><b>Looking:</b> {user.looking}</p>
               </div>
 
-              {/* Buttons */}
               <div className="clean-btns">
-
                 <button
                   className="chat"
                   onClick={() => navigate("/subscribe")}
@@ -189,17 +127,11 @@ export default function FindRoommates() {
                 >
                   Request
                 </button>
-
               </div>
-
             </div>
-
           </div>
-
         ))}
-
       </div>
-
     </div>
   );
 }
