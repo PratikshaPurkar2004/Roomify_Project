@@ -39,7 +39,7 @@ import Footer from "../Component/Footer";
 
 // User Pages
 import Dashboard from "../pages/user/Dashboard";
-import Profile from "../pages/user/Profile";
+import Profile from "../pages/Profile";
 import Requests from "../pages/user/Requests";
 import FindRoommates from "../pages/user/FindRoommates";
 

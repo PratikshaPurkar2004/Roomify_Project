@@ -1,101 +1,81 @@
-/* Full height fix */
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Sidebar */
 .sidebar {
-  width: 230px;
-  min-height: 100vh;
-
-  background: linear-gradient(to bottom, #020024, #090979, #00d4ff);
+  width: 250px;
+  height: 100vh;
+  background: #0F172A;
   color: white;
-
-  display: flex;
-  flex-direction: column;
-
   position: fixed;
   left: 0;
   top: 0;
-
-  /* Space for footer */
-  padding-bottom: 80px;
-}
-
-/* Logo */
-.sidebar-logo {
-  text-align: center;
-  font-size: 22px;
-  font-weight: bold;
-  padding: 20px 0;
-
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-/* Menu */
-.sidebar-menu {
-  flex: 1;
-  margin-top: 20px;
-
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
 }
 
-/* Menu Item */
-.menu-item {
+.sidebar-logo {
   display: flex;
   align-items: center;
   gap: 12px;
-
-  padding: 12px 25px;
-  text-decoration: none;
-  color: #e5e7eb;
-
-  font-size: 15px;
-  transition: 0.3s;
+  margin-bottom: 45px;
 }
 
-.menu-item:hover {
-  background: rgba(255,255,255,0.15);
-  color: white;
-}
-
-/* Active */
-.active {
-  background: #2563eb;
-  border-left: 4px solid #22c55e;
-}
-
-/* Logout Area */
-.sidebar-footer {
-  margin-top: auto;
-  padding: 15px 15px 30px;
-
-  border-top: 1px solid rgba(255,255,255,0.2);
-}
-
-/* Logout Button */
-.logout-btn {
-  width: 100%;
-  padding: 10px;
-
-  background: #ef4444;
-  border: none;
-  border-radius: 6px;
-
-  color: white;
-  font-size: 15px;
-
-  cursor: pointer;
-
+.logo-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #6366F1;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 600;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.logout-btn:hover {
-  background: #dc2626;
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #CBD5E1;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.menu-item:hover {
+  background: #1E293B;
+  color: white;
+}
+
+.menu-item.active {
+  background: #1E293B;
+  color: white;
+  border-left: 3px solid #6366F1;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #1E293B;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #EF4444;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
 }
