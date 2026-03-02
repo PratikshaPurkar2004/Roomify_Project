@@ -1,68 +1,77 @@
 .dashboard {
-  padding: 60px 80px;
-  background-color: #F8FAFC;
-  min-height: 100vh;
+  padding: 40px;
+  background: #F8FAFC;
+  min-height: calc(100vh - 70px); /* prevent footer overlap */
   font-family: 'Inter', sans-serif;
+  margin-left:300px;
 }
 
+/* HEADER */
 .dashboard-header h1 {
-  font-size: 32px;
-  margin-bottom: 5px;
-  color: #1E293B;
+  font-size: 28px;
+  color: #0F172A;
+  margin-bottom: 6px;
+  font-weight: 700;
 }
 
 .dashboard-header p {
   color: #64748B;
-  margin-bottom: 40px;
+  margin-bottom: 35px;
 }
 
+/* CARD ROW */
 .card-row {
   display: flex;
-  gap: 30px;
+  gap: 25px;
+  flex-wrap: wrap;
 }
 
+/* CARD */
 .card {
-  background: white;
+  flex: 1;
+  min-width: 260px;
+  background: #ffffff;
   padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   gap: 20px;
-  flex: 1;
+  border: 1px solid #E2E8F0;
   transition: 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.06);
 }
 
 .card p {
-  color: #64748B;
   margin: 0;
   font-size: 14px;
+  color: #64748B;
 }
 
 .card h2 {
-  margin: 5px 0 0 0;
+  margin-top: 6px;
   font-size: 28px;
-  color: #1E293B;
+  color: #0F172A;
 }
 
+/* ICON */
 .card-icon {
-  padding: 15px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 12px;
   color: white;
 }
 
 .card-icon.users {
-  background-color: #4F46E5;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
 }
 
 .card-icon.rooms {
-  background-color: #0EA5E9;
+  background: linear-gradient(135deg, #06B6D4, #3B82F6);
 }
 
 .card-icon.requests {
-  background-color: #10B981;
+  background: linear-gradient(135deg, #10B981, #059669);
 }
