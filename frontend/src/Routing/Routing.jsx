@@ -25,10 +25,7 @@
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 
-<<<<<<< Updated upstream
 // Auth Pages
-=======
->>>>>>> Stashed changes
 import Welcome from "../pages/auth/Welcome";
 import Login from "../pages/auth/Login";
 import ForgotPassword from "../pages/auth/ForgotPassword";
@@ -40,12 +37,11 @@ import Header from "../Component/Header";
 import Sidebar from "../Component/Sidebar";
 import Footer from "../Component/Footer";
 
-<<<<<<< Updated upstream
 // User Pages
 import Dashboard from "../pages/user/Dashboard";
 import Profile from "../pages/user/Profile";
 import Requests from "../pages/user/Requests";
-import FindRoommates from "../pages/FindRoommates";
+import FindRoommates from "../pages/user/FindRoommates";
 
 /* Dashboard Layout */
 function DashboardLayout() {
@@ -62,14 +58,6 @@ function DashboardLayout() {
     </>
   );
 }
-=======
-// Pages
-import DashboardLayout from "../layout/DashboardLayout";
-import Dashboard from "../pages/user/Dashboard";
-import Profile from "../pages/user/Profile";
-import Requests from "../pages/user/Requests";
-import Home from "../pages/Home";
->>>>>>> Stashed changes
 
 function Routing() {
   return (

@@ -16,20 +16,30 @@ export default function Profile() {
 
   const [msg, setMsg] = useState("");
 
+  // ================= FETCH PROFILE =================
   useEffect(() => {
     if (!userId) return;
 
     axios
       .get(`http://localhost:5000/api/profile/${userId}`)
       .then((res) => {
-        setForm(res.data);
+        if (res.data) {
+          setForm({
+            name: res.data.name || "",
+            age_group: res.data.age_group || "",
+            city: res.data.city || "",
+            budget: res.data.budget || "",
+            gender: res.data.gender || ""
+          });
+        }
       })
       .catch(() => {
-        setMsg("Failed to load profile");
+        setMsg("Failed to load profile ❌");
       });
 
   }, [userId]);
 
+  // ================= HANDLE INPUT =================
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -37,41 +47,96 @@ export default function Profile() {
     });
   };
 
+  // ================= UPDATE PROFILE =================
   const saveProfile = () => {
     axios
       .put(`http://localhost:5000/api/profile/${userId}`, form)
       .then(() => {
         setMsg("Profile Updated Successfully ✅");
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         setMsg("Update Failed ❌");
       });
   };
 
+  // ================= DELETE ACCOUNT =================
   const deleteProfile = () => {
-    if (!window.confirm("Delete account?")) return;
+    if (!window.confirm("Are you sure you want to delete account?")) return;
 
     axios
       .delete(`http://localhost:5000/api/profile/${userId}`)
       .then(() => {
         localStorage.clear();
         window.location.href = "/";
+      })
+      .catch(() => {
+        setMsg("Delete Failed ❌");
       });
   };
 
   return (
-    <div>
-      <h2>My Profile</h2>
-      {msg && <p>{msg}</p>}
+    <div className="profile-page">
+      <div className="profile-card">
 
-      <input name="name" value={form.name} onChange={handleChange} placeholder="Name" />
-      <input name="age_group" value={form.age_group} onChange={handleChange} placeholder="Age" />
-      <input name="city" value={form.city} onChange={handleChange} placeholder="City" />
-      <input name="budget" value={form.budget} onChange={handleChange} placeholder="Budget" />
-      <input name="gender" value={form.gender} onChange={handleChange} placeholder="Gender" />
+        <h2>My Profile</h2>
 
-      <button onClick={saveProfile}>Save</button>
-      <button onClick={deleteProfile}>Delete</button>
+        {msg && <p className="profile-msg">{msg}</p>}
+
+        <div className="profile-form">
+
+          <input
+            name="name"
+            placeholder="Full Name"
+            value={form.name}
+            onChange={handleChange}
+          />
+
+          <input
+            name="age_group"
+            placeholder="Age"
+            value={form.age_group}
+            onChange={handleChange}
+          />
+
+          <input
+            name="city"
+            placeholder="City"
+            value={form.city}
+            onChange={handleChange}
+          />
+
+          <input
+            name="budget"
+            type="number"
+            placeholder="Budget"
+            value={form.budget}
+            onChange={handleChange}
+          />
+
+          <select
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+
+        </div>
+
+        <div className="profile-actions">
+          <button className="btn-save" onClick={saveProfile}>
+            Save / Update
+          </button>
+
+          <button className="btn-delete" onClick={deleteProfile}>
+            Delete Account
+          </button>
+        </div>
+
+      </div>
     </div>
   );
 }

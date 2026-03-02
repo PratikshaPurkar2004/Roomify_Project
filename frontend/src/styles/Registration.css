@@ -1,22 +1,27 @@
 /* Background */
+*{
+  box-sizing: border-box;
+}
 .overlay {
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #07004d, #001f8f, #00bcd4);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   padding: 20px;
 }
 
 /* Card */
 .card {
   width: 100%;
-  max-width: 600px;
+  max-width: 450px;
   background: #ffffff;
-  padding: 35px 40px;
+  padding: 40px;
   border-radius: 20px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
   text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Title */
@@ -24,6 +29,7 @@
   font-size: 26px;
   margin-bottom: 6px;
   color: #1e3c72;
+  text-align: left;
 }
 
 .subtext {

@@ -22,7 +22,7 @@ const Registration = () => {
     let newErrors={};
     if(!formData.name.trim())newErrors.name="Name is Reqiured";
     if(!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))newErrors.email="Invalid Email";
-    if(!formData.password.length<6)newErrors.password="password must be 6+ didgit";
+    if(formData.password.length<6)newErrors.password="password must be 6+ didgit";
     if(!formData.user_type)newErrors.user_type="Select Role";
     if(!formData.gender)newErrors.gender="Select gender";
     return newErrors;

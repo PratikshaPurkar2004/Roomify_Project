@@ -4,7 +4,7 @@ const { createUser } = require("../models/registerModel");
 const { findUserByEmail } = require("../models/loginModel");
 
 const register = async (req, res) => {
-  const { name, DOB, email, occupation, password, user_type, city, gender } = req.body;
+  const { name,email, occupation, password, user_type, gender } = req.body;
   console.log(req.body)
   try 
   {
@@ -19,7 +19,7 @@ const register = async (req, res) => {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      createUser(name,email,hashedPassword ? occupation : occupation,hashedPassword,user_type,city,gender,
+      createUser(name,email,hashedPassword ? occupation : occupation,hashedPassword,user_type,gender,
         (err) => {
           if (err) {
             console.log("Insert error:", err);

@@ -53,7 +53,7 @@
 // export default Dashboard;
 
 import React, { useEffect, useState } from "react";
-import "../styles/Dashboard.css";
+import "../../styles/Dashboard.css";
 import { Users, Home, FileText } from "lucide-react";
 
 
