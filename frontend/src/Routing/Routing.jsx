@@ -39,7 +39,7 @@ import Footer from "../Component/Footer";
 
 // User Pages
 import Dashboard from "../pages/user/Dashboard";
-import Profile from "../pages/Profile";
+import Profile from "../pages/user/Profile";
 import Requests from "../pages/user/Requests";
 import FindRoommates from "../pages/user/FindRoommates";
 
@@ -67,7 +67,7 @@ function Routing() {
       <Route path="/" element={<Welcome />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/signup" element={<Registration />} />
 
       {/* Dashboard Routes */}

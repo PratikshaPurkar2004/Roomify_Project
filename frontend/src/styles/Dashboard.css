@@ -3,11 +3,7 @@
   background: #F8FAFC;
   min-height: calc(100vh - 70px); /* prevent footer overlap */
   font-family: 'Inter', sans-serif;
-<<<<<<< HEAD
-  margin-left: 200px;
-=======
   margin-left:300px;
->>>>>>> bfce4c875e8cccc2a6c423bccd1f096c2d1fb6b1
 }
 
 /* HEADER */
