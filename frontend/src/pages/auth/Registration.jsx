@@ -99,6 +99,7 @@ const Registration = () => {
 
   };
 
+<<<<<<< HEAD
   useEffect(()=>{
     if(success){
       setTimeout(()=>{
@@ -115,6 +116,12 @@ const Registration = () => {
       <div className="card">
         <h2>Create Account</h2>
         <p className="subtext">Please fill details to continue</p>
+=======
+  useEffect(() => {
+    if (success) {
+      // Clear any existing user session to prevent auto-redirect to dashboard
+      localStorage.removeItem("user");
+>>>>>>> a403963a70429c99a2983b6ed8d183aa77368743
 
       dispatch(clearMessage());
       navigate("/login");
