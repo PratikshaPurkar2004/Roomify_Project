@@ -1,32 +1,9 @@
-// // import React from "react";
-// // import { Routes, Route, Navigate } from "react-router-dom";
-
-// // import Welcome from "../Component/Welcome";
-// // import Login from "../Component/Login";
-// // import Forgot from "../Component/Forgot";
-// // import Registration from "../Component/Registration";
-
-// // function Routing() {
-// //   return (
-// //     <Routes>
-// //       <Route path="/" element={<Welcome />} />
-// //       <Route path="/login" element={<Login />} />
-// //       <Route path="/forgot-password" element={<Forgot />} />
-// //       <Route path="/signup" element={<Registration />} />
-
-// //       <Route path="*" element={<Navigate to="/" />} />
-// //     </Routes>
-// //   );
-// // }
-
-// // export default Routing;
-
 
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 
 // Auth Pages
-import Welcome from "../pages/auth/Welcome";
+import Home from "../pages/Home";
 import Login from "../pages/auth/Login";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
@@ -67,10 +44,10 @@ function Routing() {
     <Routes>
 
       {/* Public Routes */}
-      <Route path="/" element={<Welcome />} />
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/signup" element={<Registration />} />
       <Route path="/preferences" element={<Preference />} />
 

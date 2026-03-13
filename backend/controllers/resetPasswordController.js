@@ -1,15 +1,39 @@
-const jwt = require("jsonwebtoken");
+const db = require("../config/db");
+const bcrypt = require("bcryptjs");
 
-exports.resetPassword = async (req, res) => {
-  const { token } = req.params;
-  const { password } = req.body;
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
 
-  try 
-  {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      res.status(200).json({message: "Password updated successfully!",});
+    const [rows] = await db.query(
+      "SELECT * FROM users WHERE reset_token = ?",
+      [token]
+    );
 
-  } catch (err) {
-    res.status(400).json({message: "Invalid or expired token",});
+    if (rows.length === 0) {
+      return res.status(400).json({
+        message: "Invalid or expired token"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await db.query(
+      "UPDATE users SET password = ?, reset_token = NULL WHERE reset_token = ?",
+      [hashedPassword, token]
+    );
+
+    res.json({
+      message: "Password updated successfully"
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Server error"
+    });
   }
 };
+
+module.exports = { resetPassword };

@@ -4,7 +4,10 @@ import "../../styles/Profile.css";
 
 export default function Profile() {
 
+<<<<<<< HEAD
   // get userId safely
+=======
+>>>>>>> a403963a70429c99a2983b6ed8d183aa77368743
   const userId = localStorage.getItem("userId");
 
   const [form, setForm] = useState({
@@ -19,6 +22,7 @@ export default function Profile() {
 
   // ================= FETCH PROFILE =================
   useEffect(() => {
+<<<<<<< HEAD
 
     if (!userId) {
       setMsg("User not logged in ❌");
@@ -42,11 +46,30 @@ export default function Profile() {
       })
       .catch((err) => {
         console.log(err);
+=======
+    if (!userId) return;
+
+    axios
+    .get(`http://localhost:5000/api/profile/${userId}`)
+      .then((res) => {
+        if (res.data) {
+          setForm({
+            name: res.data.name || "",
+            age_group: res.data.age_group || "",
+            city: res.data.city || "",
+            budget: res.data.budget || "",
+            gender: res.data.gender || ""
+          });
+        }
+      })
+      .catch(() => {
+>>>>>>> a403963a70429c99a2983b6ed8d183aa77368743
         setMsg("Failed to load profile ❌");
       });
 
   }, [userId]);
 
+<<<<<<< HEAD
 
   // ================= HANDLE INPUT =================
   const handleChange = (e) => {
@@ -89,11 +112,37 @@ export default function Profile() {
   // ================= DELETE ACCOUNT =================
   const deleteProfile = () => {
 
+=======
+  // ================= HANDLE INPUT =================
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  // ================= UPDATE PROFILE =================
+  const saveProfile = () => {
+  axios
+    .put(`http://localhost:5000/api/profile/${userId}`, form)
+    .then(() => {
+      setMsg("Profile Updated Successfully ✅");
+    })
+    .catch((err) => {
+      console.log(err);
+      setMsg("Update Failed ❌");
+    });
+};
+
+  // ================= DELETE ACCOUNT =================
+  const deleteProfile = () => {
+>>>>>>> a403963a70429c99a2983b6ed8d183aa77368743
     if (!window.confirm("Are you sure you want to delete account?")) return;
 
     axios
       .delete(`http://localhost:5000/api/profile/${userId}`)
       .then(() => {
+<<<<<<< HEAD
 
         localStorage.clear();
 
@@ -112,6 +161,18 @@ export default function Profile() {
   return (
     <div className="profile-page">
 
+=======
+        localStorage.clear();
+        window.location.href = "/";
+      })
+      .catch(() => {
+        setMsg("Delete Failed ❌");
+      });
+  };
+
+  return (
+    <div className="profile-page">
+>>>>>>> a403963a70429c99a2983b6ed8d183aa77368743
       <div className="profile-card">
 
         <h2>My Profile</h2>
@@ -162,6 +223,7 @@ export default function Profile() {
         </div>
 
         <div className="profile-actions">
+<<<<<<< HEAD
 
           <button
             className="btn-save"
@@ -181,6 +243,18 @@ export default function Profile() {
 
       </div>
 
+=======
+          <button className="btn-save" onClick={saveProfile}>
+            Save / Update
+          </button>
+
+          <button className="btn-delete" onClick={deleteProfile}>
+            Delete Account
+          </button>
+        </div>
+
+      </div>
+>>>>>>> a403963a70429c99a2983b6ed8d183aa77368743
     </div>
   );
 }

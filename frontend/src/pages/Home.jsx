@@ -1,64 +1,250 @@
 import React, { useState } from "react";
-import RoomCard from "../Component/RoomCard";
-import { roomData } from "../roomData";
+import { useNavigate } from "react-router-dom";
 import "../styles/Home.css";
 
-function Home() {
-  const [filter, setFilter] = useState("All");
-  const [search, setSearch] = useState("");
+export default function Home() {
 
-  const filteredRooms = roomData.filter((room) => {
-    const genderMatch =
-      filter === "All" ? true : room.gender === filter;
+const navigate = useNavigate();
+const [activeTab,setActiveTab] = useState("rent");
 
-    const searchMatch =
-      room.location.toLowerCase().includes(search.toLowerCase());
+const rentSteps = [
+"Fill up a form with the basic details about your apartment",
+"Sign up and complete your profile",
+"Post your listing and connect with seekers"
+];
 
-    return genderMatch && searchMatch;
-  });
+const findSteps = [
+"Browse rooms or roommates by city",
+"Contact the roommate or landlord",
+"Move into your new shared space"
+];
 
-  return (
-    <div className="home">
+return(
 
-      {/* Header */}
-      <header className="header">
-        <h2 className="logo">Roomify</h2>
-        <button className="login-btn">Login / Register</button>
-      </header>
+<div className="home">
 
-      {/* Hero Section */}
-      <div className="hero-section">
-        <h1>Find Perfect Roommates in Pune</h1>
-        <p>No brokers. Verified profiles. Safe & Easy.</p>
+{/* NAVBAR */}
 
-        <div className="search-filter-row">
-          <input
-            type="text"
-            placeholder="Search by area..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+<nav className="navbar">
 
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            <option value="All">All</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-        </div>
-      </div>
+<div className="logo">Roomify</div>
 
-      {/* Listings */}
-      <div className="room-list">
-        {filteredRooms.map((room) => (
-          <RoomCard key={room.id} room={room} />
-        ))}
-      </div>
+<div className="nav-buttons">
+<button onClick={()=>navigate("/login")} className="login">Login</button>
+<button onClick={()=>navigate("/signup")} className="signup">Get Started</button>
+</div>
 
-    </div>
-  );
+</nav>
+
+
+{/* HERO */}
+
+<section className="hero">
+
+<div className="hero-text">
+
+<h1>Find Your Perfect Roommate</h1>
+
+<p>
+Roomify connects students and professionals to
+find safe and affordable shared living spaces.
+</p>
+
+<button
+className="hero-btn"
+onClick={()=>navigate("/signup")}
+>
+Start Your Journey
+</button>
+
+</div>
+
+<div className="hero-img">
+
+<img
+src="https://cdn-icons-png.flaticon.com/512/706/706830.png"
+alt="roommate"
+/>
+
+</div>
+
+</section>
+
+
+{/* CITIES */}
+
+<section className="cities">
+
+<h2>Popular Cities</h2>
+
+<div className="city-grid">
+
+<div className="city-card">
+<img src="https://images.pexels.com/photos/2409953/pexels-photo-2409953.jpeg"/>
+<h3>Mumbai</h3>
+</div>
+
+<div className="city-card">
+<img src="https://images.pexels.com/photos/439391/pexels-photo-439391.jpeg"/>
+<h3>Pune</h3>
+</div>
+
+<div className="city-card">
+<img src="https://images.pexels.com/photos/1051075/pexels-photo-1051075.jpeg"/>
+<h3>Nashik</h3>
+</div>
+
+<div className="city-card">
+<img src="https://images.pexels.com/photos/210243/pexels-photo-210243.jpeg"/>
+<h3>Hyderabad</h3>
+</div>
+
+</div>
+
+</section>
+
+
+{/* ROOM PREVIEW */}
+
+<section className="rooms">
+
+<h2>Explore Rooms</h2>
+
+<div className="room-slider">
+
+<div className="room-card">
+<img src="https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg"/>
+<p>Modern Apartment</p>
+</div>
+
+<div className="room-card">
+<img src="https://images.pexels.com/photos/1648776/pexels-photo-1648776.jpeg"/>
+<p>Luxury Bedroom</p>
+</div>
+
+<div className="room-card">
+<img src="https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"/>
+<p>Shared Living Room</p>
+</div>
+
+<div className="room-card">
+<img src="https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"/>
+<p>Budget Friendly Room</p>
+</div>
+
+</div>
+
+</section>
+
+
+{/* HOW IT WORKS */}
+
+<section className="how">
+
+<h2 className="how-title">How It Works</h2>
+
+<div className="tabs">
+
+<button
+className={activeTab==="rent" ? "tab active" : "tab"}
+onClick={()=>setActiveTab("rent")}
+>
+Rent a Room
+</button>
+
+<button
+className={activeTab==="find" ? "tab active" : "tab"}
+onClick={()=>setActiveTab("find")}
+>
+Find a Room
+</button>
+
+</div>
+
+<div className="how-container">
+
+<div className="how-steps">
+
+{(activeTab==="rent"?rentSteps:findSteps).map((step,i)=>(
+<div key={i} className="step-card">
+
+<div className="step-number">{i+1}</div>
+
+<p>{step}</p>
+
+</div>
+))}
+
+<button
+className="start"
+onClick={()=>navigate("/signup")}
+>
+Get Started
+</button>
+
+</div>
+
+<div className="how-image">
+
+<img
+src="https://cdn-icons-png.flaticon.com/512/4140/4140037.png"
+alt="illustration"
+/>
+
+</div>
+
+</div>
+
+</section>
+
+
+{/* WHY ROOMIFY */}
+
+<section className="why">
+
+<h2>Why Choose Roomify</h2>
+
+<div className="why-grid">
+
+<div className="why-card">
+<h3>Verified Users</h3>
+<p>All users are verified for safe and trusted connections.</p>
+</div>
+
+<div className="why-card">
+<h3>Smart Matching</h3>
+<p>Find roommates based on lifestyle and preferences.</p>
+</div>
+
+<div className="why-card">
+<h3>Easy Communication</h3>
+<p>Chat directly with potential roommates.</p>
+</div>
+
+</div>
+
+</section>
+
+
+{/* CTA */}
+
+<section className="cta">
+
+<h2>Ready to find your roommate?</h2>
+
+<button
+onClick={()=>navigate("/register")}
+>
+Create Account
+</button>
+
+</section>
+
+
+
+
+</div>
+
+);
+
 }
-
-export default Home;
