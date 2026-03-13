@@ -79,6 +79,16 @@ function Dashboard() {
 
   useEffect(() => {
     dispatch(fetchDashboardStats());
+    
+    // Fetch Hosts and Finders
+    fetch("http://localhost:5000/api/dashboard/users")
+      .then((res) => res.json())
+      .then((data) => {
+        setHosts(data.hosts || []);
+        setFinders(data.finders || []);
+      })
+      .catch((err) => console.error("Error fetching users:", err));
+      
   }, [dispatch]);
 
   if (loading) return <p>Loading dashboard...</p>;
@@ -127,49 +137,45 @@ function Dashboard() {
         </div>
 
       </div>
-{/* Hosts */}
+{/* Users Section */}
 <div className="user-section">
-  <h2>Hosts</h2>
+  <h2>Featured Hosts</h2>
 
-  <table className="user-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>City</th>
-      </tr>
-    </thead>
-    <tbody>
-      {hosts.map((host, index) => (
-        <tr key={index}>
-          <td>{host.name}</td>
-          <td>{host.email}</td>
-          <td>{host.city}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
+  <div className="user-list-grid">
+    {hosts.length > 0 ? hosts.map((host, index) => (
+      <div key={index} className="user-item-card">
+        <img 
+          src={host.profile_image ? `http://localhost:5000${host.profile_image}` : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"} 
+          alt={host.name} 
+          className="user-avatar" 
+        />
+        <div className="user-info">
+          <h3>{host.name}</h3>
+          <p>{host.email}</p>
+          <span className="user-city">{host.city || "Not Specified"}</span>
+        </div>
+      </div>
+    )) : <p className="no-users">No hosts available yet.</p>}
+  </div>
 
-  <h2 style={{ marginTop: "40px" }}>Finders</h2>
+  <h2 style={{ marginTop: "50px" }}>Active Finders</h2>
 
-  <table className="user-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>City</th>
-      </tr>
-    </thead>
-    <tbody>
-      {finders.map((finder, index) => (
-        <tr key={index}>
-          <td>{finder.name}</td>
-          <td>{finder.email}</td>
-          <td>{finder.city}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
+  <div className="user-list-grid">
+    {finders.length > 0 ? finders.map((finder, index) => (
+      <div key={index} className="user-item-card">
+        <img 
+          src={finder.profile_image ? `http://localhost:5000${finder.profile_image}` : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"} 
+          alt={finder.name} 
+          className="user-avatar" 
+        />
+        <div className="user-info">
+          <h3>{finder.name}</h3>
+          <p>{finder.email}</p>
+          <span className="user-city">{finder.city || "Not Specified"}</span>
+        </div>
+      </div>
+    )) : <p className="no-users">No finders available yet.</p>}
+  </div>
 </div>
     </div>);
 }

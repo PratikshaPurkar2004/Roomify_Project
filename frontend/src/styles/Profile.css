@@ -1,120 +1,150 @@
-/* ===== Background ===== */
+/* ===== PROFILE PAGE ===== */
+
 .profile-page {
   min-height: 100vh;
-  padding: 60px 20px;
-  background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+  padding: 40px 30px;
+  background: #F8FAFC;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  margin-left:150px;
+  margin-left: 280px;
 }
 
-/* ===== Card ===== */
+/* Card */
 .profile-card {
-  background: #ffffff;
+  background: white;
   width: 100%;
-  max-width: 800px;
-  padding: 40px;
-  border-radius: 18px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
-  transition: 0.3s;
+  max-width: 750px;
+  padding: 44px 40px;
+  border-radius: 20px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
-/* ===== Title ===== */
+/* Title */
 .profile-card h2 {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
   font-size: 26px;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.3px;
 }
 
-/* ===== Form Grid ===== */
+.profile-card h2::after {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  margin: 12px auto 0;
+  border-radius: 2px;
+}
+
+/* Form Grid */
 .profile-form {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
-/* ===== Inputs ===== */
+/* Inputs */
 .profile-form input,
 .profile-form select,
 .profile-form textarea {
-  padding: 12px 14px;
+  padding: 13px 16px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1.5px solid #E2E8F0;
   font-size: 14px;
-  background: #f9fafb;
-  transition: 0.2s;
+  font-family: 'Inter', sans-serif;
+  background: #F8FAFC;
+  transition: all 0.3s ease;
+  color: #1E293B;
+  outline: none;
 }
 
 .profile-form input:focus,
 .profile-form select:focus,
 .profile-form textarea:focus {
-  border-color: #3b82f6;
+  border-color: #6366F1;
   background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-/* ===== Textarea Full Width ===== */
+.profile-form input::placeholder {
+  color: #94A3B8;
+}
+
+/* Textarea Full Width */
 .profile-form textarea {
   grid-column: span 2;
   min-height: 100px;
   resize: none;
 }
 
-/* ===== Buttons Section ===== */
+/* Buttons Section */
 .profile-actions {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  margin-top: 30px;
+  gap: 16px;
+  margin-top: 32px;
 }
 
-/* ===== Save Button ===== */
+/* Save Button */
 .btn-save {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
   border: none;
-  padding: 12px 30px;
+  padding: 13px 36px;
   border-radius: 12px;
   color: white;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 .btn-save:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
 }
 
-/* ===== Delete Button ===== */
+/* Delete Button */
 .btn-delete {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #EF4444, #DC2626);
   border: none;
-  padding: 12px 30px;
+  padding: 13px 36px;
   border-radius: 12px;
   color: white;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
 }
 
 .btn-delete:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.35);
 }
 
-/* ===== Message ===== */
+/* Message */
 .profile-msg {
   text-align: center;
-  margin-bottom: 15px;
-  font-weight: 500;
-  color: #16a34a;
+  margin-bottom: 18px;
+  font-weight: 600;
+  color: #059669;
+  font-size: 14px;
+  background: #F0FDF4;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #BBF7D0;
 }
 
-/* ===== Mobile Responsive ===== */
+/* Mobile Responsive */
 @media (max-width: 768px) {
   .profile-form {
     grid-template-columns: 1fr;
@@ -125,6 +155,6 @@
   }
 
   .profile-card {
-    padding: 25px;
+    padding: 28px 24px;
   }
 }

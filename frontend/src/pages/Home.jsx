@@ -43,18 +43,18 @@ return(
 
 <div className="hero-text">
 
-<h1>Find Your Perfect Roommate</h1>
+<h1>Find Your Perfect Roommate Match</h1>
 
 <p>
 Roomify connects students and professionals to
-find safe and affordable shared living spaces.
+find safe, verified, and affordable shared living spaces — effortlessly.
 </p>
 
 <button
 className="hero-btn"
 onClick={()=>navigate("/signup")}
 >
-Start Your Journey
+Start Your Journey →
 </button>
 
 </div>
@@ -179,7 +179,7 @@ Find a Room
 className="start"
 onClick={()=>navigate("/signup")}
 >
-Get Started
+Get Started →
 </button>
 
 </div>
@@ -207,18 +207,18 @@ alt="illustration"
 <div className="why-grid">
 
 <div className="why-card">
-<h3>Verified Users</h3>
+<h3>🛡️ Verified Users</h3>
 <p>All users are verified for safe and trusted connections.</p>
 </div>
 
 <div className="why-card">
-<h3>Smart Matching</h3>
+<h3>🎯 Smart Matching</h3>
 <p>Find roommates based on lifestyle and preferences.</p>
 </div>
 
 <div className="why-card">
-<h3>Easy Communication</h3>
-<p>Chat directly with potential roommates.</p>
+<h3>💬 Easy Communication</h3>
+<p>Chat directly with potential roommates in real time.</p>
 </div>
 
 </div>
@@ -230,17 +230,65 @@ alt="illustration"
 
 <section className="cta">
 
-<h2>Ready to find your roommate?</h2>
+<h2>Ready to find your perfect roommate?</h2>
 
 <button
-onClick={()=>navigate("/register")}
+onClick={()=>navigate("/signup")}
 >
-Create Account
+Create Free Account
 </button>
 
 </section>
 
 
+{/* HOME FOOTER */}
+
+<footer className="home-footer">
+
+<div className="home-footer-grid">
+
+<div>
+<div className="footer-brand">Roomify</div>
+<p>
+Find trusted roommates and shared rooms based on
+your lifestyle and preferences. Safe, smart, and simple.
+</p>
+</div>
+
+<div>
+<h3>Platform</h3>
+<ul>
+<li>Dashboard</li>
+<li>Find Roommate</li>
+<li>Profile</li>
+<li>Requests</li>
+</ul>
+</div>
+
+<div>
+<h3>Features</h3>
+<ul>
+<li>Room Matching</li>
+<li>Preference Filter</li>
+<li>Chat System</li>
+<li>Secure Requests</li>
+</ul>
+</div>
+
+<div>
+<h3>Contact Us</h3>
+<p>Pune, Maharashtra</p>
+<p>+91 9876543210</p>
+<p>support@roomify.com</p>
+</div>
+
+</div>
+
+<div className="home-footer-bottom">
+<p>© 2026 Roomify. All rights reserved.</p>
+</div>
+
+</footer>
 
 
 </div>

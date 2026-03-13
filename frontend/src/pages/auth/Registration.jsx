@@ -22,7 +22,8 @@ const Registration = () => {
     password: "",
     confirmPassword: "",
     user_type: "",
-    gender: ""
+    gender: "",
+    profile_image: null
   });
 
   const validate = () => {
@@ -57,11 +58,11 @@ const Registration = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: files ? files[0] : value,
     }));
 
     setErrors((prev) => ({
@@ -93,7 +94,12 @@ const Registration = () => {
       return;
     }
 
-    const { confirmPassword, ...data } = formData;
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (formData[key]) {
+        data.append(key, formData[key]);
+      }
+    });
 
     dispatch(registerUser(data));
 
@@ -110,15 +116,12 @@ const Registration = () => {
   }, [success, navigate, dispatch]);
 
   return (
-
     <div className="register-container">
-
       <div className="register-card">
         <p className="logo-subtitle">Create Your Account</p>
         {error && <p className="error">{error}</p>}
 
         <form onSubmit={handleSubmit}>
-
           <input
             type="text"
             name="name"
@@ -126,7 +129,6 @@ const Registration = () => {
             value={formData.name}
             onChange={handleChange}
           />
-
           {errors.name && <p className="field-error">{errors.name}</p>}
 
           <input
@@ -136,11 +138,9 @@ const Registration = () => {
             value={formData.email}
             onChange={handleChange}
           />
-
           {errors.email && <p className="field-error">{errors.email}</p>}
 
           <div className="password-wrapper">
-
             <input
               type={showPassword ? "text" : "password"}
               name="password"
@@ -148,16 +148,13 @@ const Registration = () => {
               value={formData.password}
               onChange={handleChange}
             />
-
             <span
               className="toggle-password"
               onClick={() => setShowPassword(!showPassword)}
             >
               👁
             </span>
-
           </div>
-
           {errors.password && <p className="field-error">{errors.password}</p>}
 
           <input
@@ -167,10 +164,9 @@ const Registration = () => {
             value={formData.confirmPassword}
             onChange={handleChange}
           />
-
-          {errors.confirmPassword &&
+          {errors.confirmPassword && (
             <p className="field-error">{errors.confirmPassword}</p>
-          }
+          )}
 
           <input
             type="text"
@@ -180,6 +176,16 @@ const Registration = () => {
             onChange={handleChange}
           />
 
+          <div className="file-input-group">
+            <label>Profile Photo</label>
+            <input
+              type="file"
+              name="profile_image"
+              accept="image/*"
+              onChange={handleChange}
+            />
+          </div>
+
           <select name="user_type" value={formData.user_type} onChange={handleChange}>
             <option value="" disabled>Select Role</option>
             <option value="Host">Host</option>
@@ -187,7 +193,6 @@ const Registration = () => {
           </select>
 
           <div className="gender">
-
             <button
               type="button"
               className={formData.gender === "Male" ? "active" : ""}
@@ -195,7 +200,6 @@ const Registration = () => {
             >
               Male
             </button>
-
             <button
               type="button"
               className={formData.gender === "Female" ? "active" : ""}
@@ -203,7 +207,6 @@ const Registration = () => {
             >
               Female
             </button>
-
           </div>
 
           <button type="submit" className="register-btn">
@@ -213,11 +216,8 @@ const Registration = () => {
           <p className="login-link">
             Already have an account? <Link to="/login">Login</Link>
           </p>
-
         </form>
-
       </div>
-
     </div>
   );
 };

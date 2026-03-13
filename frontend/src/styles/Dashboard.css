@@ -1,126 +1,188 @@
+/* ===== DASHBOARD PAGE ===== */
+
 .dashboard {
-  padding: 40px;
+  padding: 35px 40px;
   background: #F8FAFC;
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh - 72px);
   font-family: 'Inter', sans-serif;
-  margin-left: 300px;
-  margin-left:300px;
+  margin-left: 280px;
 }
 
-/* HEADER */
-
+/* Header */
 .dashboard-header h1 {
   font-size: 28px;
   color: #0F172A;
   margin-bottom: 6px;
   font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .dashboard-header p {
   color: #64748B;
   margin-bottom: 35px;
+  font-size: 15px;
 }
 
-/* CARD ROW */
-
+/* Card Row */
 .card-row {
   display: flex;
-  gap: 25px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
-/* CARD */
-
+/* Card */
 .card {
   flex: 1;
-  min-width: 260px;
-  background: #ffffff;
-  padding: 25px;
-  border-radius: 16px;
+  min-width: 240px;
+  background: white;
+  padding: 28px;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   gap: 20px;
   border: 1px solid #E2E8F0;
-  transition: 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  transform-origin: left;
+}
+
+.card:hover::before {
+  transform: scaleX(1);
 }
 
 .card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.15);
 }
 
 .card p {
   margin: 0;
   font-size: 14px;
   color: #64748B;
+  font-weight: 500;
 }
 
 .card h2 {
   margin-top: 6px;
-  font-size: 28px;
+  font-size: 30px;
   color: #0F172A;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-/* ICON */
-
+/* Icon */
 .card-icon {
-  padding: 14px;
-  border-radius: 12px;
+  padding: 16px;
+  border-radius: 14px;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .card-icon.users {
   background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 .card-icon.rooms {
   background: linear-gradient(135deg, #06B6D4, #3B82F6);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 .card-icon.requests {
   background: linear-gradient(135deg, #10B981, #059669);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
-/* USERS SECTION */
-
+/* Users Section */
 .user-section {
-  margin-top: 40px;
+  margin-top: 50px;
 }
 
 .user-section h2 {
-  margin-bottom: 15px;
+  margin-bottom: 24px;
   color: #0F172A;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-/* TABLE STYLE */
+.user-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
 
-.user-table {
-  width: 100%;
-  border-collapse: collapse;
+.user-item-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 40px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid #E2E8F0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
-.user-table th {
-  background: #F1F5F9;
-  text-align: left;
-  padding: 14px;
-  font-size: 14px;
-  color: #334155;
+.user-item-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.15);
 }
 
-.user-table td {
-  padding: 14px;
-  border-top: 1px solid #E2E8F0;
-  font-size: 14px;
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 2px solid #F1F5F9;
 }
 
-.user-table tr:hover {
-  background: #F8FAFC;
+.user-info h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E293B;
 }
-.card{
-  cursor:pointer;
+
+.user-info p {
+  margin: 2px 0 6px;
+  font-size: 13px;
+  color: #64748B;
+  word-break: break-all;
+}
+
+.user-city {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6366F1;
+  background: #EEF2FF;
+  padding: 4px 10px;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+}
+
+.no-users {
+  color: #94A3B8;
+  font-size: 15px;
+  font-style: italic;
 }

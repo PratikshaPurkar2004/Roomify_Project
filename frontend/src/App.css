@@ -1,18 +1,16 @@
+/* ===== APP LAYOUT ===== */
+
 html, body, #root {
   height: 100%;
   margin: 0;
 }
+
 .content {
-  margin-left: 220px;
-  margin-top: 60px;
-
-  padding: 30px;
-
-  width: calc(100% - 220px);
-
-  min-height: calc(100vh - 60px);
-
-  background: #f4f6f9;
-
+  margin-left: 280px;
+  margin-top: 0;
+  padding: 0;
+  width: calc(100% - 280px);
+  min-height: calc(100vh - 72px);
+  background: #F8FAFC;
   box-sizing: border-box;
 }

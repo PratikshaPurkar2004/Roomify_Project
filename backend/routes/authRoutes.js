@@ -8,8 +8,22 @@ const { login } = require("../controllers/loginController");
 const { forgotPassword } = require("../controllers/forgotPasswordController");
 const { resetPassword } = require("../controllers/resetPasswordController");
 
+const multer = require("multer");
+const path = require("path");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage });
+
 // Register
-router.post("/register", register);
+router.post("/register", upload.single("profile_image"), register);
 
 // Login
 router.post("/login", login);

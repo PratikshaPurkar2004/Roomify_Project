@@ -46,35 +46,24 @@ router.get("/stats", async (req, res) => {
   }
 });
 // GET Hosts and Finders
-router.get("/users", (req, res) => {
+router.get("/users", async (req, res) => {
+  try {
+    const [hosts] = await db.query(
+      "SELECT name, email, city, profile_image FROM users WHERE user_type = 'Host' LIMIT 10"
+    );
 
-  const hostsQuery = `
-    SELECT name, email, city 
-    FROM users 
-    WHERE user_type = 'Host'
-    LIMIT 5
-  `;
+    const [finders] = await db.query(
+      "SELECT name, email, city, profile_image FROM users WHERE user_type = 'Finder' LIMIT 10"
+    );
 
-  const findersQuery = `
-    SELECT name, email, city 
-    FROM users 
-    WHERE user_type = 'Finder'
-    LIMIT 5
-  `;
-
-  db.query(hostsQuery, (err, hosts) => {
-    if (err) return res.status(500).json(err);
-
-    db.query(findersQuery, (err, finders) => {
-      if (err) return res.status(500).json(err);
-
-      res.json({
-        hosts,
-        finders
-      });
+    res.json({
+      hosts,
+      finders
     });
-  });
-
+  } catch (error) {
+    console.error("Dashboard users error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 module.exports = router;
