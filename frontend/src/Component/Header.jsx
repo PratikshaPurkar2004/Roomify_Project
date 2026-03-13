@@ -8,11 +8,21 @@ function Header() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  const userName = localStorage.getItem("userName") || "User";
+  let userName = "User";
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && (user.name || user.fullname || user.username)) {
+      userName = user.name || user.fullname || user.username;
+    }
+  } catch (e) {
+    // ignore JSON parse errors and keep default
+  }
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
+    // remove only authentication-related keys
+    localStorage.removeItem("user");
+    localStorage.removeItem("userId");
+    navigate("/login");
   };
 
   return (

@@ -60,7 +60,7 @@
 
 // export default Dashboard;
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "../../styles/Dashboard.css";
 import { Users, Home, FileText } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -70,7 +70,7 @@ function Dashboard() {
 
   const dispatch = useDispatch();
 
-  const { stats, loading, error } = useSelector(
+  const { stats = { users: 0, rooms: 0, requests: 0 }, loading, error } = useSelector(
     (state) => state.dashboard
   );
 

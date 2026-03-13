@@ -105,7 +105,7 @@ const Registration = () => {
       localStorage.removeItem("user");
 
       dispatch(clearMessage());
-      navigate("/Preference");
+      navigate("/preferences");
     }
   }, [success, navigate, dispatch]);
 

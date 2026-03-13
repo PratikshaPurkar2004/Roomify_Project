@@ -5,7 +5,6 @@ const router = express.Router();
 const db = require("../config/db");
 
 
-// ================= GET PROFILE =================
 router.get("/:id", (req, res) => {
 
   const userId = req.params.id;
@@ -40,7 +39,6 @@ router.get("/:id", (req, res) => {
 });
 
 
-// ================= UPDATE PROFILE =================
 router.put("/:id", (req, res) => {
 
   const userId = req.params.id;
@@ -84,7 +82,6 @@ router.put("/:id", (req, res) => {
 });
 
 
-// ================= DELETE ACCOUNT =================
 router.delete("/:id", (req, res) => {
 
   const userId = req.params.id;

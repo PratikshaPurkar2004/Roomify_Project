@@ -51,10 +51,13 @@ const register = async (req, res) => {
     return res.status(400).json({ message: "Name, email and password are required" });
   }
 
+  // Normalize email to avoid case/whitespace mismatch between register/login
+  const normalizedEmail = String(email).trim().toLowerCase();
+
   try {
     const [existingUsers] = await db.query(
       "SELECT user_id FROM users WHERE email = ?",
-      [email]
+      [normalizedEmail]
     );
 
     if (existingUsers.length > 0) {
@@ -63,14 +66,24 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.query(
+    const [result] = await db.query(
       `INSERT INTO users (name, email, occupation, password, user_type, gender) VALUES (?, ?, ?, ?, ?, ?)`,
-      [name, email, occupation, hashedPassword, user_type, gender]
+      [name, normalizedEmail, occupation, hashedPassword, user_type, gender]
     );
 
-    console.log("User inserted successfully");
+    console.log("User inserted successfully", { email: normalizedEmail, insertId: result.insertId });
 
-    return res.status(201).json({ message: "User registered successfully" });
+    return res.status(201).json({
+      message: "User registered successfully",
+      userId: result.insertId,
+      user: {
+        user_id: result.insertId,
+        name,
+        email: normalizedEmail,
+        user_type,
+        gender,
+      }
+    });
   } catch (error) {
     console.log("Register Error:", error);
     return res.status(500).json({ message: "Server error" });

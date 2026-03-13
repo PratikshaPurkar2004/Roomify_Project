@@ -12,15 +12,15 @@ export const loginUser = createAsyncThunk(
         "http://localhost:5000/api/auth/login",
         formData
       );
-<<<<<<< HEAD
-      localStorage.setItem("userId", res.data.user_id);
-      localStorage.setItem("userName", res.data.name);
 
+      // Save user object and userId for other pages (preferences)
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      if (res.data.user && res.data.user.user_id) {
+        localStorage.setItem("userId", String(res.data.user.user_id));
+      }
 
-=======
-       localStorage.setItem("user", JSON.stringify(res.data.user));
->>>>>>> a403963a70429c99a2983b6ed8d183aa77368743
       return res.data;
+
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Login failed"
@@ -39,6 +39,15 @@ export const registerUser = createAsyncThunk(
         "http://localhost:5000/api/auth/register",
         formData
       );
+      // If backend returned the new user id, store it so preferences page can use it
+      if (res.data.userId) {
+        localStorage.setItem("userId", String(res.data.userId));
+      }
+      // Also store the returned user object if present
+      if (res.data.user) {
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+      }
+
       return res.data;
     } catch (error) {
       return rejectWithValue(
