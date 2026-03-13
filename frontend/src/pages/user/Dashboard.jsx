@@ -68,50 +68,22 @@ import { fetchDashboardStats } from "../../redux/dashboardSlice";
 
 function Dashboard() {
 
-<<<<<<< HEAD
-  const [stats, setStats] = useState({
-    users: 0,
-    rooms: 0,
-    requests: 0,
-  });
-=======
   const dispatch = useDispatch();
 
   const { stats, loading, error } = useSelector(
     (state) => state.dashboard
   );
->>>>>>> a403963a70429c99a2983b6ed8d183aa77368743
 
   const [hosts, setHosts] = useState([]);
   const [finders, setFinders] = useState([]);
 
   useEffect(() => {
-<<<<<<< HEAD
-
-    // Fetch dashboard stats
-    fetch("http://localhost:5000/api/dashboard/stats")
-      .then((res) => res.json())
-      .then((data) => setStats(data))
-      .catch((err) => console.error(err));
-
-    // Fetch hosts and finders
-    fetch("http://localhost:5000/api/dashboard/users")
-      .then((res) => res.json())
-      .then((data) => {
-        setHosts(data.hosts);
-        setFinders(data.finders);
-      })
-      .catch((err) => console.error(err));
-
-  }, []);
-=======
     dispatch(fetchDashboardStats());
   }, [dispatch]);
 
   if (loading) return <p>Loading dashboard...</p>;
 
   if (error) return <p>{error}</p>;
->>>>>>> a403963a70429c99a2983b6ed8d183aa77368743
 
   return (
     <div className="dashboard">
