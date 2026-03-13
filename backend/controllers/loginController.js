@@ -32,19 +32,19 @@ const login = async (req, res) => {
     });
 
   } 
-  // catch (error) {
-  //   console.log(error);
-  //   res.status(500).json({
-  //     message: "Server error"
-  //   });
-  // }
-
   catch (error) {
-  console.log("LOGIN ERROR:", error.response?.data);
-  return rejectWithValue(
-    error.response?.data?.message || "Login failed"
-  );
-}
+    console.log("Login Error",error);
+    res.status(500).json({
+      message: "Server error"
+    });
+  }
+
+//   catch (error) {
+//   console.log("LOGIN ERROR:", error.response?.data);
+//   return rejectWithValue(
+//     error.response?.data?.message || "Login failed"
+//   );
+// }
 };
 
 module.exports = { login };

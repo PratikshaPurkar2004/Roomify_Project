@@ -67,7 +67,8 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <h1>Welcome Back!</h1>
-
+        <h1 className="logo">🏠 Roomify</h1>
+        <p className="subtitle">Login to your account</p>
        {error && (<p className="login-error">
         {typeof error === "string" ? error : "Login failed"}
       </p>)}
