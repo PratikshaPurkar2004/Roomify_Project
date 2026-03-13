@@ -58,7 +58,9 @@ const Registration = () => {
     if(success){
       setTimeout(()=>{
         dispatch(clearMessage());
-        navigate("/login");
+        // navigate("/login");
+        navigate("/preferences");
+
       },1500);
     }
   },[success,navigate,dispatch]);

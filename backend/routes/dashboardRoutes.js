@@ -20,5 +20,36 @@ router.get("/stats", (req, res) => {
     res.json(result[0]);
   });
 });
+// GET Hosts and Finders
+router.get("/users", (req, res) => {
+
+  const hostsQuery = `
+    SELECT name, email, city 
+    FROM users 
+    WHERE user_type = 'Host'
+    LIMIT 5
+  `;
+
+  const findersQuery = `
+    SELECT name, email, city 
+    FROM users 
+    WHERE user_type = 'Finder'
+    LIMIT 5
+  `;
+
+  db.query(hostsQuery, (err, hosts) => {
+    if (err) return res.status(500).json(err);
+
+    db.query(findersQuery, (err, finders) => {
+      if (err) return res.status(500).json(err);
+
+      res.json({
+        hosts,
+        finders
+      });
+    });
+  });
+
+});
 
 module.exports = router;

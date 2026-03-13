@@ -32,6 +32,8 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 import Registration from "../pages/auth/Registration";
 
+
+
 // Layout Components
 import Header from "../Component/Header";
 import Sidebar from "../Component/Sidebar";
@@ -39,9 +41,10 @@ import Footer from "../Component/Footer";
 
 // User Pages
 import Dashboard from "../pages/user/Dashboard";
-import Profile from "../pages/Profile";
+import Profile from "../pages/user/Profile";
 import Requests from "../pages/user/Requests";
 import FindRoommates from "../pages/user/FindRoommates";
+import Preference from "../pages/user/Preference";
 
 /* Dashboard Layout */
 function DashboardLayout() {
@@ -69,6 +72,7 @@ function Routing() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/signup" element={<Registration />} />
+      <Route path="/preferences" element={<Preference />} />
 
       {/* Dashboard Routes */}
       <Route path="/dashboard" element={<DashboardLayout />}>
@@ -76,6 +80,7 @@ function Routing() {
         <Route path="profile" element={<Profile />} />
         <Route path="requests" element={<Requests />} />
         <Route path="find-roommates" element={<FindRoommates />} />
+        
       </Route>
 
       {/* Fallback */}

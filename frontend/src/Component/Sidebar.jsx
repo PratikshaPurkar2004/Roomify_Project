@@ -146,11 +146,7 @@ function Sidebar() {
 
       </div>
 
-      <div className="sidebar-footer">
-        <button className="logout-btn" onClick={handleLogout}>
-          <FaSignOutAlt /> Logout
-        </button>
-      </div>
+    
 
     </div>
   );

@@ -45,6 +45,8 @@ const handleSubmit = async (e) => {
 
     // ✅ SAVE USER ID
     localStorage.setItem("userId", res.data.user_id);
+    localStorage.setItem("userName", res.data.name);  // ⭐ ADD THIS
+
 
     navigate("/dashboard");
 

@@ -1,0 +1,59 @@
+.pref-container{
+  text-align:center;
+  padding:40px;
+}
+
+.pref-container h1{
+  margin-bottom:10px;
+}
+
+.pref-grid{
+  margin-top:40px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:25px;
+  max-width:900px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.pref-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.pref-icon{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  border:2px solid #ddd;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:35px;
+  transition:0.3s;
+}
+
+.pref-card p{
+  margin-top:10px;
+  font-size:14px;
+}
+
+.pref-card.active .pref-icon{
+  border:3px solid #1bb76e;
+  background:#f0fff6;
+}
+
+.pref-btn{
+  margin-top:40px;
+  padding:12px 30px;
+  border:none;
+  background:#1bb76e;
+  color:white;
+  border-radius:25px;
+  font-size:16px;
+  cursor:pointer;
+}

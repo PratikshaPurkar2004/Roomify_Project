@@ -1,16 +1,13 @@
 .dashboard {
   padding: 40px;
   background: #F8FAFC;
-  min-height: calc(100vh - 70px); /* prevent footer overlap */
+  min-height: calc(100vh - 70px);
   font-family: 'Inter', sans-serif;
-<<<<<<< HEAD
-  margin-left: 200px;
-=======
-  margin-left:300px;
->>>>>>> bfce4c875e8cccc2a6c423bccd1f096c2d1fb6b1
+  margin-left: 300px;
 }
 
 /* HEADER */
+
 .dashboard-header h1 {
   font-size: 28px;
   color: #0F172A;
@@ -24,6 +21,7 @@
 }
 
 /* CARD ROW */
+
 .card-row {
   display: flex;
   gap: 25px;
@@ -31,6 +29,7 @@
 }
 
 /* CARD */
+
 .card {
   flex: 1;
   min-width: 260px;
@@ -62,6 +61,7 @@
 }
 
 /* ICON */
+
 .card-icon {
   padding: 14px;
   border-radius: 12px;
@@ -78,4 +78,48 @@
 
 .card-icon.requests {
   background: linear-gradient(135deg, #10B981, #059669);
+}
+
+/* USERS SECTION */
+
+.user-section {
+  margin-top: 40px;
+}
+
+.user-section h2 {
+  margin-bottom: 15px;
+  color: #0F172A;
+}
+
+/* TABLE STYLE */
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 40px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.user-table th {
+  background: #F1F5F9;
+  text-align: left;
+  padding: 14px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.user-table td {
+  padding: 14px;
+  border-top: 1px solid #E2E8F0;
+  font-size: 14px;
+}
+
+.user-table tr:hover {
+  background: #F8FAFC;
+}
+.card{
+  cursor:pointer;
 }

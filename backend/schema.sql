@@ -60,19 +60,12 @@ create table IF NOT EXISTS payment(
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(plan_id) REFERENCES plans(plan_id));
     
-CREATE TABLE requests (
-  request_id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT,
-  room_id INT,
-  status VARCHAR(20),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+
 
     
 SELECT COUNT(*) FROM users;
 SELECT COUNT(*) FROM rooms;
 SELECT COUNT(*) FROM requests;
-
 
 
 

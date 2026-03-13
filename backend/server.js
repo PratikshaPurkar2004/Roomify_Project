@@ -6,6 +6,9 @@ const authRoutes = require("./routes/authRoutes");
 const cityRoutes = require("./routes/cityRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const roommateRoutes = require("./routes/roommateRoutes");
+const preferenceRoutes = require("./routes/preferenceRoutes");
+
 
 const app = express();
 
@@ -17,6 +20,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/cities", cityRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/roommates", roommateRoutes);
+app.use("/api/preferences", preferenceRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend Running 🚀");

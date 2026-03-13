@@ -11,6 +11,10 @@ export const loginUser = createAsyncThunk(
         "http://localhost:5000/api/auth/login",
         formData
       );
+      localStorage.setItem("userId", res.data.user_id);
+      localStorage.setItem("userName", res.data.name);
+
+
       return res.data;
     } catch (error) {
       return rejectWithValue(
