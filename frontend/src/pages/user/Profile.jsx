@@ -46,16 +46,25 @@ export default function Profile() {
   };
 
   const saveProfile = () => {
-  axios
-    .put(`http://localhost:5000/api/profile/${userId}`, form)
-    .then(() => {
-      setMsg("Profile Updated Successfully ✅");
-    })
-    .catch((err) => {
-      console.log(err);
-      setMsg("Update Failed ❌");
-    });
-};
+    axios
+      .put(`http://localhost:5000/api/profile/${userId}`, form)
+      .then(() => {
+        setMsg("Profile Updated Successfully ✅");
+        
+        // Update user data in localStorage so other components (like Header) can update
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        storedUser.name = form.name;
+        storedUser.gender = form.gender;
+        localStorage.setItem("user", JSON.stringify(storedUser));
+        
+        // Dispatch a custom event to update the header if it listens, or just let them reload
+        window.dispatchEvent(new Event("storage"));
+      })
+      .catch((err) => {
+        console.log(err);
+        setMsg("Update Failed ❌");
+      });
+  };
 
   const deleteProfile = () => {
     if (!window.confirm("Are you sure you want to delete account?")) return;

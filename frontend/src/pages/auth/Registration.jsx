@@ -22,8 +22,7 @@ const Registration = () => {
     password: "",
     confirmPassword: "",
     user_type: "",
-    gender: "",
-    profile_image: null
+    gender: ""
   });
 
   const validate = () => {
@@ -58,11 +57,11 @@ const Registration = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: files ? files[0] : value,
+      [name]: value,
     }));
 
     setErrors((prev) => ({
@@ -94,22 +93,13 @@ const Registration = () => {
       return;
     }
 
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (formData[key]) {
-        data.append(key, formData[key]);
-      }
-    });
-
-    dispatch(registerUser(data));
+    dispatch(registerUser(formData));
 
   };
 
   useEffect(() => {
     if (success) {
-      // Clear any existing user session to prevent auto-redirect to dashboard
       localStorage.removeItem("user");
-
       dispatch(clearMessage());
       navigate("/preferences");
     }
@@ -175,16 +165,6 @@ const Registration = () => {
             value={formData.occupation}
             onChange={handleChange}
           />
-
-          <div className="file-input-group">
-            <label>Profile Photo</label>
-            <input
-              type="file"
-              name="profile_image"
-              accept="image/*"
-              onChange={handleChange}
-            />
-          </div>
 
           <select name="user_type" value={formData.user_type} onChange={handleChange}>
             <option value="" disabled>Select Role</option>

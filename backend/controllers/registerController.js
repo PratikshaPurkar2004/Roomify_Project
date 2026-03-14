@@ -65,11 +65,10 @@ const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const profileImage = req.file ? `/uploads/${req.file.filename}` : null;
 
     const [result] = await db.query(
-      `INSERT INTO users (name, email, occupation, password, user_type, gender, profile_image) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, normalizedEmail, occupation, hashedPassword, user_type, gender, profileImage]
+      `INSERT INTO users (name, email, occupation, password, user_type, gender) VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, normalizedEmail, occupation, hashedPassword, user_type, gender]
     );
 
     console.log("User inserted successfully", { email: normalizedEmail, insertId: result.insertId });
@@ -82,8 +81,7 @@ const register = async (req, res) => {
         name,
         email: normalizedEmail,
         user_type,
-        gender,
-        profile_image: profileImage
+        gender
       }
     });
   } catch (error) {

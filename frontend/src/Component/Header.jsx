@@ -8,23 +8,37 @@ function Header() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  let userName = "User";
-  let profileImage = null;
-  try {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
-      userName = user.name || user.fullname || user.username || "User";
-      profileImage = user.profile_image;
+  const [userState, setUserState] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
     }
-  } catch (e) {
-    // ignore JSON parse errors and keep default
+  });
+
+  React.useEffect(() => {
+    // Listen to custom local storage event emitted by Profile.jsx
+    const handleStorageChange = () => {
+      try {
+        setUserState(JSON.parse(localStorage.getItem("user")));
+      } catch (e) {
+        setUserState(null);
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  let userName = "User";
+  if (userState) {
+    userName = userState.name || userState.fullname || userState.username || "User";
   }
 
   const handleLogout = () => {
     // remove only authentication-related keys
     localStorage.removeItem("user");
     localStorage.removeItem("userId");
-    navigate("/login");
+    navigate("/");
   };
 
   return (
@@ -50,7 +64,7 @@ function Header() {
           </span>
 
           <img 
-            src={profileImage ? `http://localhost:5000${profileImage}` : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"} 
+            src={"https://cdn-icons-png.flaticon.com/512/3135/3135715.png"} 
             alt="profile" 
             className="avatar" 
           />
