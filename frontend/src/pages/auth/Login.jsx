@@ -7,11 +7,8 @@ import "../../styles/Login.css";
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const { loading, error, user } = useSelector((state) => state.auth);
-
   const [showPassword, setShowPassword] = useState(false);
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,7 +16,6 @@ const Login = () => {
 
   const [formError, setFormError] = useState({});
 
-  // Redirect when login successful
   useEffect(() => {
     if (user) {
       navigate("/dashboard");
@@ -39,16 +35,17 @@ const Login = () => {
 
     if (!formData.email) {
       errors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } 
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = "Invalid email format";
     }
 
     if (!formData.password) {
       errors.password = "Password is required";
-    } else if (formData.password.length < 6) {
+    } 
+    else if (formData.password.length < 6) {
       errors.password = "Password must be at least 6 characters";
     }
-
     return errors;
   };
 
@@ -77,13 +74,7 @@ const Login = () => {
           
           <div className="input-group">
             <label><b>Email :</b></label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-            />
+            <input type="email" name="email" placeholder="Enter your email"  value={formData.email} onChange={handleChange} />
             {formError.email && (
               <p className="field-error">{formError.email}</p>
             )}
@@ -93,14 +84,7 @@ const Login = () => {
             <label><b>Password :</b></label>
 
             <div className="password-wrapper">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-              />
-
+              <input type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange}  placeholder="Enter your password" />
               <span
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
@@ -108,8 +92,6 @@ const Login = () => {
                 👁
               </span>
             </div>
-
-            
             {formError.password && (
               <p className="field-error">{formError.password}</p>
             )}
@@ -119,11 +101,7 @@ const Login = () => {
             <Link to="/forgot-password">Forgot Password?</Link>
           </div>
 
-          <button
-            type="submit"
-            className="login-btn"
-            disabled={loading}
-          >
+          <button type="submit" className="login-btn" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
 
