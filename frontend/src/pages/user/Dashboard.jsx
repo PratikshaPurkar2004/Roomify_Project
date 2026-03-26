@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../../styles/Dashboard.css";
-import { Users, Home, FileText } from "lucide-react";
+import { Users, Home, FileText, UserPlus, UserSearch } from "lucide-react";
 import { calculateMatchPercentage } from "../../utils/matchUtils";
 
 function Dashboard() {
@@ -8,6 +8,8 @@ function Dashboard() {
     users: 0,
     rooms: 0,
     requests: 0,
+    hosts: 0,
+    finders: 0,
   });
 
   const [users, setUsers] = useState([]);
@@ -27,7 +29,17 @@ function Dashboard() {
     fetch("http://localhost:5000/api/dashboard/users")
       .then((res) => res.json())
       .then((data) => {
-        setUsers(data.users || []);
+        const userList = data.users || [];
+        setUsers(userList);
+
+        const hostCount = userList.filter((u) => u.user_type === "Host").length;
+        const finderCount = userList.filter((u) => u.user_type === "Finder").length;
+
+        setStats((prev) => ({
+          ...prev,
+          hosts: hostCount,
+          finders: finderCount,
+        }));
       })
       .catch((err) => console.error(err));
 

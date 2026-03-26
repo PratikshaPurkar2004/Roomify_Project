@@ -95,6 +95,8 @@
 // export default Sidebar;
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/authSlice";
 import {
   FaHome,
   FaUser,
@@ -108,9 +110,11 @@ import "../styles/Sidebar.css";
 
 function Sidebar() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
     localStorage.clear();
+    dispatch(logout());
     navigate("/");
   };
 

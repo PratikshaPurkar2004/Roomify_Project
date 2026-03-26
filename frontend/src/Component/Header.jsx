@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/authSlice";
 import "../styles/Header.css";
 
 function Header() {
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
 
   const [userState, setUserState] = useState(() => {
@@ -38,6 +41,7 @@ function Header() {
     // remove only authentication-related keys
     localStorage.removeItem("user");
     localStorage.removeItem("userId");
+    dispatch(logout());
     navigate("/");
   };
 

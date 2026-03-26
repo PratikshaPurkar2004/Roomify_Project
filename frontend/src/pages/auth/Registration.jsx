@@ -38,8 +38,12 @@ const Registration = () => {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       newErrors.email = "Invalid Email";
 
-    if ((formData.password || "").length < 6)
-      newErrors.password = "Password must be at least 6 characters";
+   const strongPasswordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+
+  if (!strongPasswordRegex.test(formData.password)) {
+  newErrors.password ="Password must include uppercase, lowercase, number & special character";
+}
 
     // Trim whitespace for comparison so users don't get a false mismatch
     const password = (formData.password || "").trim();

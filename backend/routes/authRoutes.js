@@ -6,6 +6,7 @@ const db = require("../config/db");
 const { register } = require("../controllers/registerController");
 const { login } = require("../controllers/loginController");
 const { forgotPassword } = require("../controllers/forgotPasswordController");
+const { verifyOtp } = require("../controllers/verifyOtpController");
 const { resetPassword } = require("../controllers/resetPasswordController");
 
 // Register
@@ -16,8 +17,8 @@ router.post("/login", login);
 
 // Forgot password
 router.post("/forgot-password", forgotPassword);
-
+router.post("/verify-otp",verifyOtp);
 // Reset password
-router.post("/reset-password/:token", resetPassword);
+router.post("/reset-password", resetPassword);
 
 module.exports = router;
