@@ -82,6 +82,8 @@ export default function Profile() {
 
   return (
     <div className="profile-page">
+      <div className="prof-bg-shape prof-shape-1"></div>
+      <div className="prof-bg-shape prof-shape-2"></div>
       <div className="profile-card">
 
         <h2>My Profile</h2>

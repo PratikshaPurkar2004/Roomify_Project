@@ -38,8 +38,9 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const roommateRoutes = require("./routes/roommateRoutes");
 const preferenceRoutes = require("./routes/preferenceRoutes");
-
-
+const requestRoutes = require("./routes/requestRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 const app = express();
 
@@ -53,7 +54,9 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/roommates", roommateRoutes);
 app.use("/api/preferences", preferenceRoutes);
-
+app.use("/api/requests", requestRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend Running 🚀");

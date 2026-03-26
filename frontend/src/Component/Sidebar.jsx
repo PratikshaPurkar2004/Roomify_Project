@@ -114,6 +114,16 @@ function Sidebar() {
     navigate("/");
   };
 
+  const handleChatClick = (e) => {
+    e.preventDefault();
+    const subscribed = localStorage.getItem("subscribed");
+    if (subscribed === "true") {
+      navigate("/dashboard/chat");
+    } else {
+      navigate("/dashboard/subscription");
+    }
+  };
+
   return (
     <div className="sidebar">
 
@@ -140,16 +150,15 @@ function Sidebar() {
           <FaEnvelope /> <span>Requests</span>
         </NavLink>
 
-        <NavLink to="/dashboard/subscription" className="menu-item">
+        <a href="#" className="menu-item" onClick={handleChatClick}>
           <FaComments /> <span>Chat</span>
-        </NavLink>
+        </a>
 
       </div>
-
-    
 
     </div>
   );
 }
 
 export default Sidebar;
+

@@ -12,6 +12,7 @@ router.get("/", async (req, res) => {
       users.city AS location,
       users.gender,
       users.user_type,
+      users.preferences,
       IFNULL(rooms.rent, users.budget) AS rent
     FROM users
     LEFT JOIN rooms 

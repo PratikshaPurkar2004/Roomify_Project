@@ -46,7 +46,7 @@ function Header() {
 
       {/* LEFT */}
       <div className="header-left">
-        <h1 className="page-title">Dashboard</h1>
+        
       </div>
 
       {/* RIGHT */}

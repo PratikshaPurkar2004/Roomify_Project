@@ -22,6 +22,8 @@ import Profile from "../pages/user/Profile";
 import Requests from "../pages/user/Requests";
 import FindRoommates from "../pages/user/FindRoommates";
 import Preference from "../pages/user/Preference";
+import Subscription from "../pages/Subscription";
+import Chat from "../pages/user/Chat";
 
 /* Dashboard Layout */
 function DashboardLayout() {
@@ -57,6 +59,8 @@ function Routing() {
         <Route path="profile" element={<Profile />} />
         <Route path="requests" element={<Requests />} />
         <Route path="find-roommates" element={<FindRoommates />} />
+        <Route path="subscription" element={<Subscription />} />
+        <Route path="chat" element={<Chat />} />
         
       </Route>
 

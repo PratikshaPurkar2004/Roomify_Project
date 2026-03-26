@@ -60,12 +60,30 @@ create table IF NOT EXISTS payment(
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(plan_id) REFERENCES plans(plan_id));
     
+CREATE TABLE user_preferences (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  preference_name VARCHAR(100),
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
+  CREATE TABLE requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  sender_id INT,
+  receiver_id INT,
+  status ENUM('pending','accepted','rejected') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);  
 
-    
-SELECT COUNT(*) FROM users;
-SELECT COUNT(*) FROM rooms;
-SELECT COUNT(*) FROM requests;
-
-
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  plan_name VARCHAR(50) NOT NULL,
+  amount INT NOT NULL,
+  status ENUM('active','inactive') DEFAULT 'active',
+  start_date DATE,
+  end_date DATE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
