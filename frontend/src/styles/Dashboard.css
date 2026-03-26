@@ -155,6 +155,16 @@
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
+.card-icon.hosts {
+  background: linear-gradient(135deg, #A855F7, #F472B6);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+
+.card-icon.finders {
+  background: linear-gradient(135deg, #F59E0B, #F97316);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
 .card-icon.requests {
   background: linear-gradient(135deg, #10B981, #059669);
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);

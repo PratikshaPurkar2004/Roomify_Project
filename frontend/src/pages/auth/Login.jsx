@@ -43,9 +43,13 @@ const Login = () => {
     if (!formData.password) {
       errors.password = "Password is required";
     } 
-    else if (formData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
-    }
+    const strongPasswordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+
+if (!strongPasswordRegex.test(formData.password)) {
+  errors.password =
+    "Password must include uppercase, lowercase, number & special character";
+}
     return errors;
   };
 

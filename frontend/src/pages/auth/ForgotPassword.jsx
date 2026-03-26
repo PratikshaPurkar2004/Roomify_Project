@@ -1,77 +1,69 @@
-import React, { useState,useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { forgotPassword } from "../../redux/authSlice";
-import {useNavigate} from "react-router-dom";
-import "../../styles/Login.css";
+import { forgotPassword, clearMessage } from "../../redux/authSlice";
+import { useNavigate, Link } from "react-router-dom";
+import "../../styles/ForgotPassword.css";
 
-function ForgotPassword() {
-  const navigate=useNavigate();
-  const dispatch = useDispatch();
-  const { loading, message, error,resetToken } = useSelector((state) => state.auth);
-
-  useEffect(()=>{
-    if(resetToken)
-    {
-      setTimeout(()=>{
-        navigate(`/reset-password/${resetToken}`);
-      },1500)
-    }
-  },[resetToken,navigate]);
-
+const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [validationError, setValidationError] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error, message } = useSelector((state) => state.auth);
 
-  const validateEmail = () => {
-
-    if (!email) {
-      return "Email is required";
-    }
-
-    const emailRegex =/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return "Enter a valid email address";
-    }
-    return "";
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const errorMsg = validateEmail();
+    dispatch(clearMessage());
 
-    if (errorMsg) {
-      setValidationError(errorMsg);
-      return;
+    const result = await dispatch(forgotPassword(email));
+
+    if (forgotPassword.fulfilled.match(result)) {
+      navigate("/verify-otp", { state: { email } });
     }
-    setValidationError("");
-    dispatch(forgotPassword(email));
   };
-
- 
 
   return (
-    <div className="login-container">
-      <div className="login-card">
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-icon">🔒</div>
+        <h2>Forgot Password</h2>
+        <p className="auth-subtitle">
+          Enter your registered email address and we'll send you a 6-digit OTP
+          to reset your password.
+        </p>
 
-        <h2>Reset Password 🔐</h2>
-
-        {validationError && (<p className="error-msg">{validationError}</p>)}
-        {error && (<p className="error-msg">{error}</p>)}
-        {message && (<p className="success-msg">{message}</p>)}
+        {error && <p className="auth-error">⚠️ {error}</p>}
+        {message && <p className="auth-success">✅ {message}</p>}
 
         <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <input type="email" placeholder="Enter your registered email" value={email} onChange={(e) => setEmail(e.target.value)}/>
+          <div className="auth-form-group">
+            <label><b>Email Address</b></label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
-          <button type="submit" className="login-btn" disabled={loading} >
-            {loading ? "Sending..." : "Send Reset Link"}
+          <button type="submit" className="auth-btn" disabled={loading}>
+            {loading ? (
+              <>
+                <span className="auth-spinner"></span>
+                Sending OTP...
+              </>
+            ) : (
+              "Send OTP"
+            )}
           </button>
-
         </form>
 
+        <Link to="/login" className="auth-back-link">
+          ← Back to Login
+        </Link>
       </div>
     </div>
   );
-}
+};
 
 export default ForgotPassword;

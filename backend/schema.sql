@@ -12,7 +12,9 @@ create table IF NOT EXISTS users(
     city VARCHAR(100),
     gender VARCHAR (10),
     budget INT,
-    preferences VARCHAR(100));
+    preferences VARCHAR(100),
+    reset_otp VARCHAR(10) DEFAULT NULL,
+    otp_expiry BIGINT DEFAULT NULL);
 
 create table IF NOT EXISTS rooms(
     room_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -86,4 +88,10 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+    
+SELECT COUNT(*) FROM users;
+SELECT COUNT(*) FROM rooms;
+SELECT COUNT(*) FROM connect;
+
+
 

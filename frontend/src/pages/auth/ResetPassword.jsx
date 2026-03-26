@@ -1,73 +1,124 @@
-import React, { useState,useEffect } from "react";
-import axios from "axios";
-import{useDispatch,useSelector}from "react-redux";
-import { useParams, useNavigate } from "react-router-dom";
-import {resetPassword}from "../../redux/authSlice";
-import "../../styles/Login.css";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { resetPassword, clearMessage } from "../../redux/authSlice";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import "../../styles/ForgotPassword.css";
 
-function ResetPassword() {
-  const { token } = useParams();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const {loading,message,error}=useSelector((state)=>state.auth);
+const ResetPassword = () => {
   const [password, setPassword] = useState("");
-  const [validationError ,setValidationError]=useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { loading, error, message } = useSelector((state) => state.auth);
 
-  const validatePassword=()=>{
-    if(!password)
-    {
-      return "password is required";
-    }
-
-    if(password.length<6)
-    {
-      return "password must be at least 6 characters";
-    }
-    return "";
-  };
+  const email = location.state?.email;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    dispatch(clearMessage());
 
-    const errorMsg=validatePassword();
-    if(errorMsg)
-    {
-      setValidationError(errorMsg);
+    if (password !== confirmPassword) {
       return;
     }
-    setValidationError("");
-    dispatch(resetPassword({token,password}));
+
+    if (password.length < 6) {
+      return;
+    }
+
+    const result = await dispatch(resetPassword({ email, newPassword: password }));
+
+    if (resetPassword.fulfilled.match(result)) {
+      navigate("/login");
+    }
   };
 
-  useEffect(() => {
-  if (message === "Password updated successfully") {
-    setTimeout(() => {
-      navigate("/login");
-    }, 1500);
+  if (!email) {
+    return (
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-icon">⚠️</div>
+          <h2>Session Expired</h2>
+          <p className="auth-subtitle">
+            Please start the forgot password process again.
+          </p>
+          <Link to="/forgot-password" className="auth-btn" style={{ textDecoration: 'none', display: 'flex' }}>
+            Go to Forgot Password
+          </Link>
+        </div>
+      </div>
+    );
   }
-}, [message, navigate]);
-    
-
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2>Set New Password 🔑</h2>
-        {validationError && (<p className="error-msg">{validationError}</p>)}
-        {error && (<p className="error-msg">{error}</p>)}
-        {message && (<p className="success-msg">{message}</p>)}
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-icon">🔑</div>
+        <h2>Reset Password</h2>
+        <p className="auth-subtitle">
+          Create a new strong password for your account.
+        </p>
+
+        {error && <p className="auth-error">⚠️ {error}</p>}
+        {message && <p className="auth-success">✅ {message}</p>}
 
         <form onSubmit={handleSubmit}>
-        <div className="input-group">
-          <input type="password" placeholder="Enter new password" value={password} onChange={(e) => setPassword(e.target.value)} required/>
-        </div>
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? "updating.....":"Update Password"}
+          <div className="auth-form-group">
+            <label><b>New Password</b></label>
+            <input
+              type="password"
+              placeholder="Enter new password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+          </div>
+
+          <div className="auth-form-group">
+            <label><b>Confirm Password</b></label>
+            <input
+              type="password"
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+            {confirmPassword && password !== confirmPassword && (
+              <p className="auth-error" style={{ marginTop: '8px' }}>
+                ⚠️ Passwords do not match
+              </p>
+            )}
+          </div>
+
+          <div className="password-requirements">
+            💡 Password must be at least 6 characters long
+          </div>
+
+          <button
+            type="submit"
+            className="auth-btn"
+            disabled={loading || password !== confirmPassword || password.length < 6}
+            style={{ marginTop: '16px' }}
+          >
+            {loading ? (
+              <>
+                <span className="auth-spinner"></span>
+                Resetting...
+              </>
+            ) : (
+              "Reset Password"
+            )}
           </button>
         </form>
+
+        <Link to="/login" className="auth-back-link">
+          ← Back to Login
+        </Link>
       </div>
     </div>
   );
-}
+};
 
 export default ResetPassword;

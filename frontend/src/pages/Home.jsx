@@ -77,7 +77,7 @@ alt="roommate"
 
 <h2>Popular Cities</h2>
 
-<div className="city-grid">
+<div onClick={()=>navigate("/signup")} className="city-grid">
 
 <div className="city-card">
 <img src="https://images.pexels.com/photos/2409953/pexels-photo-2409953.jpeg"/>
@@ -110,7 +110,7 @@ alt="roommate"
 
 <h2>Explore Rooms</h2>
 
-<div className="room-slider">
+<div onClick={()=>navigate("/signup")} className="room-slider">
 
 <div className="room-card">
 <img src="https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg"/>

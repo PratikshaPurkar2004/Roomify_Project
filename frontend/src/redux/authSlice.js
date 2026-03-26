@@ -58,43 +58,43 @@ export const registerUser = createAsyncThunk(
 );
 
 
-// FORGOT PASSWORD THUNK
+
+
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email, { rejectWithValue }) => {
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/forgot-password",
-        { email }
-      );
+      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
       return res.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to send reset link"
-      );
+      return rejectWithValue(error.response?.data?.message || "Failed to send OTP");
     }
   }
 );
 
+export const verifyOtp = createAsyncThunk(
+  "auth/verifyOtp",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/auth/verify-otp", data);
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "OTP verification failed");
+    }
+  }
+);
 
-// RESET PASSWORD THUNK
 export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
-  async ({ token, password }, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
-      const res = await axios.post(
-        `http://localhost:5000/api/auth/reset-password/${token}`,
-        { password }
-      );
-      return res.data.message;
+      const res = await axios.post("http://localhost:5000/api/auth/reset-password", data);
+      return res.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Reset password failed"
-      );
+      return rejectWithValue(error.response?.data?.message || "Password reset failed");
     }
   }
 );
-
 
 
 // SINGLE SLICE
@@ -114,6 +114,11 @@ const authSlice = createSlice({
       state.error = null;
       state.success = false;
       state.message = null;
+    },
+    logout: (state) => {
+      state.user = null;
+      state.error = null;
+      state.loading = false;
     },
   },
 
@@ -181,6 +186,22 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
+      // VERIFY OTP
+      .addCase(verifyOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+      })
+
+      .addCase(verifyOtp.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.payload.message;
+      })
+
+      .addCase(verifyOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
       // RESET PASSWORD
       .addCase(resetPassword.pending, (state) => {
@@ -201,6 +222,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearMessage } = authSlice.actions;
+export const { clearMessage, logout } = authSlice.actions;
 
 export default authSlice.reducer;

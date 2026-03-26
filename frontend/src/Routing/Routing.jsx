@@ -6,6 +6,7 @@ import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import Home from "../pages/Home";
 import Login from "../pages/auth/Login";
 import ForgotPassword from "../pages/auth/ForgotPassword";
+import VerifyOtp from "../pages/auth/VerifyOtp";
 import ResetPassword from "../pages/auth/ResetPassword";
 import Registration from "../pages/auth/Registration";
 
@@ -49,7 +50,8 @@ function Routing() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/signup" element={<Registration />} />
       <Route path="/preferences" element={<Preference />} />
 
