@@ -59,14 +59,21 @@ function Dashboard() {
   useEffect(() => {
     const userIdParams = localStorage.getItem("userId") ? `?userId=${localStorage.getItem("userId")}` : "";
     fetch(`http://localhost:5000/api/dashboard/stats${userIdParams}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => setStats(data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error("Stats fetch error:", err));
 
     fetch("http://localhost:5000/api/dashboard/users")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
-        const userList = data.users || [];
+        // Check if data has users property (success) or is an error object
+        const userList = (data && Array.isArray(data.users)) ? data.users : [];
         setUsers(userList);
 
         const hostCount = userList.filter((u) => u.user_type === "Host").length;
@@ -78,17 +85,23 @@ function Dashboard() {
           finders: finderCount,
         }));
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error("Users fetch error:", err);
+        setUsers([]);
+      });
 
     if (userId) {
       fetch(`http://localhost:5000/api/preferences/${userId}`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
         .then(data => {
           if (data && data.preferences) {
             setMyPreferences(data.preferences.split(",").map(p => p.trim()));
           }
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error("Preferences fetch error:", err));
 
       if (isHost) {
         fetch(`http://localhost:5000/api/rooms/host/${userId}`)
@@ -98,112 +111,10 @@ function Dashboard() {
               setMyRooms(data.rooms);
             }
           })
-          .catch(err => console.error(err));
+          .catch(err => console.error("Rooms fetch error:", err));
       }
     }
-  }, [isHost]);
-
-  const handleDeleteRoom = (roomId) => {
-    if (!window.confirm("Are you sure you want to delete this room?")) return;
-    const userId = localStorage.getItem("userId");
-
-    fetch(`http://localhost:5000/api/rooms/delete/${roomId}`, {
-      method: "DELETE",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          fetch(`http://localhost:5000/api/rooms/host/${userId}`)
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.success) setMyRooms(data.rooms);
-            });
-        }
-      })
-      .catch((err) => console.error(err));
-  };
-
-  const handleEditRoomSubmit = (e) => {
-    e.preventDefault();
-    const userId = localStorage.getItem("userId");
-    if (!userId || !selectedRoom) return;
-
-    const formData = new FormData();
-    formData.append("location", editRoom.location);
-    formData.append("rent", editRoom.rent);
-    formData.append("availability", editRoom.availability);
-    if (editRoom.image) {
-      formData.append("image", editRoom.image);
-    }
-
-    fetch(`http://localhost:5000/api/rooms/edit/${selectedRoom.room_id}`, {
-      method: "PUT",
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setShowEditRoomModal(false);
-          setSelectedRoom(null);
-          // Refresh rooms
-          fetch(`http://localhost:5000/api/rooms/host/${userId}`)
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.success) setMyRooms(data.rooms);
-            });
-        }
-      })
-      .catch((err) => console.error(err));
-  };
-
-  const openEditModal = (room) => {
-    setSelectedRoom(room);
-    setEditRoom({
-      location: room.location,
-      rent: room.rent,
-      availability: room.availability,
-      image: null
-    });
-    setShowEditRoomModal(true);
-  };
-
-  const openViewModal = (room) => {
-    setSelectedRoom(room);
-    setShowViewRoomModal(true);
-  };
-
-  const handleAddRoom = (e) => {
-    e.preventDefault();
-    const userId = localStorage.getItem("userId");
-    if (!userId) return;
-
-    const formData = new FormData();
-    formData.append("host_id", userId);
-    formData.append("location", newRoom.location);
-    formData.append("rent", newRoom.rent);
-    if (newRoom.image) {
-      formData.append("image", newRoom.image);
-    }
-
-    fetch("http://localhost:5000/api/rooms/add", {
-      method: "POST",
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setShowAddRoomModal(false);
-          setNewRoom({ location: "", rent: "", image: null });
-          // Refresh rooms
-          fetch(`http://localhost:5000/api/rooms/host/${userId}`)
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) setMyRooms(data.rooms);
-            });
-        }
-      })
-      .catch((err) => console.error(err));
-  };
+  }, []);
 
   return (
     <div className="dashboard">

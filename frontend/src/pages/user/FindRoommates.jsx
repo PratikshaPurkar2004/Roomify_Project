@@ -57,17 +57,35 @@ export default function FindRoommates() {
   useEffect(() => {
     setResults([]); // Reset view while fetching new results
     fetch("http://localhost:5000/api/roommates")
-      .then(res => res.json())
-      .then(data => {
-        setRoommates(data);
-        if (searchType === "roommates") setResults(data);
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
       })
-      .catch(err => console.error(err));
+      .then(data => {
+        // Check if data is an array (success) or an error object
+        if (Array.isArray(data)) {
+          setRoommates(data);
+          if (searchType === "roommates") setResults(data);
+        } else if (data.message) {
+          console.error("API Error:", data.message);
+          setRoommates([]);
+          if (searchType === "roommates") setResults([]);
+        } else {
+          console.error("Unexpected response format:", data);
+          setRoommates([]);
+          if (searchType === "roommates") setResults([]);
+        }
+      })
+      .catch(err => {
+        console.error("Fetch error:", err);
+        setRoommates([]);
+        if (searchType === "roommates") setResults([]);
+      });
 
     fetch("http://localhost:5000/api/rooms")
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
+        if (data && data.success) {
           setRooms(data.rooms);
           if (searchType === "rooms") setResults(data.rooms);
         }
@@ -81,7 +99,7 @@ export default function FindRoommates() {
     return calculateMatchPercentage(myPreferences, userPrefs || "");
   };
 
-  const handleSearch = () => {
+  useEffect(() => {
     const listToFilter = searchType === "roommates" ? roommates : rooms;
 
     const filtered = listToFilter.filter(item => {
@@ -108,7 +126,7 @@ export default function FindRoommates() {
     });
 
     setResults(filtered);
-  };
+  }, [city, gender, budget, roommates, rooms, searchType]);
 
   const handleRequest = async (receiverId, name) => {
     try {
@@ -180,12 +198,15 @@ export default function FindRoommates() {
         <div className="rm-search-box glass-panel">
           <div className="rm-input-group">
             <MapPin size={18} className="rm-input-icon location-icon" />
-            <input
-              type="text"
-              placeholder="City"
+            <select
               value={city}
               onChange={(e)=>setCity(e.target.value)}
-            />
+            >
+              <option value="">All Cities</option>
+              {[...new Set(roommates.map(user => user.location).filter(Boolean))].sort().map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
 
           <div className="rm-input-group">
@@ -210,7 +231,7 @@ export default function FindRoommates() {
             </select>
           </div>
 
-          <button className="rm-search-btn" onClick={handleSearch}>
+          <button className="rm-search-btn">
             <Search size={18} />
             Search
           </button>
@@ -266,7 +287,7 @@ export default function FindRoommates() {
                         className={`rm-btn ${acceptedIds.includes(item.id) ? 'rm-btn-chat' : 'rm-btn-disabled'}`}
                         onClick={() => {
                         if (!acceptedIds.includes(item.id)) return;
-                        navigate("/dashboard/chat");
+                        navigate("/dashboard/chat", { state: { selectedUserId: item.id } });
                         }}
                         title={acceptedIds.includes(item.id) ? "Chat with roommate" : "Connect first to chat"}
                     >

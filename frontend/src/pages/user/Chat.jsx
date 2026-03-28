@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/Chat.css";
 import { MessageCircle, Send, MapPin, Users } from "lucide-react";
 
 export default function Chat() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [contacts, setContacts] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -14,6 +15,7 @@ export default function Chat() {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const FREE_LIMIT = 5;
 
+  const messagesBodyRef = useRef(null);
   const userId = localStorage.getItem("userId");
 
   // Check subscription on mount
@@ -42,6 +44,16 @@ export default function Chat() {
       .catch(err => console.error("Error:", err))
       .finally(() => setIsLoading(false));
   }, [userId, navigate]);
+
+  // Auto-select contact if navigated from FindRoommates
+  useEffect(() => {
+    if (contacts.length > 0 && location.state?.selectedUserId && !selectedContact) {
+      const contactToSelect = contacts.find(c => c.id === location.state.selectedUserId);
+      if (contactToSelect) {
+        handleSelectContact(contactToSelect);
+      }
+    }
+  }, [contacts, location.state, selectedContact]);
 
   const fetchMessages = async (contactId) => {
     try {
@@ -78,10 +90,16 @@ export default function Chat() {
     return () => clearInterval(interval);
   }, [selectedContact, userId]);
 
-  const handleSend = async () => {
-    if (!newMessage.trim() || !selectedContact) return;
+  // Scroll only the messages container to bottom when messages update
+  useEffect(() => {
+    if (messagesBodyRef.current) {
+      messagesBodyRef.current.scrollTop = messagesBodyRef.current.scrollHeight;
+    }
+  }, [messages]);
 
-    // Check free message limit if not subscribed
+  const sendMessage = async (textToSend) => {
+    if (!textToSend.trim() || !selectedContact) return;
+
     if (!isSubscribed) {
       const usedMessages = parseInt(localStorage.getItem(`freeMessages_${userId}`) || "0");
       if (usedMessages >= FREE_LIMIT) {
@@ -91,9 +109,6 @@ export default function Chat() {
       localStorage.setItem(`freeMessages_${userId}`, usedMessages + 1);
     }
 
-    const messageText = newMessage;
-    setNewMessage(""); // Clear input early for better UX
-
     try {
       const res = await fetch("http://localhost:5000/api/chat", {
         method: "POST",
@@ -101,7 +116,7 @@ export default function Chat() {
         body: JSON.stringify({
           sender_id: userId,
           receiver_id: selectedContact.id,
-          content: messageText
+          content: textToSend
         })
       });
       const data = await res.json();
@@ -120,6 +135,15 @@ export default function Chat() {
     }
   };
 
+  const handleSend = () => {
+    sendMessage(newMessage);
+    setNewMessage(""); 
+  };
+
+  const handleSendIcebreaker = (text) => {
+    sendMessage(text);
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === "Enter") handleSend();
   };
@@ -129,7 +153,7 @@ export default function Chat() {
       <div className="chat-page">
         <div className="chat-loading">
           <div className="chat-spinner"></div>
-          <p>Loading chat...</p>
+          <p>Loading your inbox...</p>
         </div>
       </div>
     );
@@ -140,9 +164,9 @@ export default function Chat() {
       {/* Subscription Limit Modal */}
       {showLimitModal && (
         <div className="modal-overlay">
-          <div className="custom-modal glass-panel">
+          <div className="custom-modal">
             <h3>Free Plan Limit Reached</h3>
-            <p>You have used your {FREE_LIMIT} free messages. Subscribe to unlock unlimited chat with your roommates!</p>
+            <p>You have used your {FREE_LIMIT} free messages. Subscribe to unlock unlimited high-speed chatting with your future roommates!</p>
             <div className="modal-actions">
               <button className="rm-btn rm-btn-disabled" onClick={() => setShowLimitModal(false)}>Cancel</button>
               <button className="rm-btn rm-btn-chat" onClick={() => navigate("/dashboard/subscription")}>View Plans</button>
@@ -151,27 +175,27 @@ export default function Chat() {
         </div>
       )}
 
-      {/* Background shapes */}
+      {/* Dynamic Backgrounds */}
       <div className="chat-bg-shape chat-shape-1"></div>
       <div className="chat-bg-shape chat-shape-2"></div>
 
       <div className="chat-container">
         <header className="chat-header">
-          <h2 className="chat-title">Chat</h2>
-          <p className="chat-subtitle">Chat with your accepted roommate matches</p>
+          <h2 className="chat-title">Messages</h2>
+          <p className="chat-subtitle">Connect instantly with your roommate matches</p>
         </header>
 
         {!Array.isArray(contacts) || contacts.length === 0 ? (
           <div className="no-contacts-card">
-            <Users size={64} className="no-chat-icon" />
-            <h2>No Accepted Matches Yet</h2>
-            <p>Once someone accepts your roommate request (or you accept theirs), they'll appear here for chatting.</p>
+            <Users size={72} className="no-chat-icon" />
+            <h2>No Connections Yet</h2>
+            <p>Once you accept someone's roommate request (or they accept yours), you can start an instant chat right here.</p>
           </div>
         ) : (
           <div className="chat-layout">
-            {/* Contacts List */}
+            {/* Contacts Sidebar */}
             <div className="chat-contacts">
-              <h3 className="contacts-title">Contacts ({contacts.length})</h3>
+              <h3 className="contacts-title">Your Connections</h3>
               {Array.isArray(contacts) && contacts.map(contact => (
                 <div
                   key={contact?.id || Math.random()}
@@ -183,13 +207,13 @@ export default function Chat() {
                   </div>
                   <div className="contact-info">
                     <h4>{contact?.name || "Unknown"}</h4>
-                    <p><MapPin size={12} /> {contact?.city || "Not specified"}</p>
+                    <p><MapPin size={14} /> {contact?.city || "Anywhere"}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Messages Area */}
+            {/* Messages Content */}
             {selectedContact ? (
               <div className="chat-messages">
                 <div className="chat-messages-header">
@@ -198,23 +222,40 @@ export default function Chat() {
                   </div>
                   <div>
                     <h3>{selectedContact?.name || "Unknown"}</h3>
-                    <p>● Online</p>
+                    <p>Online</p>
                   </div>
                 </div>
 
-                <div className="messages-body">
-                  {Array.isArray(messages) && messages.map(msg => (
-                    <div key={msg?.id || Math.random()} className={`message-bubble ${msg?.sender === "me" ? "sent" : "received"}`}>
-                      {msg?.text}
-                      <div className="message-time">{msg?.time}</div>
+                <div className="messages-body" ref={messagesBodyRef}>
+                  {Array.isArray(messages) && messages.length === 0 ? (
+                    <div className="icebreakers-container">
+                      <p className="icebreakers-title">Start the conversation 👋</p>
+                      <div className="icebreaker-pills">
+                        <button className="icebreaker-pill" onClick={() => handleSendIcebreaker("Hey! Are you still looking for a roommate?")}>
+                          Hey! Are you still looking for a roommate?
+                        </button>
+                        <button className="icebreaker-pill" onClick={() => handleSendIcebreaker("Hi! When are you planning to move?")}>
+                          Hi! When are you planning to move?
+                        </button>
+                        <button className="icebreaker-pill" onClick={() => handleSendIcebreaker("Hey! Just accepted your match!")}>
+                          Hey! Just accepted your match!
+                        </button>
+                      </div>
                     </div>
-                  ))}
+                  ) : (
+                    Array.isArray(messages) && messages.map(msg => (
+                      <div key={msg?.id || Math.random()} className={`message-bubble ${msg?.sender === "me" ? "sent" : "received"}`}>
+                        {msg?.text}
+                        <span className="message-time">{msg?.time}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 <div className="chat-input-area">
                   <input
                     type="text"
-                    placeholder="Type a message..."
+                    placeholder="Type something amazing..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
@@ -227,9 +268,9 @@ export default function Chat() {
               </div>
             ) : (
               <div className="select-contact">
-                <MessageCircle size={64} className="no-chat-icon" />
-                <h3>Select a contact</h3>
-                <p>Choose someone from your accepted matches to start chatting</p>
+                <MessageCircle size={80} className="no-chat-icon" />
+                <h3>Your Messages Await</h3>
+                <p>Select a contact from the sidebar to start your conversation and get to know your future roommate.</p>
               </div>
             )}
           </div>
