@@ -139,7 +139,7 @@ function Sidebar() {
       <div className="sidebar-menu">
 
         <NavLink to="/dashboard" end className="menu-item">
-          <FaHome /> <span>Dashboard</span>
+          <FaHome /> <span>Home</span>
         </NavLink>
 
         <NavLink to="/dashboard/profile" className="menu-item">
