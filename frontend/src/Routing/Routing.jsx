@@ -63,6 +63,7 @@ function Routing() {
         <Route path="find-roommates" element={<FindRoommates />} />
         <Route path="subscription" element={<Subscription />} />
         <Route path="chat" element={<Chat />} />
+        <Route path="preferences" element={<Preference />} />
         
       </Route>
 

@@ -104,6 +104,7 @@ import {
   FaEnvelope,
   FaComments,
   FaSignOutAlt,
+  FaPuzzlePiece
 } from "react-icons/fa";
 
 import "../styles/Sidebar.css";
@@ -152,6 +153,10 @@ function Sidebar() {
 
         <NavLink to="/dashboard/requests" className="menu-item">
           <FaEnvelope /> <span>Requests</span>
+        </NavLink>
+
+        <NavLink to="/dashboard/preferences" className="menu-item">
+          <FaPuzzlePiece /> <span>Preferences</span>
         </NavLink>
 
         <a href="#" className="menu-item" onClick={handleChatClick}>

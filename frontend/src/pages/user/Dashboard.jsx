@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import "../../styles/Dashboard.css";
 import { Users, Home, FileText, UserPlus, UserSearch } from "lucide-react";
 import { calculateMatchPercentage } from "../../utils/matchUtils";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     users: 0,
     rooms: 0,
@@ -94,6 +96,34 @@ function Dashboard() {
               <p>Total Requests</p>
               <h2>{stats.requests}</h2>
             </div>
+          </div>
+        </div>
+
+        {/* Preferences Section Widget */}
+        <div className="dash-pref-widget" onClick={() => navigate("/dashboard/preferences")} style={{ cursor: "pointer", marginTop: "30px" }}>
+          <div className="dash-pref-header">
+            <div className="dash-pref-title">
+              <div className="dash-pref-title-icon">🧩</div>
+              <h3>My Preferences</h3>
+            </div>
+            <button className="dash-pref-edit-btn">
+              Edit Preferences
+            </button>
+          </div>
+
+          <div className="dash-pref-tags">
+            {myPreferences.length > 0 ? (
+              myPreferences.map((pref, idx) => (
+                <span key={idx} className="dash-pref-tag">
+                  {pref}
+                </span>
+              ))
+            ) : (
+              <div className="dash-pref-empty">
+                <p>No preferences set yet. Tell us what you like!</p>
+                <button className="dash-pref-empty-btn">Set Preferences</button>
+              </div>
+            )}
           </div>
         </div>
 
