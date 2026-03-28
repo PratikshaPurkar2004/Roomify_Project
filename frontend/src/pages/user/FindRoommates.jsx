@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/FindRoommates.css";
 import { calculateMatchPercentage } from "../../utils/matchUtils";
-import { Search, MapPin, Wallet, User, MessageCircle, UserPlus, Users } from "lucide-react";
+import { Search, MapPin, Wallet, User, MessageCircle, UserPlus, Users, Home } from "lucide-react";
 
 export default function FindRoommates() {
   const navigate = useNavigate();
 
   const [roommates, setRoommates] = useState([]);
   const [results, setResults] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [searchType, setSearchType] = useState("roommates"); // 'roommates' or 'rooms'
   const [city, setCity] = useState("");
   const [budget, setBudget] = useState("");
   const [gender, setGender] = useState("");
@@ -53,34 +55,56 @@ export default function FindRoommates() {
   }, []);
 
   useEffect(() => {
+    setResults([]); // Reset view while fetching new results
     fetch("http://localhost:5000/api/roommates")
       .then(res => res.json())
       .then(data => {
         setRoommates(data);
-        setResults(data);
+        if (searchType === "roommates") setResults(data);
       })
       .catch(err => console.error(err));
-  }, []);
+
+    fetch("http://localhost:5000/api/rooms")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setRooms(data.rooms);
+          if (searchType === "rooms") setResults(data.rooms);
+        }
+      })
+      .catch(err => {
+        console.error("Fetch Rooms Error:", err);
+      });
+  }, [searchType]);
 
   const getMatch = (userPrefs) => {
     return calculateMatchPercentage(myPreferences, userPrefs || "");
   };
 
   const handleSearch = () => {
-    const filtered = roommates.filter(user => {
-      const userLocation = String(user.location || "").toLowerCase();
-      const userGender = String(user.gender || "").toLowerCase();
-      const userRent = (user.rent !== null && user.rent !== undefined) ? Number(user.rent) : null;
+    const listToFilter = searchType === "roommates" ? roommates : rooms;
 
+    const filtered = listToFilter.filter(item => {
+      const itemLocation = String(item.location || "").toLowerCase();
       const searchCity = city.toLowerCase();
-      const searchGender = gender.toLowerCase();
-      const maxBudget = budget !== "" ? Number(budget) : null;
+      const matchesCity = city === "" || itemLocation.includes(searchCity);
 
-      const matchesCity = city === "" || userLocation.includes(searchCity);
-      const matchesGender = gender === "" || userGender === searchGender;
-      const matchesBudget = maxBudget === null || (userRent !== null && userRent <= maxBudget);
+      if (searchType === "roommates") {
+        const userGender = String(item.gender || "").toLowerCase();
+        const userRent = (item.rent !== null && item.rent !== undefined) ? Number(item.rent) : null;
+        const searchGender = gender.toLowerCase();
+        const maxBudget = budget !== "" ? Number(budget) : null;
 
-      return matchesCity && matchesGender && matchesBudget;
+        const matchesGender = gender === "" || userGender === searchGender;
+        const matchesBudget = maxBudget === null || (userRent !== null && userRent <= maxBudget);
+        return matchesCity && matchesGender && matchesBudget;
+      } else {
+        // Rooms filtering
+        const roomRent = Number(item.rent);
+        const maxBudget = budget !== "" ? Number(budget) : null;
+        const matchesBudget = maxBudget === null || roomRent <= maxBudget;
+        return matchesCity && matchesBudget;
+      }
     });
 
     setResults(filtered);
@@ -128,9 +152,29 @@ export default function FindRoommates() {
 
       <div className="roommate-container">
         <header className="rm-header">
-          <h2 className="rm-title">Find Your Perfect Roommate</h2>
-          <p className="rm-subtitle">Discover and connect with like-minded people.</p>
+          <h2 className="rm-title">{searchType === 'roommates' ? 'Find Your Perfect Roommate' : 'Find Your Perfect Room'}</h2>
+          <p className="rm-subtitle">
+            {searchType === 'roommates' 
+              ? 'Discover and connect with like-minded people.' 
+              : 'Browse available listings and find your next space.'}
+          </p>
         </header>
+
+        {/* Toggle Switch */}
+        <div className="search-type-toggle">
+            <button 
+                className={`toggle-btn ${searchType === 'roommates' ? 'active' : ''}`}
+                onClick={() => setSearchType('roommates')}
+            >
+                <Users size={18} /> Roommates
+            </button>
+            <button 
+                className={`toggle-btn ${searchType === 'rooms' ? 'active' : ''}`}
+                onClick={() => setSearchType('rooms')}
+            >
+                <Home size={18} /> Rooms
+            </button>
+        </div>
 
         {/* Search Box */}
         <div className="rm-search-box glass-panel">
@@ -176,69 +220,100 @@ export default function FindRoommates() {
         <div className="roommate-grid">
           {results.length === 0 && (
             <div className="no-roommates-card">
-              <Users size={64} className="no-rm-icon" />
-              <h2>No Roommates Found</h2>
+              {searchType === 'roommates' ? <Users size={64} className="no-rm-icon" /> : <Home size={64} className="no-rm-icon" />}
+              <h2>No {searchType === 'roommates' ? 'Roommates' : 'Rooms'} Found</h2>
               <p>Try adjusting your search filters to find more matches.</p>
             </div>
           )}
 
-          {results.map((user) => {
-            const match = getMatch(user.preferences || "");
-            const hasSentRequest = sentRequests.includes(user.id);
+          {results.map((item) => {
+            if (searchType === "roommates") {
+                const match = getMatch(item.preferences || "");
+                const hasSentRequest = sentRequests.includes(item.id);
 
-            return (
-              <div className="roommate-card-modern" key={user.id}>
-                <div className="rm-card-header">
-                  <div className="rm-avatar">
-                   {user.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="rm-user-info">
-                    <h3>{user.name}</h3>
-                    <p className="city"><MapPin size={14} style={{marginRight:'4px', opacity:0.7}}/>{user.location || "Not Specified"}</p>
-                  </div>
-                  <div className="rm-match-badge">
-                    {match}% Match
-                  </div>
-                </div>
+                return (
+                <div className="roommate-card-modern" key={item.id}>
+                    <div className="rm-card-header">
+                    <div className="rm-avatar">
+                    {item.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="rm-user-info">
+                        <h3>{item.name}</h3>
+                        <p className="city"><MapPin size={14} style={{marginRight:'4px', opacity:0.7}}/>{item.location || "Not Specified"}</p>
+                    </div>
+                    <div className="rm-match-badge">
+                        {match}% Match
+                    </div>
+                    </div>
 
-                <div className="rm-card-body">
-                  <div className="rm-detail">
-                    <Wallet size={18} className="rm-icon budget-icon" />
-                    <span>Budget: <strong>₹{user.rent || "N/A"}</strong></span>
-                  </div>
-                  <div className="rm-detail">
-                    <User size={18} className="rm-icon gender-icon" />
-                    <span>Gender: <strong>{user.gender || "Any"}</strong></span>
-                  </div>
-                  <div className="rm-detail">
-                    <Search size={18} className="rm-icon looking-icon" />
-                    <span>Looking For: <strong>{user.user_type}</strong></span>
-                  </div>
-                </div>
+                    <div className="rm-card-body">
+                    <div className="rm-detail">
+                        <Wallet size={18} className="rm-icon budget-icon" />
+                        <span>Budget: <strong>₹{item.rent || "N/A"}</strong></span>
+                    </div>
+                    <div className="rm-detail">
+                        <User size={18} className="rm-icon gender-icon" />
+                        <span>Gender: <strong>{item.gender || "Any"}</strong></span>
+                    </div>
+                    <div className="rm-detail">
+                        <Search size={18} className="rm-icon looking-icon" />
+                        <span>Looking For: <strong>{item.user_type}</strong></span>
+                    </div>
+                    </div>
 
-                <div className="rm-card-actions">
-                  <button
-                    className={`rm-btn ${acceptedIds.includes(user.id) ? 'rm-btn-chat' : 'rm-btn-disabled'}`}
-                    onClick={() => {
-                      if (!acceptedIds.includes(user.id)) return;
-                      navigate("/dashboard/chat");
-                    }}
-                    title={acceptedIds.includes(user.id) ? "Chat with roommate" : "Connect first to chat"}
-                  >
-                    <MessageCircle size={18} />
-                    <span>{acceptedIds.includes(user.id) ? 'Chat' : 'Connect to Chat'}</span>
-                  </button>
-                  <button
-                    className={`rm-btn ${hasSentRequest ? 'rm-btn-sent' : 'rm-btn-request'}`}
-                    onClick={() => !hasSentRequest && handleRequest(user.id, user.name)}
-                    disabled={hasSentRequest}
-                  >
-                    <UserPlus size={18} />
-                    <span>{hasSentRequest ? 'Sent' : 'Request'}</span>
-                  </button>
+                    <div className="rm-card-actions">
+                    <button
+                        className={`rm-btn ${acceptedIds.includes(item.id) ? 'rm-btn-chat' : 'rm-btn-disabled'}`}
+                        onClick={() => {
+                        if (!acceptedIds.includes(item.id)) return;
+                        navigate("/dashboard/chat");
+                        }}
+                        title={acceptedIds.includes(item.id) ? "Chat with roommate" : "Connect first to chat"}
+                    >
+                        <MessageCircle size={18} />
+                        <span>{acceptedIds.includes(item.id) ? 'Chat' : 'Connect to Chat'}</span>
+                    </button>
+                    <button
+                        className={`rm-btn ${hasSentRequest ? 'rm-btn-sent' : 'rm-btn-request'}`}
+                        onClick={() => !hasSentRequest && handleRequest(item.id, item.name)}
+                        disabled={hasSentRequest}
+                    >
+                        <UserPlus size={18} />
+                        <span>{hasSentRequest ? 'Sent' : 'Request'}</span>
+                    </button>
+                    </div>
                 </div>
-              </div>
-            );
+                );
+            } else {
+                // Room Card Implementation for Finder
+                return (
+                    <div className="room-card-modern" key={item.room_id}>
+                        <div className="room-img-container">
+                            {item.image_url ? (
+                                <img src={`http://localhost:5000${item.image_url}`} alt="Room" className="room-img" />
+                            ) : (
+                                <div className="room-img-placeholder">Roomify</div>
+                            )}
+                            <div className="room-rent-tag">₹{item.rent}</div>
+                        </div>
+                        <div className="room-card-body">
+                            <h3>Room in {item.location?.split(',')[0] || "Unknown Location"}</h3>
+                            <div className="room-loc">
+                                <MapPin size={14} /> {item.location}
+                            </div>
+                            <div className="host-info">
+                                <div className="host-avatar">{item.host_name?.charAt(0) || "U"}</div>
+                                <span>Host: {item.host_name || "Unknown"}</span>
+                            </div>
+                        </div>
+                        <div className="room-card-footer">
+                            <button className="room-btn-contact" onClick={() => navigate("/dashboard/chat")}>
+                                <MessageCircle size={16} /> Contact Host
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
           })}
         </div>
       </div>
