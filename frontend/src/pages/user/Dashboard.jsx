@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const [showUsers, setShowUsers] = useState(false);
   const [stats, setStats] = useState({
     users: 0,
     rooms: 0,
