@@ -19,8 +19,9 @@
 // module.exports = db;
 
 
+const path = require("path");
 const mysql = require("mysql2/promise");
-require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
 const DB_HOST = process.env.DB_HOST || "localhost";
 const DB_USER = process.env.DB_USER || "root";
@@ -32,6 +33,9 @@ const db = mysql.createPool({
   user: DB_USER,
   password: DB_PASSWORD,
   database: DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
 
 // Quick connection test to expose DB errors early

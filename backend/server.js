@@ -28,9 +28,10 @@
 //   console.log(`Server running on port ${PORT}`);
 // });
 
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const authRoutes = require("./routes/authRoutes");
 
@@ -60,6 +61,18 @@ app.use("/api/chat", chatRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend Running 🚀");
+});
+
+// Health check for database
+app.get("/health", async (req, res) => {
+  try {
+    const connection = await db.getConnection();
+    await connection.ping();
+    connection.release();
+    res.json({ status: "ok", message: "Database connected" });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 5000;

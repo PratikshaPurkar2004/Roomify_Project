@@ -43,7 +43,7 @@ router.get("/:userId", async (req, res) => {
       r.id as request_id,
       r.sender_id,
       u.name,
-      u.city,
+      u.area,
       u.gender,
       u.budget as base_budget,
       IFNULL(rooms.rent, u.budget) AS rent,
@@ -61,8 +61,9 @@ router.get("/:userId", async (req, res) => {
     // Format response to match the frontend expected structure
     const formatted = results.map(row => ({
       id: row.request_id,
+      senderId: row.sender_id,
       name: row.name,
-      city: row.city,
+      city: row.area,
       gender: row.gender,
       budget: row.rent, // Use actual rent if exists, else budget
       status: row.status
@@ -85,6 +86,34 @@ router.get("/sent/:userId", async (req, res) => {
     res.json({ success: true, sentRequests: results.map(r => r.receiver_id) });
   } catch (err) {
     console.error("Database error (requests sent GET):", err);
+    res.status(500).json({ success: false, message: "Database error" });
+  }
+});
+
+// GET all requests SENT by a user with full details
+router.get("/sent-details/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  const sql = `
+    SELECT 
+      r.id as request_id,
+      r.receiver_id as peer_id,
+      u.name,
+      u.area as city,
+      u.gender,
+      IFNULL(rooms.rent, u.budget) AS budget,
+      r.status,
+      r.created_at
+    FROM requests r
+    JOIN users u ON r.receiver_id = u.user_id
+    LEFT JOIN rooms ON u.user_id = rooms.host_id
+    WHERE r.sender_id = ?
+    ORDER BY r.created_at DESC
+  `;
+  try {
+    const [results] = await db.query(sql, [userId]);
+    res.json({ success: true, requests: results });
+  } catch (err) {
+    console.error("Database error (requests sent-details GET):", err);
     res.status(500).json({ success: false, message: "Database error" });
   }
 });

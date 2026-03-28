@@ -89,6 +89,16 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
     
+CREATE TABLE IF NOT EXISTS messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  sender_id INT NOT NULL,
+  receiver_id INT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (sender_id) REFERENCES users(user_id),
+  FOREIGN KEY (receiver_id) REFERENCES users(user_id)
+);
+
 SELECT COUNT(*) FROM users;
 SELECT COUNT(*) FROM rooms;
 SELECT COUNT(*) FROM connect;

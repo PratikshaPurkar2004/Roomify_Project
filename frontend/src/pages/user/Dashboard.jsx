@@ -22,14 +22,21 @@ function Dashboard() {
   useEffect(() => {
     const userIdParams = localStorage.getItem("userId") ? `?userId=${localStorage.getItem("userId")}` : "";
     fetch(`http://localhost:5000/api/dashboard/stats${userIdParams}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => setStats(data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error("Stats fetch error:", err));
 
     fetch("http://localhost:5000/api/dashboard/users")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
-        const userList = data.users || [];
+        // Check if data has users property (success) or is an error object
+        const userList = (data && Array.isArray(data.users)) ? data.users : [];
         setUsers(userList);
 
         const hostCount = userList.filter((u) => u.user_type === "Host").length;
@@ -41,18 +48,24 @@ function Dashboard() {
           finders: finderCount,
         }));
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error("Users fetch error:", err);
+        setUsers([]);
+      });
 
     const userId = localStorage.getItem("userId");
     if (userId) {
       fetch(`http://localhost:5000/api/preferences/${userId}`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
         .then(data => {
           if (data && data.preferences) {
             setMyPreferences(data.preferences.split(",").map(p => p.trim()));
           }
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error("Preferences fetch error:", err));
     }
   }, []);
 
