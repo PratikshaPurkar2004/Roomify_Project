@@ -71,7 +71,11 @@ router.get("/users", async (req, res) => {
   try {
     console.log("Fetching users from database...");
     const [users] = await db.query(
+<<<<<<< HEAD
       "SELECT user_id, name, email, city, user_type, preferences FROM users LIMIT 20"
+=======
+      "SELECT user_id, name, email, area, user_type, preferences FROM users LIMIT 20"
+>>>>>>> 0a8a04b (update chat and request)
     );
     console.log(`Retrieved ${users.length} users`);
 
