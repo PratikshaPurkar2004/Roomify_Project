@@ -373,208 +373,203 @@ function Dashboard() {
           <span className="f-value">~2h</span>
         </div>
       </div>
-    </div>
-            </div >
-        )
-}
 
-{/* Host Room Management Header */ }
-{
-  isHost && (
-    <div className="room-management-section">
-      <div className="room-management-header">
-        <h2>Your Managed Listings</h2>
-      </div>
+      {/* Host Room Management Header */}
+      {
+        isHost && (
+          <div className="room-management-section">
+            <div className="room-management-header">
+              <h2>Your Managed Listings</h2>
+            </div>
 
-      <div className="host-rooms-grid">
-        {myRooms.length > 0 ? (
-          myRooms.map((room) => (
-            <div key={room.room_id} className="room-card">
-              {room.image_url ? (
-                <img src={`http://localhost:5000${room.image_url}`} alt="Room" className="room-image" />
+            <div className="host-rooms-grid">
+              {myRooms.length > 0 ? (
+                myRooms.map((room) => (
+                  <div key={room.room_id} className="room-card">
+                    {room.image_url ? (
+                      <img src={`http://localhost:5000${room.image_url}`} alt="Room" className="room-image" />
+                    ) : (
+                      <div className="room-image-placeholder">No Image</div>
+                    )}
+                    <div className="room-card-content">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <h3>Room in {room.location.split(',')[0]}</h3>
+                        <span className="room-status">{room.availability}</span>
+                      </div>
+                      <div className="room-details">
+                        <p className="room-price">₹{room.rent}</p>
+                        <p className="room-location">
+                          <MapPin size={14} /> {room.location}
+                        </p>
+                      </div>
+
+                      <div className="room-card-actions-row">
+                        <button className="room-action-btn view" onClick={() => openViewModal(room)}>View</button>
+                        <button className="room-action-btn edit" onClick={() => openEditModal(room)}>Edit</button>
+                        <button className="room-action-btn delete" onClick={() => handleDeleteRoom(room.room_id)}>Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                ))
               ) : (
-                <div className="room-image-placeholder">No Image</div>
+                <p className="no-users">You haven't added any rooms yet.</p>
               )}
-              <div className="room-card-content">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <h3>Room in {room.location.split(',')[0]}</h3>
-                  <span className="room-status">{room.availability}</span>
-                </div>
-                <div className="room-details">
-                  <p className="room-price">₹{room.rent}</p>
-                  <p className="room-location">
-                    <MapPin size={14} /> {room.location}
-                  </p>
-                </div>
+            </div>
+          </div>
+        )
+      }
 
-                <div className="room-card-actions-row">
-                  <button className="room-action-btn view" onClick={() => openViewModal(room)}>View</button>
-                  <button className="room-action-btn edit" onClick={() => openEditModal(room)}>Edit</button>
-                  <button className="room-action-btn delete" onClick={() => handleDeleteRoom(room.room_id)}>Delete</button>
+
+
+      {/* Add Room Modal */}
+      {
+        showAddRoomModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3>Add New Room</h3>
+                <X size={24} onClick={() => setShowAddRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
+              </div>
+              <form onSubmit={handleAddRoom}>
+                <div className="form-group">
+                  <label>Location</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Pune, Maharashtra"
+                    value={newRoom.location}
+                    onChange={(e) => setNewRoom({ ...newRoom, location: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Monthly Rent (₹)</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 5000"
+                    value={newRoom.rent}
+                    onChange={(e) => setNewRoom({ ...newRoom, rent: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Room Photo</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setNewRoom({ ...newRoom, image: e.target.files[0] })}
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button type="button" className="cancel-btn" onClick={() => setShowAddRoomModal(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="save-btn">
+                    List Room
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )
+      }
+      {/* Edit Room Modal */}
+      {
+        showEditRoomModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3>Edit Room</h3>
+                <X size={24} onClick={() => setShowEditRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
+              </div>
+              <form onSubmit={handleEditRoomSubmit}>
+                <div className="form-group">
+                  <label>Location</label>
+                  <input
+                    type="text"
+                    value={editRoom.location}
+                    onChange={(e) => setEditRoom({ ...editRoom, location: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Monthly Rent (₹)</label>
+                  <input
+                    type="number"
+                    value={editRoom.rent}
+                    onChange={(e) => setEditRoom({ ...editRoom, rent: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Availability</label>
+                  <select
+                    value={editRoom.availability}
+                    onChange={(e) => setEditRoom({ ...editRoom, availability: e.target.value })}
+                    className="modal-select"
+                  >
+                    <option value="available">Available</option>
+                    <option value="booked">Booked</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Update Photo (Optional)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setEditRoom({ ...editRoom, image: e.target.files[0] })}
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button type="button" className="cancel-btn" onClick={() => setShowEditRoomModal(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="save-btn">
+                    Update Room
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )
+      }
+
+      {/* View Room Modal */}
+      {
+        showViewRoomModal && selectedRoom && (
+          <div className="modal-overlay">
+            <div className="modal-content view-room-modal">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3>Room Details</h3>
+                <X size={24} onClick={() => setShowViewRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
+              </div>
+              <div className="view-room-details">
+                {selectedRoom.image_url ? (
+                  <img src={`http://localhost:5000${selectedRoom.image_url}`} alt="Room" className="detail-room-img" />
+                ) : (
+                  <div className="detail-room-img-placeholder">No Image Available</div>
+                )}
+                <div className="detail-grid">
+                  <div className="detail-item">
+                    <span className="label">Location:</span>
+                    <span className="value">{selectedRoom.location}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Monthly Rent:</span>
+                    <span className="value">₹{selectedRoom.rent}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Status:</span>
+                    <span className={`value status-badge ${selectedRoom.availability}`}>{selectedRoom.availability}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p className="no-users">You haven't added any rooms yet.</p>
-        )}
-      </div>
-    </div>
-  )
-}
-
-
-      </div >
-
-  {/* Add Room Modal */ }
-{
-  showAddRoomModal && (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3>Add New Room</h3>
-          <X size={24} onClick={() => setShowAddRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
-        </div>
-        <form onSubmit={handleAddRoom}>
-          <div className="form-group">
-            <label>Location</label>
-            <input
-              type="text"
-              placeholder="e.g. Pune, Maharashtra"
-              value={newRoom.location}
-              onChange={(e) => setNewRoom({ ...newRoom, location: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Monthly Rent (₹)</label>
-            <input
-              type="number"
-              placeholder="e.g. 5000"
-              value={newRoom.rent}
-              onChange={(e) => setNewRoom({ ...newRoom, rent: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Room Photo</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setNewRoom({ ...newRoom, image: e.target.files[0] })}
-            />
-          </div>
-          <div className="modal-actions">
-            <button type="button" className="cancel-btn" onClick={() => setShowAddRoomModal(false)}>
-              Cancel
-            </button>
-            <button type="submit" className="save-btn">
-              List Room
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-{/* Edit Room Modal */ }
-{
-  showEditRoomModal && (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3>Edit Room</h3>
-          <X size={24} onClick={() => setShowEditRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
-        </div>
-        <form onSubmit={handleEditRoomSubmit}>
-          <div className="form-group">
-            <label>Location</label>
-            <input
-              type="text"
-              value={editRoom.location}
-              onChange={(e) => setEditRoom({ ...editRoom, location: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Monthly Rent (₹)</label>
-            <input
-              type="number"
-              value={editRoom.rent}
-              onChange={(e) => setEditRoom({ ...editRoom, rent: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Availability</label>
-            <select
-              value={editRoom.availability}
-              onChange={(e) => setEditRoom({ ...editRoom, availability: e.target.value })}
-              className="modal-select"
-            >
-              <option value="available">Available</option>
-              <option value="booked">Booked</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Update Photo (Optional)</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setEditRoom({ ...editRoom, image: e.target.files[0] })}
-            />
-          </div>
-          <div className="modal-actions">
-            <button type="button" className="cancel-btn" onClick={() => setShowEditRoomModal(false)}>
-              Cancel
-            </button>
-            <button type="submit" className="save-btn">
-              Update Room
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-{/* View Room Modal */ }
-{
-  showViewRoomModal && selectedRoom && (
-    <div className="modal-overlay">
-      <div className="modal-content view-room-modal">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3>Room Details</h3>
-          <X size={24} onClick={() => setShowViewRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
-        </div>
-        <div className="view-room-details">
-          {selectedRoom.image_url ? (
-            <img src={`http://localhost:5000${selectedRoom.image_url}`} alt="Room" className="detail-room-img" />
-          ) : (
-            <div className="detail-room-img-placeholder">No Image Available</div>
-          )}
-          <div className="detail-grid">
-            <div className="detail-item">
-              <span className="label">Location:</span>
-              <span className="value">{selectedRoom.location}</span>
-            </div>
-            <div className="detail-item">
-              <span className="label">Monthly Rent:</span>
-              <span className="value">₹{selectedRoom.rent}</span>
-            </div>
-            <div className="detail-item">
-              <span className="label">Status:</span>
-              <span className={`value status-badge ${selectedRoom.availability}`}>{selectedRoom.availability}</span>
+              <div className="modal-actions" style={{ justifyContent: 'center' }}>
+                <button className="save-btn" onClick={() => setShowViewRoomModal(false)}>Close</button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="modal-actions" style={{ justifyContent: 'center' }}>
-          <button className="save-btn" onClick={() => setShowViewRoomModal(false)}>Close</button>
-        </div>
-      </div>
-    </div>
-  )
-}
+        )
+      }
     </div >
   );
 }
