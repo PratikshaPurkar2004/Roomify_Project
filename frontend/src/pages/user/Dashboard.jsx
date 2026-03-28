@@ -4,7 +4,6 @@ import "../../styles/Dashboard.css";
 import { Users, Home, FileText, UserPlus, UserSearch, Plus, MapPin, DollarSign, X, TrendingUp, Activity } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { calculateMatchPercentage } from "../../utils/matchUtils";
-import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const navigate = useNavigate();
