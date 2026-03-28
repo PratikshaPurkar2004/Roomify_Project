@@ -97,13 +97,6 @@ function Header() {
               </div>
 
               <div
-                className="dropdown-item"
-                onClick={() => navigate("/dashboard/preferences")}
-              >
-                Preferences
-              </div>
-
-              <div
                 className="dropdown-item logout"
                 onClick={handleLogout}
               >

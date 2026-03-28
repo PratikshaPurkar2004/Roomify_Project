@@ -5,6 +5,21 @@ import { AlertTriangle, X, Trash2 } from "lucide-react";
 import "../../styles/Profile.css";
 import { useNavigate } from "react-router-dom";
 
+const allPreferences = [
+  { id: 1, name: "Night Owl", icon: "🦉" },
+  { id: 2, name: "Early Bird", icon: "🦚" },
+  { id: 3, name: "Studious", icon: "📚" },
+  { id: 4, name: "Fitness Freak", icon: "🏋️" },
+  { id: 5, name: "Sporty", icon: "⚽" },
+  { id: 6, name: "Wanderer", icon: "🚗" },
+  { id: 7, name: "Party Lover", icon: "🥳" },
+  { id: 8, name: "Pet Lover", icon: "🐶" },
+  { id: 9, name: "Vegan", icon: "🥗" },
+  { id: 10, name: "Non Alcoholic", icon: "🚫🍺" },
+  { id: 11, name: "Music Lover", icon: "🎸" },
+  { id: 12, name: "Non Smoker", icon: "🚭" },
+];
+
 export default function Profile() {
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
@@ -20,6 +35,13 @@ export default function Profile() {
 
   const [toast, setToast] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [msg, setMsg] = useState("");
+  
+  // Preferences State
+  const [selected, setSelected] = useState([]);
+  const [originalPrefs, setOriginalPrefs] = useState([]);
+  const [prefSaving, setPrefSaving] = useState(false);
+  const [prefMsg, setPrefMsg] = useState({ text: "", type: "" });
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -31,13 +53,14 @@ export default function Profile() {
   useEffect(() => {
     if (!userId) return;
 
+    // Fetch Profile
     axios
     .get(`http://localhost:5000/api/profile/${userId}`)
       .then((res) => {
         if (res.data) {
           setForm({
             name: res.data.name || "",
-            dob: res.data.DOB ? res.data.DOB.split('T')[0] : "", // Handle potential ISO string
+            dob: res.data.DOB ? res.data.DOB.split('T')[0] : "",
             occupation: res.data.occupation || "",
             city: res.data.area || "",
             budget: res.data.budget || "",
@@ -47,6 +70,23 @@ export default function Profile() {
       })
       .catch(() => {
         showToast("Failed to load profile", "error");
+      });
+
+    // Fetch Preferences
+    fetch(`http://localhost:5000/api/preferences/${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.preferences) {
+          const prefs = data.preferences
+            .split(",")
+            .map((p) => p.trim())
+            .filter(Boolean);
+          setSelected(prefs);
+          setOriginalPrefs(prefs);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching preferences:", err);
       });
 
   }, [userId]);
@@ -59,27 +99,21 @@ export default function Profile() {
   };
 
   const saveProfile = () => {
-    // Validation: Name should not contain numbers
     if (/\d/.test(form.name)) {
       showToast("Numbers are not allowed in name", "error");
       return;
     }
 
-    // Map city to area for backend
     const payload = { ...form, area: form.city };
     
     axios
       .put(`http://localhost:5000/api/profile/${userId}`, payload)
       .then(() => {
         showToast("Profile Updated Successfully ✅", "success");
-        
-        // Update user data in localStorage so other components (like Header) can update
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         storedUser.name = form.name;
         storedUser.gender = form.gender;
         localStorage.setItem("user", JSON.stringify(storedUser));
-        
-        // Dispatch a custom event to update the header if it listens, or just let them reload
         window.dispatchEvent(new Event("storage"));
       })
       .catch((err) => {
@@ -101,6 +135,49 @@ export default function Profile() {
       });
   };
 
+  const togglePreference = (name) => {
+    setPrefMsg({ text: "", type: "" });
+    if (selected.includes(name)) {
+      setSelected(selected.filter((item) => item !== name));
+    } else {
+      setSelected([...selected, name]);
+    }
+  };
+
+  const hasPrefChanges =
+    JSON.stringify([...selected].sort()) !==
+    JSON.stringify([...originalPrefs].sort());
+
+  const handleUpdatePreferences = async () => {
+    if (selected.length === 0) {
+      setPrefMsg({ text: "Please select at least one preference", type: "error" });
+      return;
+    }
+
+    setPrefSaving(true);
+    setPrefMsg({ text: "", type: "" });
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/preferences/save-preferences",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, preferences: selected }),
+        }
+      );
+
+      const data = await response.json();
+      setOriginalPrefs([...selected]);
+      setPrefMsg({ text: "Preferences updated successfully! ✅", type: "success" });
+    } catch (error) {
+      console.error("Error saving preferences:", error);
+      setPrefMsg({ text: "Something went wrong. Please try again.", type: "error" });
+    } finally {
+      setPrefSaving(false);
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -109,7 +186,6 @@ export default function Profile() {
     >
       <div className="profile-wrapper">
         
-        {/* TOAST NOTIFICATION */}
         <AnimatePresence>
           {toast && (
             <motion.div 
@@ -133,7 +209,6 @@ export default function Profile() {
           )}
         </AnimatePresence>
         
-        {/* LEFT SIDE: PREMIUM PROFILE PREVIEW */}
         <motion.div 
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -165,7 +240,6 @@ export default function Profile() {
           </div>
         </motion.div>
 
-        {/* RIGHT SIDE: EDIT FORM */}
         <motion.div 
           initial={{ x: 20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -213,30 +287,50 @@ export default function Profile() {
           </div>
         </motion.div>
 
-        <div style={{ marginTop: "20px", textAlign: "center" }}>
-          <button
-            className="profile-pref-link"
-            onClick={() => navigate("/dashboard/preferences")}
-            style={{
-              background: "none",
-              border: "1.5px solid #6366F1",
-              color: "#6366F1",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              cursor: "pointer",
-              fontWeight: "600",
-              transition: "0.3s"
-            }}
-            onMouseOver={(e) => (e.target.style.background = "#EEF2FF")}
-            onMouseOut={(e) => (e.target.style.background = "none")}
-          >
-            Modify Preferences 🧩
-          </button>
+        <div className="profile-separator"></div>
+
+        <div className="profile-preferences-section">
+          <h3>My Lifestyle Preferences</h3>
+          <p className="profile-pref-subtitle">
+            These tags help us find you the most compatible roommates.
+          </p>
+
+          {prefMsg.text && (
+            <div className={`pref-msg-inline pref-msg-${prefMsg.type}`}>
+              {prefMsg.text}
+            </div>
+          )}
+
+          <div className="profile-pref-grid">
+            {allPreferences.map((item) => {
+              const isActive = selected.includes(item.name);
+              return (
+                <div
+                  key={item.id}
+                  className={`profile-pref-card ${isActive ? "active" : ""}`}
+                  onClick={() => togglePreference(item.name)}
+                >
+                  <div className="profile-pref-icon">{item.icon}</div>
+                  <p>{item.name}</p>
+                  {isActive && <div className="profile-pref-check">✓</div>}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="profile-pref-actions">
+            <button
+              className="btn-save-pref"
+              onClick={handleUpdatePreferences}
+              disabled={prefSaving || !hasPrefChanges}
+            >
+              {prefSaving ? "Saving..." : hasPrefChanges ? "Update Preferences" : "No Changes"}
+            </button>
+          </div>
         </div>
 
       </div>
 
-      {/* CUSTOM DELETE CONFIRMATION MODAL */}
       <AnimatePresence>
         {showDeleteModal && (
           <div className="delete-modal-overlay">
