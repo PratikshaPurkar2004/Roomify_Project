@@ -155,10 +155,6 @@ function Sidebar() {
           <FaEnvelope /> <span>Requests</span>
         </NavLink>
 
-        <NavLink to="/dashboard/preferences" className="menu-item">
-          <FaPuzzlePiece /> <span>Preferences</span>
-        </NavLink>
-
         <a href="#" className="menu-item" onClick={handleChatClick}>
           <FaComments /> <span>Chat</span>
         </a>

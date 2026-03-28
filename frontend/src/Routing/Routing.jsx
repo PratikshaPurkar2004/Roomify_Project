@@ -22,7 +22,6 @@ import Dashboard from "../pages/user/Dashboard";
 import Profile from "../pages/user/Profile";
 import Requests from "../pages/user/Requests";
 import FindRoommates from "../pages/user/FindRoommates";
-import Preference from "../pages/user/Preference";
 import Subscription from "../pages/Subscription";
 import Chat from "../pages/user/Chat";
 
@@ -53,7 +52,6 @@ function Routing() {
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/signup" element={<Registration />} />
-      <Route path="/preferences" element={<Preference />} />
 
       {/* Dashboard Routes */}
       <Route path="/dashboard" element={<DashboardLayout />}>
@@ -63,7 +61,6 @@ function Routing() {
         <Route path="find-roommates" element={<FindRoommates />} />
         <Route path="subscription" element={<Subscription />} />
         <Route path="chat" element={<Chat />} />
-        <Route path="preferences" element={<Preference />} />
         
       </Route>
 
