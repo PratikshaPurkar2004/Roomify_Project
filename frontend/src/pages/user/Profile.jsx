@@ -3,9 +3,10 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, X, Trash2 } from "lucide-react";
 import "../../styles/Profile.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
-
+  const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
 
   const [form, setForm] = useState({
@@ -211,6 +212,27 @@ export default function Profile() {
              </div>
           </div>
         </motion.div>
+
+        <div style={{ marginTop: "20px", textAlign: "center" }}>
+          <button
+            className="profile-pref-link"
+            onClick={() => navigate("/dashboard/preferences")}
+            style={{
+              background: "none",
+              border: "1.5px solid #6366F1",
+              color: "#6366F1",
+              padding: "10px 20px",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontWeight: "600",
+              transition: "0.3s"
+            }}
+            onMouseOver={(e) => (e.target.style.background = "#EEF2FF")}
+            onMouseOut={(e) => (e.target.style.background = "none")}
+          >
+            Modify Preferences 🧩
+          </button>
+        </div>
 
       </div>
 
