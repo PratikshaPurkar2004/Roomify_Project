@@ -140,6 +140,30 @@ function Dashboard() {
       });
   };
 
+  const handleEditRoomSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("location", editRoom.location);
+    formData.append("rent", editRoom.rent);
+    formData.append("availability", editRoom.availability);
+    if (editRoom.image) formData.append("image", editRoom.image);
+
+    fetch(`http://localhost:5000/api/rooms/edit/${selectedRoom.room_id}`, { method: "PUT", body: formData })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setShowEditRoomModal(false);
+          window.location.reload();
+        }
+      });
+  };
+
+  const openEditModal = (room) => {
+    setSelectedRoom(room);
+    setEditRoom({ location: room.location, rent: room.rent, availability: room.availability, image: null });
+    setShowEditRoomModal(true);
+  };
+
   return (
     <div className="dashboard">
       <div className="dash-bg-shape dash-shape-1"></div>
@@ -269,6 +293,10 @@ function Dashboard() {
                         <p className="mini-room-title">Room in {room.location.split(',')[0]}</p>
                         <p className="mini-room-price">₹{room.rent}</p>
                       </div>
+                      <div className="mini-actions">
+                        <button onClick={() => openEditModal(room)} className="mini-edit-btn"><Plus size={12} /></button>
+                        <button onClick={() => handleDeleteRoom(room.room_id)} className="mini-del-btn"><X size={12} /></button>
+                      </div>
                     </div>
                   )) : (
                     <p className="empty-mini">No listings yet.</p>
@@ -293,6 +321,43 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      {showAddRoomModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Add New Room</h3>
+            <form onSubmit={handleAddRoom}>
+              <input type="text" placeholder="Location" value={newRoom.location} onChange={e => setNewRoom({...newRoom, location: e.target.value})} required />
+              <input type="number" placeholder="Rent" value={newRoom.rent} onChange={e => setNewRoom({...newRoom, rent: e.target.value})} required />
+              <input type="file" onChange={e => setNewRoom({...newRoom, image: e.target.files[0]})} />
+              <div className="modal-actions">
+                <button type="button" onClick={() => setShowAddRoomModal(false)}>Cancel</button>
+                <button type="submit" className="save-btn">Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showEditRoomModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Edit Room</h3>
+            <form onSubmit={handleEditRoomSubmit}>
+              <input type="text" value={editRoom.location} onChange={e => setEditRoom({...editRoom, location: e.target.value})} required />
+              <input type="number" value={editRoom.rent} onChange={e => setEditRoom({...editRoom, rent: e.target.value})} required />
+              <select value={editRoom.availability} onChange={e => setEditRoom({...editRoom, availability: e.target.value})}>
+                <option value="available">Available</option>
+                <option value="booked">Booked</option>
+              </select>
+              <div className="modal-actions">
+                <button type="button" onClick={() => setShowEditRoomModal(false)}>Cancel</button>
+                <button type="submit" className="save-btn">Update</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
