@@ -9,7 +9,6 @@ import {
   Mail, 
   MessageSquare, 
   LogOut, 
-  Layout, 
   Building 
 } from "lucide-react";
 import "../styles/Sidebar.css";

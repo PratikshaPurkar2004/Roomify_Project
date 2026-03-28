@@ -18,8 +18,11 @@ const requestRoutes = require("./routes/requestRoutes");
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const roomRoutes = require("./routes/roomRoutes");
+<<<<<<< HEAD
 const cityRoutes = require("./routes/cityRoutes");
 const matchRoutes = require("./routes/matchRoutes");
+=======
+>>>>>>> ca83e5b (updated dashbord)
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +36,7 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+<<<<<<< HEAD
 
 // Inject Socket.io into requests
 app.use((req, res, next) => {
@@ -42,6 +46,8 @@ app.use((req, res, next) => {
 
 // Initialize Socket Handler
 socketHandler(io);
+=======
+>>>>>>> ca83e5b (updated dashbord)
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -53,8 +59,11 @@ app.use("/api/requests", requestRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/rooms", roomRoutes);
+<<<<<<< HEAD
 app.use("/api/cities", cityRoutes);
 app.use("/api/matches", matchRoutes);
+=======
+>>>>>>> ca83e5b (updated dashbord)
 
 app.get("/", (req, res) => {
   res.send("Backend Running 🚀");

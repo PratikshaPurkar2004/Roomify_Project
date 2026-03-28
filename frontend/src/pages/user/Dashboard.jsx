@@ -29,7 +29,7 @@ function Dashboard() {
     requests: 0,
     hosts: 0,
     finders: 0,
-    views: 1240, // Mocked for premium feel
+    views: 1240,
     matches: 0,
   });
 
@@ -39,6 +39,8 @@ function Dashboard() {
   const [showEditRoomModal, setShowEditRoomModal] = useState(false);
   const [showViewRoomModal, setShowViewRoomModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [newRoom, setNewRoom] = useState({ location: "", rent: "", image: null });
+  const [editRoom, setEditRoom] = useState({ location: "", rent: "", availability: "available", image: null });
   
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
   const isHost = currentUser.user_type === "Host";
@@ -86,24 +88,20 @@ function Dashboard() {
     const userId = localStorage.getItem("userId");
     if (!userId) return;
 
-    // Fetch Stats
     fetch(`http://localhost:5000/api/dashboard/stats?userId=${userId}`)
       .then(res => res.json())
       .then(data => setStats(prev => ({ ...prev, ...data })))
       .catch(err => console.error(err));
 
-    // Fetch Gale-Shapley Optimal Match
     fetch(`http://localhost:5000/api/matches/optimal/${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data.success && data.topMatch) {
           setTopMatch(data.topMatch);
-          setStats(prev => ({ ...prev, matches: data.allMatches?.length || 0 }));
         }
       })
       .catch(err => console.error(err));
 
-    // Fetch Host Rooms if applicable
     if (isHost) {
       fetch(`http://localhost:5000/api/rooms/host/${userId}`)
         .then(res => res.json())
@@ -112,13 +110,42 @@ function Dashboard() {
     }
   }, [isHost]);
 
+  const handleDeleteRoom = (roomId) => {
+    if (!window.confirm("Are you sure?")) return;
+    fetch(`http://localhost:5000/api/rooms/delete/${roomId}`, { method: "DELETE" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setMyRooms(prev => prev.filter(r => r.room_id !== roomId));
+        }
+      });
+  };
+
+  const handleAddRoom = (e) => {
+    e.preventDefault();
+    const userId = localStorage.getItem("userId");
+    const formData = new FormData();
+    formData.append("host_id", userId);
+    formData.append("location", newRoom.location);
+    formData.append("rent", newRoom.rent);
+    if (newRoom.image) formData.append("image", newRoom.image);
+
+    fetch("http://localhost:5000/api/rooms/add", { method: "POST", body: formData })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setShowAddRoomModal(false);
+          window.location.reload();
+        }
+      });
+  };
+
   return (
     <div className="dashboard">
       <div className="dash-bg-shape dash-shape-1"></div>
       <div className="dash-bg-shape dash-shape-2"></div>
       
       <div className="dashboard-container">
-        {/* Unified Premium Hero Section */}
         <div className="dashboard-hero-premium">
           <div className="hero-main-content">
             <div className="hero-text-overlay">
@@ -160,14 +187,11 @@ function Dashboard() {
                 ))}
               </div>
               <div className="img-overlay-gradient"></div>
-              <button className="carousel-arrow carousel-arrow-left" onClick={prevSlide}>&#8249;</button>
-              <button className="carousel-arrow carousel-arrow-right" onClick={nextSlide}>&#8250;</button>
             </div>
           </div>
         </div>
 
         <div className="dash-two-column-layout">
-          {/* Left: Gale-Shapley Highlight */}
           <div className="dash-match-highlight">
             <div className="premium-card match-card-gs">
               <div className="match-card-header">
@@ -184,15 +208,10 @@ function Dashboard() {
                   <div className="gs-info">
                     <h4>{topMatch.name}</h4>
                     <p><MapPin size={14} /> {topMatch.city || "Nearby"}</p>
-                    <div className="gs-tags">
-                      {topMatch.preferences?.split(",").slice(0,3).map((tag, i) => (
-                        <span key={i} className="gs-tag">{tag.trim()}</span>
-                      ))}
-                    </div>
+                    <button className="gs-connect-btn" onClick={() => navigate("/dashboard/find-roommates")}>
+                      Connect <ArrowRight size={16} />
+                    </button>
                   </div>
-                  <button className="gs-connect-btn" onClick={() => navigate("/dashboard/find-roommates")}>
-                    Connect <ArrowRight size={16} />
-                  </button>
                 </div>
               ) : (
                 <div className="gs-empty">
@@ -202,7 +221,6 @@ function Dashboard() {
               )}
             </div>
 
-            {/* Global Activity Analytics */}
             <div className="analytics-card-glass mt-4">
               <div className="analytics-header-compact">
                 <div className="header-meta">
@@ -213,13 +231,13 @@ function Dashboard() {
                   </div>
                 </div>
                 <div className="stats-pill-green">
-                  <TrendingUp size={16} /> <span>Engagement {((stats.matches / (stats.views || 1)) * 100).toFixed(1)}%</span>
+                  <TrendingUp size={16} /> <span>Engagement High</span>
                 </div>
               </div>
 
               <div className="chart-wrapper-premium">
                 <ResponsiveContainer width="100%" height={240}>
-                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <AreaChart data={chartData}>
                     <defs>
                       <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
@@ -237,7 +255,6 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Right: Management & Quick Actions */}
           <div className="dash-management-column">
             {isHost && (
               <div className="management-card">
@@ -252,13 +269,11 @@ function Dashboard() {
                         <p className="mini-room-title">Room in {room.location.split(',')[0]}</p>
                         <p className="mini-room-price">₹{room.rent}</p>
                       </div>
-                      <span className={`mini-status ${room.availability}`}>{room.availability}</span>
                     </div>
                   )) : (
                     <p className="empty-mini">No listings yet.</p>
                   )}
                 </div>
-                <button className="view-all-link" onClick={() => navigate("/dashboard/find-rooms")}>View All Marketplace <ArrowRight size={14}/></button>
               </div>
             )}
             
@@ -278,9 +293,6 @@ function Dashboard() {
           </div>
         </div>
       </div>
-      
-      {/* Modals placeholders - simplified for brevity, keeping existing logic structure */}
-      {showAddRoomModal && <div className="modal-overlay">/* Modal content would go here */</div>}
     </div>
   );
 }
