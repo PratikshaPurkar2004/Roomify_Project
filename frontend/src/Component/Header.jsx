@@ -33,8 +33,14 @@ function Header() {
   }, []);
 
   let userName = "User";
+  let profileImage = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+  
   if (userState) {
     userName = userState.name || userState.fullname || userState.username || "User";
+    // Use user's profile image if available
+    if (userState.profile_image) {
+      profileImage = `http://localhost:5000${userState.profile_image}`;
+    }
   }
 
   const handleLogout = () => {
@@ -68,9 +74,10 @@ function Header() {
           </span>
 
           <img 
-            src={"https://cdn-icons-png.flaticon.com/512/3135/3135715.png"} 
+            src={profileImage} 
             alt="profile" 
-            className="avatar" 
+            className="avatar"
+            onError={(e) => e.target.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
           />
 
           {open && (
