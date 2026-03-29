@@ -37,23 +37,28 @@ router.get("/stats", async (req, res) => {
       SELECT 
         (SELECT COUNT(*) FROM users) AS users,
         (SELECT COUNT(*) FROM rooms) AS rooms,
-        (SELECT COUNT(*) FROM requests WHERE receiver_id = ?) AS requests
+        (SELECT COUNT(*) FROM requests WHERE receiver_id = ?) AS requests,
+        (SELECT views FROM users WHERE user_id = ?) AS views,
+        (SELECT COUNT(*) FROM users WHERE user_type = 'Host') AS hosts,
+        (SELECT COUNT(*) FROM users WHERE user_type = 'Finder') AS finders
     `;
-    params = [userId];
+    params = [userId, userId];
   } else {
     sql = `
       SELECT 
         (SELECT COUNT(*) FROM users) AS users,
         (SELECT COUNT(*) FROM rooms) AS rooms,
-        (SELECT COUNT(*) FROM requests) AS requests
+        (SELECT COUNT(*) FROM requests) AS requests,
+        0 AS views,
+        (SELECT COUNT(*) FROM users WHERE user_type = 'Host') AS hosts,
+        (SELECT COUNT(*) FROM users WHERE user_type = 'Finder') AS finders
     `;
   }
 
   try {
     console.log("Executing stats query...");
     const [result] = await db.query(sql, params);
-    console.log("Stats query result:", result);
-    res.json(result[0] || { users: 0, rooms: 0, requests: 0 });
+    res.json(result[0] || { users: 0, rooms: 0, requests: 0, views: 0, hosts: 0, finders: 0 });
   } catch (err) {
     console.error("Dashboard Stats Error:", err.message);
     console.error("Full error:", err);

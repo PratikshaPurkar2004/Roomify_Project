@@ -42,11 +42,14 @@ const preferenceRoutes = require("./routes/preferenceRoutes");
 const requestRoutes = require("./routes/requestRoutes");
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const roomRoutes = require("./routes/roomRoutes");
+const cityRoutes = require("./routes/cityRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -58,6 +61,8 @@ app.use("/api/preferences", preferenceRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use("/api/cities", cityRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend Running 🚀");

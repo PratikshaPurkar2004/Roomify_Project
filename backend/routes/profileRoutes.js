@@ -11,7 +11,8 @@ router.get("/:id", async (req, res) => {
   const sql = `
     SELECT 
       name,
-      age_group,
+      DOB,
+      occupation,
       area,
       budget,
       gender
@@ -35,18 +36,14 @@ router.get("/:id", async (req, res) => {
 });
 
 
-router.put("/:id", async (req, res) => {
-  const userId = req.params.id;
-  const { name, age_group, area, budget, gender } = req.body;
-
   const userSql = `
     UPDATE users
-    SET name=?, age_group=?, area=?, budget=?, gender=?
+    SET name=?, DOB=?, occupation=?, area=?, budget=?, gender=?
     WHERE user_id=?
   `;
 
   try {
-    await db.query(userSql, [name, age_group, area, budget, gender, userId]);
+    await db.query(userSql, [name, dob, occupation, area, budget, gender, userId]);
     res.json({ message: "Profile Updated Successfully" });
   } catch (err) {
     console.log("USER UPDATE ERROR:", err);

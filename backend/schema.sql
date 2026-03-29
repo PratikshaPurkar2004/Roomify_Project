@@ -7,7 +7,6 @@ create table IF NOT EXISTS users(
     email VARCHAR(100) UNIQUE NOT NULL,
     occupation VARCHAR(50),
     password VARCHAR(100) NOT NULL,
-    user_type ENUM('Host','Finder')NOT NULL,
     age_group INT,
     city VARCHAR(100),
     gender VARCHAR (10),

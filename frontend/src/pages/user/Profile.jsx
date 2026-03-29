@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
 import "../../styles/Profile.css";
 
 export default function Profile() {
@@ -8,7 +9,8 @@ export default function Profile() {
 
   const [form, setForm] = useState({
     name: "",
-    age_group: "",
+    dob: "",
+    occupation: "",
     city: "",
     budget: "",
     gender: ""
@@ -25,8 +27,9 @@ export default function Profile() {
         if (res.data) {
           setForm({
             name: res.data.name || "",
-            age_group: res.data.age_group || "",
-            city: res.data.city || "",
+            dob: res.data.DOB ? res.data.DOB.split('T')[0] : "", // Handle potential ISO string
+            occupation: res.data.occupation || "",
+            city: res.data.area || "",
             budget: res.data.budget || "",
             gender: res.data.gender || ""
           });
@@ -46,8 +49,11 @@ export default function Profile() {
   };
 
   const saveProfile = () => {
+    // Map city to area for backend
+    const payload = { ...form, area: form.city };
+    
     axios
-      .put(`http://localhost:5000/api/profile/${userId}`, form)
+      .put(`http://localhost:5000/api/profile/${userId}`, payload)
       .then(() => {
         setMsg("Profile Updated Successfully ✅");
         
@@ -81,69 +87,96 @@ export default function Profile() {
   };
 
   return (
-    <div className="profile-page">
-      <div className="prof-bg-shape prof-shape-1"></div>
-      <div className="prof-bg-shape prof-shape-2"></div>
-      <div className="profile-card">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="profile-page"
+    >
+      <div className="profile-wrapper">
+        
+        {/* LEFT SIDE: PREMIUM PROFILE PREVIEW */}
+        <motion.div 
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="profile-preview-card"
+        >
+          <div className="preview-header">
+             <div className="avatar-circle">
+                {form.name.charAt(0).toUpperCase()}
+             </div>
+             <h2>{form.name || "Your Name"}</h2>
+             <span className="occupation-badge">{form.occupation || "Occupation"}</span>
+          </div>
 
-        <h2>My Profile</h2>
+          <div className="preview-stats">
+             <div className="p-stat">
+                <span className="p-label">City</span>
+                <span className="p-val">{form.city || "Not set"}</span>
+             </div>
+             <div className="p-stat">
+                <span className="p-label">Budget</span>
+                <span className="p-val">₹{form.budget || "0"}</span>
+             </div>
+          </div>
 
-        {msg && <p className="profile-msg">{msg}</p>}
+          {msg && <p className="profile-msg">{msg}</p>}
 
-        <div className="profile-form">
+          <div className="preview-actions">
+             <button className="btn-main-save" onClick={saveProfile}>Save Changes</button>
+             <button className="btn-light-delete" onClick={deleteProfile}>Delete Account</button>
+          </div>
+        </motion.div>
 
-          <input
-            name="name"
-            placeholder="Full Name"
-            value={form.name}
-            onChange={handleChange}
-          />
+        {/* RIGHT SIDE: EDIT FORM */}
+        <motion.div 
+          initial={{ x: 20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="profile-edit-form"
+        >
+          <div className="form-section">
+             <h3>Personal Details</h3>
+             <div className="input-group-grid">
+                <div className="input-box">
+                   <label>Full Name</label>
+                   <input name="name" value={form.name} onChange={handleChange} placeholder="Enter your full name" />
+                </div>
+                <div className="input-box">
+                   <label>Birth Date</label>
+                   <input type="date" name="dob" value={form.dob} onChange={handleChange} />
+                </div>
+                <div className="input-box">
+                   <label>Occupation</label>
+                   <input name="occupation" value={form.occupation} onChange={handleChange} placeholder="e.g. Designer, Student" />
+                </div>
+                <div className="input-box">
+                   <label>Gender</label>
+                   <select name="gender" value={form.gender} onChange={handleChange}>
+                      <option value="">Select</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                   </select>
+                </div>
+             </div>
+          </div>
 
-          <input
-            name="age_group"
-            placeholder="Age"
-            value={form.age_group}
-            onChange={handleChange}
-          />
-
-          <input
-            name="city"
-            placeholder="City"
-            value={form.city}
-            onChange={handleChange}
-          />
-
-          <input
-            name="budget"
-            type="number"
-            placeholder="Budget"
-            value={form.budget}
-            onChange={handleChange}
-          />
-
-          <select
-            name="gender"
-            value={form.gender}
-            onChange={handleChange}
-          >
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-
-        </div>
-
-        <div className="profile-actions">
-          <button className="btn-save" onClick={saveProfile}>
-            Save / Update
-          </button>
-
-          <button className="btn-delete" onClick={deleteProfile}>
-            Delete Account
-          </button>
-        </div>
+          <div className="form-section">
+             <h3>Preferences & Location</h3>
+             <div className="input-group-grid">
+                <div className="input-box">
+                   <label>City / Location</label>
+                   <input name="city" value={form.city} onChange={handleChange} placeholder="e.g. Pune" />
+                </div>
+                <div className="input-box">
+                   <label>Max Budget (₹)</label>
+                   <input name="budget" type="number" value={form.budget} onChange={handleChange} placeholder="Monthly budget" />
+                </div>
+             </div>
+          </div>
+        </motion.div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }

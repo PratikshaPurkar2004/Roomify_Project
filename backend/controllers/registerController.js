@@ -43,7 +43,7 @@ const db = require("../config/db");
 const bcrypt = require("bcryptjs");
 
 const register = async (req, res) => {
-  const { name, email, occupation, password, user_type, gender } = req.body;
+  const { name, email, occupation, password,gender } = req.body;
 
   console.log("Register request:", req.body);
 
@@ -67,8 +67,8 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const [result] = await db.query(
-      `INSERT INTO users (name, email, occupation, password, user_type, gender) VALUES (?, ?, ?, ?, ?, ?)`,
-      [name, normalizedEmail, occupation, hashedPassword, user_type, gender]
+      `INSERT INTO users (name, email, occupation, password, gender, DOB) VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, normalizedEmail, occupation, hashedPassword, gender, dob || null]
     );
 
     console.log("User inserted successfully", { email: normalizedEmail, insertId: result.insertId });
@@ -80,7 +80,6 @@ const register = async (req, res) => {
         user_id: result.insertId,
         name,
         email: normalizedEmail,
-        user_type,
         gender
       }
     });
