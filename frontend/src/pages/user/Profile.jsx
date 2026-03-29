@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertTriangle, X, Trash2 } from "lucide-react";
 import "../../styles/Profile.css";
 
 export default function Profile() {
@@ -17,6 +18,7 @@ export default function Profile() {
   });
 
   const [msg, setMsg] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -73,8 +75,6 @@ export default function Profile() {
   };
 
   const deleteProfile = () => {
-    if (!window.confirm("Are you sure you want to delete account?")) return;
-
     axios
       .delete(`http://localhost:5000/api/profile/${userId}`)
       .then(() => {
@@ -83,6 +83,7 @@ export default function Profile() {
       })
       .catch(() => {
         setMsg("Delete Failed ❌");
+        setShowDeleteModal(false);
       });
   };
 
@@ -124,7 +125,7 @@ export default function Profile() {
 
           <div className="preview-actions">
              <button className="btn-main-save" onClick={saveProfile}>Save Changes</button>
-             <button className="btn-light-delete" onClick={deleteProfile}>Delete Account</button>
+             <button className="btn-light-delete" onClick={() => setShowDeleteModal(true)}>Delete Account</button>
           </div>
         </motion.div>
 
@@ -177,6 +178,38 @@ export default function Profile() {
         </motion.div>
 
       </div>
+
+      {/* CUSTOM DELETE CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="delete-modal-overlay">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="delete-modal-card"
+            >
+              <div className="modal-close-btn" onClick={() => setShowDeleteModal(false)}>
+                <X size={20} />
+              </div>
+              <div className="modal-warning-icon">
+                <AlertTriangle size={40} />
+              </div>
+              <h2>Delete Account?</h2>
+              <p>This action is permanent and cannot be undone. All your data, roommates, and requests will be lost forever.</p>
+              
+              <div className="modal-action-btns">
+                <button className="confirm-delete-btn" onClick={deleteProfile}>
+                  <Trash2 size={18} /> Delete Forever
+                </button>
+                <button className="cancel-delete-btn" onClick={() => setShowDeleteModal(false)}>
+                  I'll stay
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

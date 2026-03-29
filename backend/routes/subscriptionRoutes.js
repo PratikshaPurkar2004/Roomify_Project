@@ -69,7 +69,7 @@ router.get("/contacts/:userId", async (req, res) => {
       SELECT 
         u.user_id as id,
         u.name,
-        u.area,
+        u.city,
         u.gender,
         u.email
       FROM requests r
