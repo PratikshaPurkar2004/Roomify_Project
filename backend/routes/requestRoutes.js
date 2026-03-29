@@ -43,7 +43,7 @@ router.get("/:userId", async (req, res) => {
       r.id as request_id,
       r.sender_id,
       u.name,
-      u.area,
+      u.city,
       u.gender,
       u.budget as base_budget,
       IFNULL(rooms.rent, u.budget) AS rent,
@@ -63,7 +63,7 @@ router.get("/:userId", async (req, res) => {
       id: row.request_id,
       senderId: row.sender_id,
       name: row.name,
-      city: row.area,
+      city: row.city,
       gender: row.gender,
       budget: row.rent, // Use actual rent if exists, else budget
       status: row.status
@@ -98,7 +98,7 @@ router.get("/sent-details/:userId", async (req, res) => {
       r.id as request_id,
       r.receiver_id as peer_id,
       u.name,
-      u.area as city,
+      u.city,
       u.gender,
       IFNULL(rooms.rent, u.budget) AS budget,
       r.status,

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertTriangle, X, Trash2 } from "lucide-react";
 import "../../styles/Profile.css";
 import { useNavigate } from "react-router-dom";
 
@@ -31,12 +33,12 @@ export default function Profile() {
   });
 
   const [msg, setMsg] = useState("");
-  
   // Preferences State
   const [selected, setSelected] = useState([]);
   const [originalPrefs, setOriginalPrefs] = useState([]);
   const [prefSaving, setPrefSaving] = useState(false);
   const [prefMsg, setPrefMsg] = useState({ text: "", type: "" });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -107,8 +109,6 @@ export default function Profile() {
   };
 
   const deleteProfile = () => {
-    if (!window.confirm("Are you sure you want to delete account?")) return;
-
     axios
       .delete(`http://localhost:5000/api/profile/${userId}`)
       .then(() => {
@@ -117,6 +117,7 @@ export default function Profile() {
       })
       .catch(() => {
         setMsg("Delete Failed ❌");
+        setShowDeleteModal(false);
       });
   };
 
@@ -191,6 +192,21 @@ export default function Profile() {
           />
 
           <input
+            name="dob"
+            type="date"
+            placeholder="Date of Birth"
+            value={form.dob || ""}
+            onChange={handleChange}
+          />
+
+          <input
+            name="occupation"
+            placeholder="Occupation"
+            value={form.occupation || ""}
+            onChange={handleChange}
+          />
+
+          <input
             name="city"
             placeholder="City"
             value={form.city}
@@ -222,7 +238,7 @@ export default function Profile() {
             Save / Update
           </button>
 
-          <button className="btn-delete" onClick={deleteProfile}>
+          <button className="btn-delete" onClick={() => setShowDeleteModal(true)}>
             Delete Account
           </button>
         </div>
@@ -272,6 +288,38 @@ export default function Profile() {
         </div>
 
       </div>
+
+      {/* CUSTOM DELETE CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="delete-modal-overlay">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="delete-modal-card"
+            >
+              <div className="modal-close-btn" onClick={() => setShowDeleteModal(false)}>
+                <X size={20} />
+              </div>
+              <div className="modal-warning-icon">
+                <AlertTriangle size={40} />
+              </div>
+              <h2>Delete Account?</h2>
+              <p>This action is permanent and cannot be undone. All your data, roommates, and requests will be lost forever.</p>
+              
+              <div className="modal-action-btns">
+                <button className="confirm-delete-btn" onClick={deleteProfile}>
+                  <Trash2 size={18} /> Delete Forever
+                </button>
+                <button className="cancel-delete-btn" onClick={() => setShowDeleteModal(false)}>
+                  I'll stay
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
