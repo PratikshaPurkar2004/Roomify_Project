@@ -11,8 +11,9 @@ router.get("/:id", async (req, res) => {
   const sql = `
     SELECT 
       name,
-      age_group,
-      city,
+      DOB,
+      occupation,
+      area,
       budget,
       gender
     FROM users
@@ -20,30 +21,29 @@ router.get("/:id", async (req, res) => {
   `;
 
   try {
+    console.log("Fetching profile for userId:", userId);
     const [result] = await db.query(sql, [userId]);
+    console.log("Profile query result:", result);
     if (result.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
     res.json(result[0]);
   } catch (err) {
-    console.log("GET ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Profile GET ERROR:", err.message);
+    console.error("Full error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
 
-router.put("/:id", async (req, res) => {
-  const userId = req.params.id;
-  const { name, age_group, city, budget, gender } = req.body;
-
   const userSql = `
     UPDATE users
-    SET name=?, age_group=?, city=?, budget=?, gender=?
+    SET name=?, DOB=?, occupation=?, area=?, budget=?, gender=?
     WHERE user_id=?
   `;
 
   try {
-    await db.query(userSql, [name, age_group, city, budget, gender, userId]);
+    await db.query(userSql, [name, dob, occupation, area, budget, gender, userId]);
     res.json({ message: "Profile Updated Successfully" });
   } catch (err) {
     console.log("USER UPDATE ERROR:", err);

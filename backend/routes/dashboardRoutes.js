@@ -56,26 +56,31 @@ router.get("/stats", async (req, res) => {
   }
 
   try {
+    console.log("Executing stats query...");
     const [result] = await db.query(sql, params);
     res.json(result[0] || { users: 0, rooms: 0, requests: 0, views: 0, hosts: 0, finders: 0 });
   } catch (err) {
-    console.error("Dashboard Error:", err);
-    res.status(500).json({ error: "Database error" });
+    console.error("Dashboard Stats Error:", err.message);
+    console.error("Full error:", err);
+    res.status(500).json({ error: "Database error", details: err.message });
   }
 });
 // GET All Users
 router.get("/users", async (req, res) => {
   try {
+    console.log("Fetching users from database...");
     const [users] = await db.query(
-      "SELECT name, email, city, user_type, preferences FROM users LIMIT 20"
+      "SELECT user_id, name, email, area, user_type, preferences FROM users LIMIT 20"
     );
+    console.log(`Retrieved ${users.length} users`);
 
     res.json({
       users
     });
   } catch (error) {
-    console.error("Dashboard users error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Dashboard users error:", error.message);
+    console.error("Full error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

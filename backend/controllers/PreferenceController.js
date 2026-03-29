@@ -20,13 +20,16 @@ exports.savePreferences = async (req, res) => {
 exports.getPreferences = async (req, res) => {
   try {
     const userId = req.params.userId;
+    console.log("Fetching preferences for userId:", userId);
     const sql = "SELECT preferences FROM users WHERE user_id = ?";
     const [rows] = await db.query(sql, [userId]);
+    console.log("Preferences query result:", rows);
 
     const prefsString = (rows[0] && rows[0].preferences) || "";
     return res.json({ preferences: prefsString });
   } catch (err) {
-    console.error("Get preferences error:", err);
-    return res.status(500).json({ message: "Database error" });
+    console.error("Get preferences error:", err.message);
+    console.error("Full error:", err);
+    return res.status(500).json({ message: "Database error", error: err.message });
   }
 };

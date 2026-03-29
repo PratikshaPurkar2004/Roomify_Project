@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
     SELECT 
       users.user_id AS id,
       users.name,
-      users.city AS location,
+      users.area AS location,
       users.gender,
       users.user_type,
       users.preferences,
@@ -20,13 +20,17 @@ router.get("/", async (req, res) => {
   `;
 
   try {
+    console.log("Fetching roommates from database...");
     const [results] = await db.query(sql);
+    console.log(`Retrieved ${results.length} roommates`);
     return res.json(results);
   } catch (err) {
-    console.error("Database error (roommates):", err);
+    console.error("Database error (roommates):", err.message);
+    console.error("Full error:", err);
     return res.status(500).json({
       success: false,
-      message: "Database error"
+      message: "Database error",
+      error: err.message
     });
   }
 

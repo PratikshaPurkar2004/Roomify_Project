@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../styles/Requests.css";
-import { User, MapPin, Wallet, CheckCircle, XCircle, Inbox, UserCheck, UserX } from "lucide-react";
+import { User, MapPin, Wallet, CheckCircle, XCircle, Inbox, UserCheck, UserX, MessageCircle, Send } from "lucide-react";
 
 export default function Requests() {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("incoming"); // 'incoming' or 'sent'
   const [requests, setRequests] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
   const [toastMessage, setToastMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -14,6 +18,8 @@ export default function Requests() {
       return;
     }
 
+    setIsLoading(true);
+    // Fetch incoming
     fetch(`http://localhost:5000/api/requests/${userId}`)
       .then(res => res.json())
       .then(data => {
@@ -22,7 +28,17 @@ export default function Requests() {
           setRequests(pending);
         }
       })
-      .catch(err => console.error("Error fetching requests:", err))
+      .catch(err => console.error("Error fetching incoming:", err));
+
+    // Fetch sent
+    fetch(`http://localhost:5000/api/requests/sent-details/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSentRequests(data.requests);
+        }
+      })
+      .catch(err => console.error("Error fetching sent:", err))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -36,7 +52,11 @@ export default function Requests() {
       const data = await res.json();
       if (data.success) {
         setToastMessage(`Request ${status} successfully! ✅`);
-        setRequests(prev => prev.filter(r => r.id !== id));
+        if (status === "rejected") {
+          setRequests(prev => prev.filter(r => r.id !== id));
+        } else {
+          setRequests(prev => prev.map(r => r.id === id ? { ...r, status: "accepted" } : r));
+        }
       } else {
         setToastMessage("Failed to update status.");
       }
@@ -49,9 +69,10 @@ export default function Requests() {
   const acceptRequest = (id) => updateStatus(id, "accepted");
   const rejectRequest = (id) => updateStatus(id, "rejected");
 
+  const displayList = activeTab === "incoming" ? requests : sentRequests;
+
   return (
     <div className="requests-page">
-      {/* Dynamic Background Elements */}
       <div className="req-bg-shape req-shape-1"></div>
       <div className="req-bg-shape req-shape-2"></div>
       
@@ -63,33 +84,89 @@ export default function Requests() {
       )}
 
       <div className="requests-container">
-        <header className="requests-header">
+        <header className="requests-header" style={{ marginBottom: '20px' }}>
           <h1 className="requests-title">Roommate Requests</h1>
-          <p className="requests-subtitle">Manage your incoming roommate requests and find your perfect match.</p>
+          <p className="requests-subtitle">Manage your incoming requests and track the ones you've sent.</p>
         </header>
+
+        {/* Custom Tabs */}
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '30px' }}>
+          <button 
+            onClick={() => setActiveTab("incoming")}
+            style={{
+              padding: '12px 24px',
+              borderRadius: '12px',
+              border: 'none',
+              background: activeTab === 'incoming' ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.7)',
+              color: activeTab === 'incoming' ? 'white' : '#64748b',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: activeTab === 'incoming' ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
+              fontFamily: 'Outfit'
+            }}
+          >
+            <Inbox size={16} style={{ verticalAlign: 'middle', marginRight: '8px' }}/>
+            Incoming Requests
+          </button>
+          <button 
+            onClick={() => setActiveTab("sent")}
+            style={{
+              padding: '12px 24px',
+              borderRadius: '12px',
+              border: 'none',
+              background: activeTab === 'sent' ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.7)',
+              color: activeTab === 'sent' ? 'white' : '#64748b',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: activeTab === 'sent' ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
+              fontFamily: 'Outfit'
+            }}
+          >
+            <Send size={16} style={{ verticalAlign: 'middle', marginRight: '8px' }}/>
+            Sent Requests
+          </button>
+        </div>
 
         {isLoading ? (
           <div className="requests-loading">
             <div className="req-spinner"></div>
             <p>Loading requests...</p>
           </div>
-        ) : requests.length === 0 ? (
+        ) : displayList.length === 0 ? (
           <div className="no-requests-card">
              <Inbox size={64} className="no-req-icon" />
-             <h2>No Pending Requests</h2>
-             <p>You're all caught up! Check back later for new roommate requests.</p>
+             <h2>No {activeTab === "incoming" ? "Pending" : "Sent"} Requests</h2>
+             <p>{activeTab === "incoming" 
+               ? "You're all caught up! Check back later for new roommate requests."
+               : "You haven't sent any roommate requests yet. Go to Find Roommates to connect with people!"}</p>
           </div>
         ) : (
           <div className="requests-grid">
-            {requests.map((req) => (
-              <div key={req.id} className="request-card-modern">
+            {displayList.map((req) => (
+              <div key={req.id || req.request_id} className="request-card-modern">
                 <div className="req-card-header">
                   <div className="req-avatar">
                     {req.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="req-user-info">
-                    <h3>{req.name}</h3>
-                    <span className="req-badge">Needs a Roommate</span>
+                    <h3 style={{ fontSize: '18px', marginBottom: '6px' }}>
+                      <span style={{ fontWeight: '400', color: '#64748b', fontSize: '14px' }}>
+                        {activeTab === "incoming" ? "Request from: " : "Sent to: "}
+                      </span>
+                      <br/>{req.name}
+                    </h3>
+                    {activeTab === "incoming" ? (
+                      <span className="req-badge" style={{ background: req.status === 'accepted' ? '#10b981' : '#f1f5f9', color: req.status === 'accepted' ? 'white' : '#475569' }}>
+                        {req.status === 'accepted' ? 'Match Accepted 🎉' : 'Needs a Roommate'}
+                      </span>
+                    ) : (
+                      <span className="req-badge" style={{ 
+                        background: req.status === 'accepted' ? '#10b981' : req.status === 'rejected' ? '#ef4444' : '#f59e0b',
+                        color: 'white'
+                      }}>
+                        Status: {req.status}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -109,20 +186,36 @@ export default function Requests() {
                 </div>
 
                 <div className="req-card-actions">
-                  <button
-                    className="req-btn req-btn-reject"
-                    onClick={() => rejectRequest(req.id)}
-                  >
-                    <UserX size={18} />
-                    <span>Decline</span>
-                  </button>
-                  <button
-                    className="req-btn req-btn-accept"
-                    onClick={() => acceptRequest(req.id)}
-                  >
-                    <UserCheck size={18} />
-                    <span>Accept Match</span>
-                  </button>
+                  {activeTab === "incoming" ? (
+                    req.status === 'accepted' ? (
+                      <button
+                        className="req-btn req-btn-accept"
+                        onClick={() => navigate("/dashboard/chat", { state: { selectedUserId: req.senderId } })}
+                        style={{ width: '100%' }}
+                      >
+                        <MessageCircle size={18} />
+                        <span>Chat with {req.name}</span>
+                      </button>
+                    ) : (
+                      <>
+                        <button className="req-btn req-btn-reject" onClick={() => rejectRequest(req.id)}>
+                          <UserX size={18} /><span>Decline</span>
+                        </button>
+                        <button className="req-btn req-btn-accept" onClick={() => acceptRequest(req.id)}>
+                          <UserCheck size={18} /><span>Accept Request</span>
+                        </button>
+                      </>
+                    )
+                  ) : (
+                    <button
+                      className="req-btn"
+                      style={{ width: '100%', background: req.status === 'accepted' ? 'linear-gradient(135deg, #0ea5e9, #3b82f6)' : '#f1f5f9', color: req.status === 'accepted' ? 'white' : '#94a3b8', cursor: req.status === 'accepted' ? 'pointer' : 'not-allowed' }}
+                      onClick={() => req.status === 'accepted' && navigate("/dashboard/chat", { state: { selectedUserId: req.peer_id } })}
+                      disabled={req.status !== 'accepted'}
+                    >
+                      {req.status === 'accepted' ? <><MessageCircle size={18} /><span>Chat with {req.name}</span></> : <span>Waiting for approval</span>}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

@@ -21,6 +21,14 @@ function Preference() {
 
   const navigate = useNavigate();
   const [selected, setSelected] = useState([]);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  };
 
   // Toggle preference selection
   const togglePreference = (name) => {
@@ -35,7 +43,7 @@ function Preference() {
   const handleUpdate = async () => {
 
     if (selected.length === 0) {
-      alert("Please select at least one preference");
+      showToast("Please select at least one preference", "error");
       return;
     }
 
@@ -56,19 +64,27 @@ function Preference() {
 
       const data = await response.json();
 
-      alert(data.message);
+      showToast(data.message || "Preferences updated!", "success");
 
-      navigate("/login");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
 
     } catch (error) {
       console.error("Error saving preferences:", error);
-      alert("Something went wrong");
+      showToast("Something went wrong", "error");
     }
 
   };
 
   return (
     <div className="pref-container">
+      
+      {toast && (
+        <div className={`pref-toast ${toast.type}`}>
+          {toast.message}
+        </div>
+      )}
 
       <h1>Your Preferences</h1>
       <p>Select preferences that describe you</p>
