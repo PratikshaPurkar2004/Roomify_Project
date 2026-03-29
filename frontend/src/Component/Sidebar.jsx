@@ -147,8 +147,9 @@ function Sidebar() {
         </NavLink>
 
         <NavLink to="/dashboard/find-roommates" className="menu-item">
-          <FaSearch /> <span>Find Roommate</span>
+          <FaSearch /> <span>Find Roommate/Rooms</span>
         </NavLink>
+
 
         <NavLink to="/dashboard/requests" className="menu-item">
           <FaEnvelope /> <span>Requests</span>
