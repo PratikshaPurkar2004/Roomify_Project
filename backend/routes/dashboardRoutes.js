@@ -37,7 +37,7 @@ router.get("/stats", async (req, res) => {
       SELECT 
         (SELECT COUNT(*) FROM users) AS users,
         (SELECT COUNT(*) FROM rooms) AS rooms,
-        (SELECT COUNT(*) FROM requests WHERE receiver_id = ?) AS requests,
+        (SELECT COUNT(*) FROM connect WHERE receiver_id = ?) AS requests,
         (SELECT views FROM users WHERE user_id = ?) AS views,
         (SELECT COUNT(*) FROM users WHERE user_type = 'Host') AS hosts,
         (SELECT COUNT(*) FROM users WHERE user_type = 'Finder') AS finders
@@ -48,7 +48,7 @@ router.get("/stats", async (req, res) => {
       SELECT 
         (SELECT COUNT(*) FROM users) AS users,
         (SELECT COUNT(*) FROM rooms) AS rooms,
-        (SELECT COUNT(*) FROM requests) AS requests,
+        (SELECT COUNT(*) FROM connect) AS requests,
         0 AS views,
         (SELECT COUNT(*) FROM users WHERE user_type = 'Host') AS hosts,
         (SELECT COUNT(*) FROM users WHERE user_type = 'Finder') AS finders
@@ -70,7 +70,7 @@ router.get("/users", async (req, res) => {
   try {
     console.log("Fetching users from database...");
     const [users] = await db.query(
-      "SELECT user_id, name, email, area, user_type, preferences FROM users LIMIT 20"
+      "SELECT user_id, name, email, city, user_type, preferences FROM users LIMIT 20"
     );
     console.log(`Retrieved ${users.length} users`);
 

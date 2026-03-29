@@ -13,7 +13,7 @@ router.get("/:id", async (req, res) => {
       name,
       DOB,
       occupation,
-      area,
+      city,
       budget,
       gender
     FROM users
@@ -35,10 +35,13 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  const { name, dob, occupation, area, budget, gender } = req.body;
+  const userId = req.params.id;
 
   const userSql = `
     UPDATE users
-    SET name=?, DOB=?, occupation=?, area=?, budget=?, gender=?
+    SET name=?, DOB=?, occupation=?, city=?, budget=?, gender=?
     WHERE user_id=?
   `;
 
@@ -50,7 +53,6 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: "Server update error" });
   }
 });
-
 
 router.delete("/:id", async (req, res) => {
   const userId = req.params.id;
