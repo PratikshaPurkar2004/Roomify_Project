@@ -57,7 +57,7 @@ router.get("/host/:hostId", async (req, res) => {
 
 // POST to add a new room with image
 router.post("/add", upload.single("image"), async (req, res) => {
-  const { host_id, location, rent } = req.body;
+  const { host_id, location, address, rent, max_tenants, furnishing, amenities } = req.body;
   const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
   if (!host_id || !location || !rent) {
@@ -66,8 +66,8 @@ router.post("/add", upload.single("image"), async (req, res) => {
 
   try {
     const [result] = await db.query(
-      "INSERT INTO rooms (host_id, location, rent, availability, image_url) VALUES (?, ?, ?, 'available', ?)",
-      [host_id, location, rent, image_url]
+      "INSERT INTO rooms (host_id, location, address, rent, max_tenants, furnishing, amenities, availability, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)",
+      [host_id, location, address, rent, max_tenants || 1, furnishing || "Unfurnished", amenities || "", image_url]
     );
 
     res.json({
@@ -101,12 +101,12 @@ router.delete("/delete/:roomId", async (req, res) => {
 // UPDATE a room (Edit)
 router.put("/edit/:roomId", upload.single("image"), async (req, res) => {
   const { roomId } = req.params;
-  const { location, rent, availability } = req.body;
+  const { location, address, rent, availability, max_tenants, furnishing, amenities } = req.body;
   const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
-    let query = "UPDATE rooms SET location = ?, rent = ?, availability = ?";
-    let params = [location, rent, availability];
+    let query = "UPDATE rooms SET location = ?, address = ?, rent = ?, availability = ?, max_tenants = ?, furnishing = ?, amenities = ?";
+    let params = [location, address, rent, availability, max_tenants, furnishing, amenities];
 
     if (image_url) {
       query += ", image_url = ?";
