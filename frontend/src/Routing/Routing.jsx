@@ -60,10 +60,7 @@ function Routing() {
         <Route path="find-rooms" element={<FindRooms />} />
         <Route path="subscription" element={<Subscription />} />
         <Route path="chat" element={<Chat />} />
-<<<<<<< HEAD
-=======
 
->>>>>>> df264d1 (updated room/roomates)
       </Route>
 
       {/* Fallback */}
