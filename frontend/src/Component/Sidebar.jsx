@@ -106,6 +106,7 @@ import {
   FaSignOutAlt,
   FaPuzzlePiece,
   FaDoorOpen,
+  FaHeart,
 } from "react-icons/fa";
 
 import "../styles/Sidebar.css";
