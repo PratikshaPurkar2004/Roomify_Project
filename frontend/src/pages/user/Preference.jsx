@@ -61,13 +61,20 @@ function Preference() {
           preferences: selected
         })
       });
-
       const data = await response.json();
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const userObj = JSON.parse(userStr);
+          userObj.preferences = selected.join(",");
+          localStorage.setItem("user", JSON.stringify(userObj));
+        } catch (e) {}
+      }
 
       showToast(data.message || "Preferences updated!", "success");
 
       setTimeout(() => {
-        navigate("/login");
+        navigate("/dashboard");
       }, 1500);
 
     } catch (error) {
@@ -75,6 +82,35 @@ function Preference() {
       showToast("Something went wrong", "error");
     }
 
+  };
+
+  const handleSkip = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      const skipPref = "skipped";
+      await fetch("http://localhost:5000/api/preferences/save-preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userId, preferences: [skipPref] })
+      });
+
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const userObj = JSON.parse(userStr);
+          userObj.preferences = skipPref;
+          localStorage.setItem("user", JSON.stringify(userObj));
+        } catch (e) {}
+      }
+      
+      showToast("Preferences skipped", "success");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
+    } catch (error) {
+      console.error("Error skipping preferences:", error);
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -102,9 +138,14 @@ function Preference() {
         ))}
       </div>
 
-      <button className="pref-btn" onClick={handleUpdate}>
-        Update Preferences
-      </button>
+      <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '20px' }}>
+        <button className="pref-btn" style={{ margin: 0 }} onClick={handleUpdate}>
+          Update Preferences
+        </button>
+        <button className="pref-btn" style={{ margin: 0, backgroundColor: 'transparent', color: '#6366F1', border: '2px solid #6366F1' }} onClick={handleSkip}>
+          Skip
+        </button>
+      </div>
 
     </div>
   );

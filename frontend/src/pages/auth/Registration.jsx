@@ -99,7 +99,7 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
     if (success) {
       localStorage.removeItem("user");
       dispatch(clearMessage());
-      navigate("/preferences");
+      navigate("/login");
     }
   }, [success, navigate, dispatch]);
 

@@ -13,6 +13,8 @@ router.get("/", async (req, res) => {
       users.gender,
       users.user_type,
       users.preferences,
+      users.occupation,
+      TIMESTAMPDIFF(YEAR, users.DOB, CURDATE()) AS age,
       IFNULL(rooms.rent, users.budget) AS rent
     FROM users
     LEFT JOIN rooms 

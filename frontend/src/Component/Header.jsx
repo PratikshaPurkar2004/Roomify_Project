@@ -33,13 +33,20 @@ function Header() {
   }, []);
 
   let userName = "User";
-  let profileImage = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-  
+  let profileImage = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; // default
   if (userState) {
     userName = userState.name || userState.fullname || userState.username || "User";
-    // Use user's profile image if available
     if (userState.profile_image) {
       profileImage = `http://localhost:5000${userState.profile_image}`;
+    } else if (userState.gender) {
+      const gender = userState.gender.toLowerCase();
+      if (gender === "male" || gender === "m") {
+        profileImage = "https://cdn-icons-png.flaticon.com/512/2922/2922510.png"; // distinct male avatar
+      } else if (gender === "female" || gender === "f") {
+        profileImage = "https://cdn-icons-png.flaticon.com/512/2922/2922561.png"; // distinct female avatar
+      } else {
+        profileImage = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; // default
+      }
     }
   }
 

@@ -1,7 +1,7 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Dashboard.css";
-import { Users, Home, FileText, UserPlus, UserSearch, Plus, MapPin, DollarSign, X, TrendingUp, Activity } from "lucide-react";
+import { Users, Home, FileText, UserPlus, UserSearch, Plus, MapPin, DollarSign, X, TrendingUp, Activity, Search } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { calculateMatchPercentage } from "../../utils/matchUtils";
 
@@ -41,6 +41,59 @@ function Dashboard() {
   ];
   const [randomPhrase] = useState(phrases[Math.floor(Math.random() * phrases.length)]);
 
+  // Hero Image Carousel
+  const heroImages = [
+    {
+      src: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
+      alt: "Modern Living Room"
+    },
+    {
+      src: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg",
+      alt: "Roommates sharing a living space"
+    },
+    {
+      src: "https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg",
+      alt: "Cozy bedroom for rent"
+    },
+    {
+      src: "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
+      alt: "Happy roommates in apartment"
+    }
+  ];
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const touchStartRef = useRef(0);
+  const touchEndRef = useRef(0);
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+  }, [heroImages.length]);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
+  }, [heroImages.length]);
+
+  // Auto-slide every 4 seconds
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 4000);
+    return () => clearInterval(timer);
+  }, [nextSlide]);
+
+  const handleTouchStart = (e) => {
+    touchStartRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartRef.current - touchEndRef.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextSlide();
+      else prevSlide();
+    }
+  };
+
   const chartData = [
     { name: 'Mon', views: Math.floor((stats.views || 0) * 0.4), matches: Math.floor((stats.views || 0) * 0.2) },
     { name: 'Tue', views: Math.floor((stats.views || 0) * 0.6), matches: Math.floor((stats.views || 0) * 0.3) },
@@ -60,7 +113,7 @@ function Dashboard() {
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     const userIdParams = userId ? `?userId=${userId}` : "";
-    
+
     fetch(`http://localhost:5000/api/dashboard/stats${userIdParams}`)
       .then((res) => res.json())
       .then((data) => setStats(data))
@@ -227,124 +280,150 @@ function Dashboard() {
       <div className="dashboard-container">
         {/* Redesigned Unified Premium Hero Section */}
         <div className="dashboard-hero-premium">
-            <div className="hero-main-content">
-                <div className="hero-text-overlay">
-                    <span className="hero-badge">WELCOME BACK, {currentUser.name || "SAYALI"}</span>
-                    <h1>Find your perfect <span className="text-gradient">room and roommate</span></h1>
-                    <p>
-                        Our ecosystem simplifies your search for verified listings and compatible roommates. {randomPhrase}
-                    </p>
-                    
-                    <div className="hero-actions-premium">
-                        {isHost && (
-                            <button className="hero-btn-premium add" onClick={() => setShowAddRoomModal(true)}>
-                                <Plus size={20} /> Add Room
-                            </button>
-                        )}
-                    </div>
+          <div className="hero-main-content">
+            <div className="hero-text-overlay">
+              <span className="hero-badge">WELCOME BACK, {currentUser.name || "SAYALI"}</span>
+              <h1>Find your perfect <span className="text-gradient">room and roommate</span></h1>
+              <p>
+                Our ecosystem simplifies your search for verified listings and compatible roommates. {randomPhrase}
+              </p>
 
-                    <div className="hero-stats-bar">
-                        <div className="stat-item clickable" onClick={() => navigate("/dashboard/find-roommates")}>
-                            <span className="stat-num">{stats.rooms || myRooms.length}</span>
-                            <span className="stat-desc">Total Rooms</span>
-                        </div>
-                        <div className="stat-divider"></div>
-                        <div className="stat-item clickable" onClick={() => navigate("/dashboard/requests")}>
-                            <span className="stat-num">{stats.requests || 0}</span>
-                            <span className="stat-desc">Total Requests</span>
-                        </div>
-                        <div className="stat-divider"></div>
-                        <div className="stat-item">
-                            <span className="stat-num">{stats.matches || 0}</span>
-                            <span className="stat-desc">Matches</span>
-                        </div>
-                        <div className="stat-divider"></div>
-                        <div className="stat-item">
-                            <span className="stat-num">{stats.views || 0}</span>
-                            <span className="stat-desc">Views</span>
-                        </div>
-                    </div>
+              <div className="hero-actions-premium">
+                <button className="hero-btn-premium find-rooms" onClick={() => navigate("/dashboard/find-rooms")}>
+                  <Search size={20} /> Find Rooms
+                </button>
+                <button className="hero-btn-premium find-roommates" onClick={() => navigate("/dashboard/find-roommates")}>
+                  <UserSearch size={20} /> Find Roommates
+                </button>
+              </div>
+
+              <div className="hero-stats-bar">
+                <div className="stat-item">
+                  <span className="stat-num">{stats.views || 0}</span>
+                  <span className="stat-desc">#Views</span>
                 </div>
-                <div className="hero-image-container">
-                    <img 
-                        src="https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg" 
-                        alt="Stunning Modern Living Room" 
-                        className="hero-img-main"
-                    />
-                    <div className="img-overlay-gradient"></div>
+                <div className="stat-divider"></div>
+                <div className="stat-item">
+                  <span className="stat-num">{stats.matches || 0}</span>
+                  <span className="stat-desc">#Matches</span>
                 </div>
+                <div className="stat-divider"></div>
+                <div className="stat-item clickable" onClick={() => navigate("/dashboard/requests")}>
+                  <span className="stat-num">{stats.requests || 0}</span>
+                  <span className="stat-desc">#Requests</span>
+                </div>
+                <div className="stat-divider"></div>
+                <div className="stat-item clickable" onClick={() => navigate("/dashboard/find-roommates")}>
+                  <span className="stat-num">{stats.rooms || myRooms.length}</span>
+                  <span className="stat-desc">#Rooms</span>
+                </div>
+              </div>
             </div>
+            <div
+              className="hero-image-container"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div className="hero-carousel-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+                {heroImages.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img.src}
+                    alt={img.alt}
+                    className="hero-img-main"
+                  />
+                ))}
+              </div>
+              <div className="img-overlay-gradient"></div>
+
+              {/* Navigation Arrows */}
+              <button className="carousel-arrow carousel-arrow-left" onClick={prevSlide}>&#8249;</button>
+              <button className="carousel-arrow carousel-arrow-right" onClick={nextSlide}>&#8250;</button>
+
+              {/* Dots */}
+              <div className="carousel-dots">
+                {heroImages.map((_, idx) => (
+                  <span
+                    key={idx}
+                    className={`carousel-dot ${idx === currentSlide ? 'active' : ''}`}
+                    onClick={() => setCurrentSlide(idx)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
 
         {/* Global Activity Analytics */}
         <div className="finder-analytics-section-premium">
-            <div className="analytics-card-glass">
-                <div className="analytics-header-compact">
-                    <div className="header-meta">
-                        <div className="icon-badge-violet">
-                            <Activity size={20} />
-                        </div>
-                        <div>
-                            <h3>Performance Analytics</h3>
-                            <p>Overview of platform engagement and total views</p>
-                        </div>
-                    </div>
-                    <div className="stats-pill-green">
-                        <TrendingUp size={16} /> <span>Engagement {stats.views > 0 ? ((stats.requests / stats.views) * 100).toFixed(1) : "0.0"}%</span>
-                    </div>
+          <div className="analytics-card-glass">
+            <div className="analytics-header-compact">
+              <div className="header-meta">
+                <div className="icon-badge-violet">
+                  <Activity size={20} />
                 </div>
-
-                <div className="chart-wrapper-premium">
-                    <ResponsiveContainer width="100%" height={320}>
-                        <AreaChart
-                            data={chartData}
-                            margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-                        >
-                            <defs>
-                                <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
-                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                                </linearGradient>
-                                <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.2}/>
-                                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
-                            <YAxis hide />
-                            <Tooltip 
-                                contentStyle={{ 
-                                    borderRadius: '16px', 
-                                    border: 'none', 
-                                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-                                    background: 'rgba(255,255,255,0.9)',
-                                    backdropFilter: 'blur(10px)'
-                                }}
-                            />
-                            <Area 
-                                type="monotone" 
-                                dataKey="views" 
-                                stroke="#6366f1" 
-                                strokeWidth={4}
-                                fillOpacity={1} 
-                                fill="url(#colorViews)" 
-                                name="Total Views"
-                            />
-                            <Area 
-                                type="monotone" 
-                                dataKey="matches" 
-                                stroke="#a855f7" 
-                                strokeWidth={4}
-                                fillOpacity={1} 
-                                fill="url(#colorEngagement)" 
-                                name="Total Engagement"
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                <div>
+                  <h3>Performance Analytics</h3>
+                  <p>Overview of platform engagement and total views</p>
                 </div>
+              </div>
+              <div className="stats-pill-green">
+                <TrendingUp size={16} /> <span>Engagement {stats.views > 0 ? ((stats.requests / stats.views) * 100).toFixed(1) : "0.0"}%</span>
+              </div>
             </div>
+
+            <div className="chart-wrapper-premium">
+              <ResponsiveContainer width="100%" height={320}>
+                <AreaChart
+                  data={chartData}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#a855f7" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
+                  <YAxis hide />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: '16px',
+                      border: 'none',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                      background: 'rgba(255,255,255,0.9)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="views"
+                    stroke="#6366f1"
+                    strokeWidth={4}
+                    fillOpacity={1}
+                    fill="url(#colorViews)"
+                    name="Total Views"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="matches"
+                    stroke="#a855f7"
+                    strokeWidth={4}
+                    fillOpacity={1}
+                    fill="url(#colorEngagement)"
+                    name="Total Engagement"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
 
         {/* Host Room Management Header */}
@@ -359,9 +438,9 @@ function Dashboard() {
                 myRooms.map((room) => (
                   <div key={room.room_id} className="room-card">
                     {room.image_url ? (
-                        <img src={`http://localhost:5000${room.image_url}`} alt="Room" className="room-image" />
+                      <img src={`http://localhost:5000${room.image_url}`} alt="Room" className="room-image" />
                     ) : (
-                        <div className="room-image-placeholder">No Image</div>
+                      <div className="room-image-placeholder">No Image</div>
                     )}
                     <div className="room-card-content">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -378,7 +457,7 @@ function Dashboard() {
                           <p><strong>Tenants:</strong> {room.max_tenants || 1} | <strong>Status:</strong> {room.furnishing}</p>
                         </div>
                       </div>
-                      
+
                       <div className="room-card-actions-row">
                         <button className="room-action-btn view" onClick={() => openViewModal(room)}>View</button>
                         <button className="room-action-btn edit" onClick={() => openEditModal(room)}>Edit</button>
@@ -406,8 +485,8 @@ function Dashboard() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3>Add New Room</h3>
-                <X size={24} onClick={() => setShowAddRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
+              <h3>Add New Room</h3>
+              <X size={24} onClick={() => setShowAddRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
             </div>
             <form onSubmit={handleAddRoom}>
               <div className="form-group">
@@ -454,7 +533,7 @@ function Dashboard() {
               </div>
               <div className="form-group">
                 <label>Furnishing Status</label>
-                <select 
+                <select
                   value={newRoom.furnishing || "Unfurnished"}
                   onChange={(e) => setNewRoom({ ...newRoom, furnishing: e.target.value })}
                   className="modal-select"
@@ -498,8 +577,8 @@ function Dashboard() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3>Edit Room</h3>
-                <X size={24} onClick={() => setShowEditRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
+              <h3>Edit Room</h3>
+              <X size={24} onClick={() => setShowEditRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
             </div>
             <form onSubmit={handleEditRoomSubmit}>
               <div className="form-group">
@@ -542,7 +621,7 @@ function Dashboard() {
               </div>
               <div className="form-group">
                 <label>Furnishing Status</label>
-                <select 
+                <select
                   value={editRoom.furnishing || "Unfurnished"}
                   onChange={(e) => setEditRoom({ ...editRoom, furnishing: e.target.value })}
                   className="modal-select"
@@ -562,7 +641,7 @@ function Dashboard() {
               </div>
               <div className="form-group">
                 <label>Availability</label>
-                <select 
+                <select
                   value={editRoom.availability}
                   onChange={(e) => setEditRoom({ ...editRoom, availability: e.target.value })}
                   className="modal-select"
@@ -597,8 +676,8 @@ function Dashboard() {
         <div className="modal-overlay">
           <div className="modal-content view-room-modal">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3>Room Details</h3>
-                <X size={24} onClick={() => setShowViewRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
+              <h3>Room Details</h3>
+              <X size={24} onClick={() => setShowViewRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
             </div>
             <div className="view-room-details">
               {selectedRoom.image_url ? (
@@ -638,7 +717,7 @@ function Dashboard() {
               </div>
             </div>
             <div className="modal-actions" style={{ justifyContent: 'center' }}>
-                <button className="save-btn" onClick={() => setShowViewRoomModal(false)}>Close</button>
+              <button className="save-btn" onClick={() => setShowViewRoomModal(false)}>Close</button>
             </div>
           </div>
         </div>

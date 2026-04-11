@@ -18,7 +18,12 @@ const Login = ({ onClose, onSwitch }) => {
 
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      const prefs = user.preferences;
+      if (!prefs || prefs === "" || prefs === "null" || prefs === "[]" || prefs === "skipped") {
+        navigate("/preferences");
+      } else {
+        navigate("/dashboard");
+      }
     }
   }, [user, navigate]);
 
