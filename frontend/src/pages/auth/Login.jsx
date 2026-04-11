@@ -15,11 +15,52 @@ const Login = ({ onClose, onSwitch }) => {
   });
 
   const [formError, setFormError] = useState({});
+  const [currentImage, setCurrentImage] = useState(0);
+
+  const authImages = [
+    {
+      url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1500&auto=format&fit=crop",
+      title: "Find your perfect shared space.",
+      desc: "Join thousands of verified users finding their ideal flatmates safely and smartly."
+    },
+    {
+      url: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1500&auto=format&fit=crop",
+      title: "Discover beautiful rooms.",
+      desc: "Browse through hundreds of premium listings."
+    },
+    {
+      url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1500&auto=format&fit=crop",
+      title: "Connect with great flatmates.",
+      desc: "Find people who match your vibe and lifestyle."
+    }
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % authImages.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [authImages.length]);
+
+  useEffect(() => {
+    // Clear any previous error messages when the component mounts
+    setFormData({ email: "", password: "" });
+    setFormError({});
+  }, []);
 
   useEffect(() => {
     if (user) {
-      const prefs = user.preferences;
-      if (!prefs || prefs === "" || prefs === "null" || prefs === "[]" || prefs === "skipped") {
+      const p = user.preferences;
+      // Comprehensive check for missing or empty preferences
+      const noPreferences = !p || 
+                            p === "" || 
+                            p === "null" || 
+                            p === "[]" || 
+                            p === "skipped" || 
+                            (Array.isArray(p) && p.length === 0) ||
+                            (typeof p === 'object' && !Array.isArray(p) && Object.keys(p).length === 0);
+
+      if (noPreferences) {
         navigate("/preferences");
       } else {
         navigate("/dashboard");
@@ -27,35 +68,54 @@ const Login = ({ onClose, onSwitch }) => {
     }
   }, [user, navigate]);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-     setFormError({});
-  };
-
-  const validate = () => {
+  const validate = (data = formData) => {
     let errors = {};
 
-    if (!formData.email) {
+    // Email Validation: Exactly one @, not only numbers
+    if (!data.email) {
       errors.email = "Email is required";
-    } 
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Invalid email format";
+    } else {
+      const emailValue = data.email.trim();
+      const atCount = (emailValue.match(/@/g) || []).length;
+      const isOnlyNumbers = /^\d+$/.test(emailValue.replace(/[@.]/g, ""));
+      
+      if (atCount !== 1) {
+        errors.email = "Email must contain exactly one @ symbol";
+      } else if (isOnlyNumbers) {
+        errors.email = "Email cannot be only numbers";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+        errors.email = "Invalid email format";
+      }
     }
 
-    if (!formData.password) {
-      errors.password = "Password is required";
-    } 
-    const strongPasswordRegex =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+    // Password Validation: Mix of letter, number, and special character
+    const password = data.password || "";
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[@$!%*?&]/.test(password);
 
-if (!strongPasswordRegex.test(formData.password)) {
-  errors.password =
-    "Password must include uppercase, lowercase, number & special character";
-}
+    if (!password) {
+      errors.password = "Password is required";
+    } else if (password.length < 6) {
+      errors.password = "At least 6 characters";
+    } else if (!(hasLetter && hasNumber && hasSpecial)) {
+      errors.password = "Letters, numbers & specials required";
+    }
+
     return errors;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    const updatedData = { ...formData, [name]: value };
+    setFormData(updatedData);
+    
+    // Real-time Validation
+    const errors = validate(updatedData);
+    setFormError(prev => ({
+      ...prev,
+      [name]: errors[name]
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -107,6 +167,7 @@ if (!strongPasswordRegex.test(formData.password)) {
               <input
                 type="email"
                 name="email"
+                autoComplete="chrome-off"
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
@@ -121,6 +182,7 @@ if (!strongPasswordRegex.test(formData.password)) {
               <div className="password-wrapper">
                 <input
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
@@ -153,9 +215,27 @@ if (!strongPasswordRegex.test(formData.password)) {
         </div>
 
         <div className="login-image-side">
-          <div className="glass-overlay">
-            <h2>Find your perfect<br/>shared space.</h2>
-            <p>Join thousands of verified users finding their ideal flatmates safely and smartly.</p>
+          {authImages.map((img, index) => (
+            <div 
+              key={index} 
+              className={`auth-slide ${index === currentImage ? 'active' : ''}`}
+              style={{ backgroundImage: `url(${img.url})` }}
+            >
+              <div className="glass-overlay">
+                <h2>{img.title}</h2>
+                <p>{img.desc}</p>
+              </div>
+            </div>
+          ))}
+
+          <div className="auth-slider-dots">
+            {authImages.map((_, index) => (
+              <span 
+                key={index} 
+                className={`dot ${index === currentImage ? 'active' : ''}`}
+                onClick={() => setCurrentImage(index)}
+              ></span>
+            ))}
           </div>
         </div>
       </div>

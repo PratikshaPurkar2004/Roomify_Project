@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../../styles/Preference.css";
 import { useNavigate } from "react-router-dom";
+import HomeNavbar from "../../Component/HomeNavbar";
 
 const preferences = [
   { id: 1, name: "Night Owl", icon: "🦉" },
@@ -17,17 +18,26 @@ const preferences = [
   { id: 12, name: "Non Smoker", icon: "🚭" },
 ];
 
+import { motion, AnimatePresence } from "framer-motion";
+
 function Preference() {
 
   const navigate = useNavigate();
   const [selected, setSelected] = useState([]);
   const [toast, setToast] = useState(null);
 
+  React.useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+      navigate("/");
+    }
+  }, [navigate]);
+
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => {
       setToast(null);
-    }, 3000);
+    }, 4000);
   };
 
   // Toggle preference selection
@@ -75,7 +85,7 @@ function Preference() {
 
       setTimeout(() => {
         navigate("/dashboard");
-      }, 1500);
+      }, 2500);
 
     } catch (error) {
       console.error("Error saving preferences:", error);
@@ -114,37 +124,59 @@ function Preference() {
   };
 
   return (
-    <div className="pref-container">
+    <div className="pref-page">
+      <HomeNavbar isSimple={true} />
       
-      {toast && (
-        <div className={`pref-toast ${toast.type}`}>
-          {toast.message}
+      <div className="pref-container">
+        
+        <AnimatePresence>
+          {toast && (
+            <motion.div 
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 50, opacity: 0 }}
+              className={`pref-toast ${toast.type}`}
+            >
+              <span className="toast-icon">{toast.type === 'success' ? '✨' : '⚠️'}</span>
+              <div className="toast-content">
+                <strong>{toast.type === 'success' ? 'Success!' : 'Notice'}</strong>
+                <p>{toast.message}</p>
+              </div>
+              <motion.div 
+                initial={{ width: "100%" }}
+                animate={{ width: "0%" }}
+                transition={{ duration: 4, ease: "linear" }}
+                className="toast-progress" 
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <h1>Your Preferences</h1>
+        <p>Select preferences that describe you to find the best matches.</p>
+
+        <div className="pref-grid">
+          {preferences.map((item) => (
+            <div
+              key={item.id}
+              className={`pref-card ${selected.includes(item.name) ? "active" : ""}`}
+              onClick={() => togglePreference(item.name)}
+            >
+              <div className="pref-icon">{item.icon}</div>
+              <p>{item.name}</p>
+            </div>
+          ))}
         </div>
-      )}
 
-      <h1>Your Preferences</h1>
-      <p>Select preferences that describe you</p>
+        <div className="pref-footer">
+          <button className="pref-btn" onClick={handleUpdate}>
+            Update Preferences
+          </button>
+          <button className="pref-btn btn-skip" onClick={handleSkip}>
+            Skip for Now
+          </button>
+        </div>
 
-      <div className="pref-grid">
-        {preferences.map((item) => (
-          <div
-            key={item.id}
-            className={`pref-card ${selected.includes(item.name) ? "active" : ""}`}
-            onClick={() => togglePreference(item.name)}
-          >
-            <div className="pref-icon">{item.icon}</div>
-            <p>{item.name}</p>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '20px' }}>
-        <button className="pref-btn" style={{ margin: 0 }} onClick={handleUpdate}>
-          Update Preferences
-        </button>
-        <button className="pref-btn" style={{ margin: 0, backgroundColor: 'transparent', color: '#6366F1', border: '2px solid #6366F1' }} onClick={handleSkip}>
-          Skip
-        </button>
       </div>
 
     </div>

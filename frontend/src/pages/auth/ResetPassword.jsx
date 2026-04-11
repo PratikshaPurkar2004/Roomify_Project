@@ -18,11 +18,19 @@ const ResetPassword = () => {
     e.preventDefault();
     dispatch(clearMessage());
 
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[@$!%*?&]/.test(password);
+
     if (password !== confirmPassword) {
       return;
     }
 
     if (password.length < 6) {
+      return;
+    }
+
+    if (!(hasLetter && hasNumber && hasSpecial)) {
       return;
     }
 
@@ -93,7 +101,7 @@ const ResetPassword = () => {
           </div>
 
           <div className="password-requirements">
-            💡 Password must be at least 6 characters long
+            💡 Password must be at least 6 characters and include letters, numbers, and special characters (@$!%*?&)
           </div>
 
           <button

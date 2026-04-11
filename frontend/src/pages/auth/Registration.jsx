@@ -22,33 +22,94 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
     gender: ""
   });
 
-  const validate = () => {
+  const [currentImage, setCurrentImage] = useState(0);
 
+  const registerImages = [
+    {
+      url: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1469&auto=format&fit=crop",
+      title: "Find your people.",
+      desc: "Create your account in seconds and unlock smart matching, verified profiles, and seamless direct messaging."
+    },
+    {
+      url: "https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1500&auto=format&fit=crop",
+      title: "Share experiences.",
+      desc: "Connect with roommates who share your lifestyle and hobbies."
+    },
+    {
+      url: "https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1500&auto=format&fit=crop",
+      title: "Safe & verified.",
+      desc: "Every profile undergoes verification to ensure your peace of mind."
+    }
+  ];
+
+  useEffect(() => {
+    // Clear any previous error messages when the component mounts
+    dispatch(clearMessage());
+    
+    // Reset local form data explicitly just in case
+    setFormData({
+      name: "",
+      email: "",
+      occupation: "",
+      password: "",
+      confirmPassword: "",
+      gender: ""
+    });
+    setErrors({});
+
+    const timer = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % registerImages.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [dispatch, registerImages.length]);
+
+  const validate = (data = formData) => {
     let newErrors = {};
 
-    if (!formData.name.trim())
+    // Name Validation: No numbers allowed
+    if (!data.name.trim()) {
       newErrors.name = "Name is required";
+    } else if (/\d/.test(data.name)) {
+      newErrors.name = "Numbers are not allowed in name";
+    }
 
-    if (!formData.email)
+    // Email Validation: Exactly one @, not only numbers
+    if (!data.email) {
       newErrors.email = "Email is required";
+    } else {
+      const emailValue = data.email.trim();
+      const atCount = (emailValue.match(/@/g) || []).length;
+      const isOnlyNumbers = /^\d+$/.test(emailValue.replace(/[@.]/g, ""));
+      
+      if (atCount !== 1) {
+        newErrors.email = "Email must contain exactly one @ symbol";
+      } else if (isOnlyNumbers) {
+        newErrors.email = "Email cannot be only numbers";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+        newErrors.email = "Invalid email format";
+      }
+    }
 
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = "Invalid Email";
+    // Password Validation: Mix of letter, number, and special character
+    const password = data.password || "";
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[@$!%*?&]/.test(password);
 
-   const strongPasswordRegex =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    } else if (!(hasLetter && hasNumber && hasSpecial)) {
+      newErrors.password = "Include letters, numbers & special characters";
+    }
 
-  if (!strongPasswordRegex.test(formData.password)) {
-  newErrors.password ="Password must include uppercase, lowercase, number & special character";
-}
-
-    // Trim whitespace for comparison so users don't get a false mismatch
-    const password = (formData.password || "").trim();
-    const confirmPassword = (formData.confirmPassword || "").trim();
-    if (password !== confirmPassword)
+    // Confirm Password
+    if (data.confirmPassword && password !== data.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
+    }
 
-    if (!formData.gender)
+    if (!data.gender && data.gender !== undefined)
       newErrors.gender = "Select gender";
 
     return newErrors;
@@ -56,23 +117,29 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const updatedData = { ...formData, [name]: value };
+    
+    setFormData(updatedData);
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
+    // Real-time Validation
+    const validationErrors = validate(updatedData);
     setErrors((prev) => ({
       ...prev,
-      [name]: undefined,
+      [name]: validationErrors[name],
     }));
+    
+    // If confirmation changes, also re-validate confirmPassword if it exists
+    if (name === "password" && updatedData.confirmPassword) {
+      setErrors(prev => ({
+        ...prev,
+        confirmPassword: updatedData.password !== updatedData.confirmPassword ? "Passwords do not match" : undefined
+      }));
+    }
   };
 
   const handleGender = (value) => {
-    setFormData((prev) => ({
-      ...prev,
-      gender: value,
-    }));
+    const updatedData = { ...formData, gender: value };
+    setFormData(updatedData);
 
     setErrors((prev) => ({
       ...prev,
@@ -81,9 +148,7 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
   };
 
   const handleSubmit = (e) => {
-
     e.preventDefault();
-
     const validationErrors = validate();
 
     if (Object.keys(validationErrors).length > 0) {
@@ -92,7 +157,6 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
     }
 
     dispatch(registerUser(formData));
-
   };
 
   useEffect(() => {
@@ -121,22 +185,41 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
           <span className="close-btn" onClick={handleClose}>×</span>
           
           <div className="register-image-side">
-             
-             {/* Creative Elements */}
-             <div className="floating-cards-container">
-               <div className="floating-card fc-2">
-                 <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop" alt="user" />
-                 <div>
-                   <p>Mike T.</p>
-                   <span>Listed a room 🏠</span>
-                 </div>
-               </div>
-             </div>
+            {registerImages.map((img, index) => (
+              <div 
+                key={index} 
+                className={`auth-slide ${index === currentImage ? 'active' : ''}`}
+                style={{ backgroundImage: `url(${img.url})` }}
+              >
+                {/* Floating Card (Only on first slide for effect) */}
+                {index === 0 && (
+                  <div className="floating-cards-container">
+                    <div className="floating-card fc-2">
+                      <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop" alt="user" />
+                      <div>
+                        <p>Mike T.</p>
+                        <span>Listed a room 🏠</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="glass-overlay">
+                  <h2>{img.title}</h2>
+                  <p>{img.desc}</p>
+                </div>
+              </div>
+            ))}
 
-             <div className="glass-overlay">
-               <h2>Find your people.</h2>
-               <p>Create your account in seconds and unlock smart matching, verified profiles, and seamless direct messaging.</p>
-             </div>
+            <div className="auth-slider-dots">
+              {registerImages.map((_, index) => (
+                <span 
+                  key={index} 
+                  className={`dot ${index === currentImage ? 'active' : ''}`}
+                  onClick={() => setCurrentImage(index)}
+                ></span>
+              ))}
+            </div>
           </div>
           
           <div className="register-form-side">
@@ -146,13 +229,14 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
             
             {error && <p className="error">{error}</p>}
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} autoComplete="off">
               <div className="input-row">
                 <div className="input-group">
                   <label>Full Name</label>
                   <input
                     type="text"
                     name="name"
+                    autoComplete="chrome-off"
                     placeholder="Your Name"
                     value={formData.name}
                     onChange={handleChange}
@@ -165,6 +249,7 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
                   <input
                     type="email"
                     name="email"
+                    autoComplete="chrome-off"
                     placeholder="Email Address"
                     value={formData.email}
                     onChange={handleChange}
@@ -180,6 +265,7 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
                     <input
                       type={showPassword ? "text" : "password"}
                       name="password"
+                      autoComplete="new-password"
                       placeholder="Password"
                       value={formData.password}
                       onChange={handleChange}
@@ -196,13 +282,23 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
 
                 <div className="input-group">
                   <label>Confirm</label>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                  />
+                  <div className="password-wrapper">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      autoComplete="new-password"
+                      placeholder="Confirm Password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                    />
+                    <span
+                      className="toggle-password"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      👁
+                    </span>
+                  </div>
+                  
                   {errors.confirmPassword && (
                     <p className="field-error">{errors.confirmPassword}</p>
                   )}

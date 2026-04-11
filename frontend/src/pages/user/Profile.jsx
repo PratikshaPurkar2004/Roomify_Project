@@ -17,8 +17,15 @@ export default function Profile() {
     gender: ""
   });
 
-  const [msg, setMsg] = useState("");
+  const [toast, setToast] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
 
   useEffect(() => {
     if (!userId) return;
@@ -38,7 +45,7 @@ export default function Profile() {
         }
       })
       .catch(() => {
-        setMsg("Failed to load profile ❌");
+        showToast("Failed to load profile", "error");
       });
 
   }, [userId]);
@@ -51,13 +58,19 @@ export default function Profile() {
   };
 
   const saveProfile = () => {
+    // Validation: Name should not contain numbers
+    if (/\d/.test(form.name)) {
+      showToast("Numbers are not allowed in name", "error");
+      return;
+    }
+
     // Map city to area for backend
     const payload = { ...form, area: form.city };
     
     axios
       .put(`http://localhost:5000/api/profile/${userId}`, payload)
       .then(() => {
-        setMsg("Profile Updated Successfully ✅");
+        showToast("Profile Updated Successfully ✅", "success");
         
         // Update user data in localStorage so other components (like Header) can update
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -70,7 +83,7 @@ export default function Profile() {
       })
       .catch((err) => {
         console.log(err);
-        setMsg("Update Failed ❌");
+        showToast("Update Failed ❌", "error");
       });
   };
 
@@ -82,7 +95,7 @@ export default function Profile() {
         window.location.href = "/";
       })
       .catch(() => {
-        setMsg("Delete Failed ❌");
+        showToast("Delete Failed ❌", "error");
         setShowDeleteModal(false);
       });
   };
@@ -94,6 +107,30 @@ export default function Profile() {
       className="profile-page"
     >
       <div className="profile-wrapper">
+        
+        {/* TOAST NOTIFICATION */}
+        <AnimatePresence>
+          {toast && (
+            <motion.div 
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 50, opacity: 0 }}
+              className={`pref-toast ${toast.type}`}
+            >
+              <span className="toast-icon">{toast.type === 'success' ? '✨' : '⚠️'}</span>
+              <div className="toast-content">
+                <strong>{toast.type === 'success' ? 'Success!' : 'Update Notice'}</strong>
+                <p>{toast.message}</p>
+              </div>
+              <motion.div 
+                initial={{ width: "100%" }}
+                animate={{ width: "0%" }}
+                transition={{ duration: 4, ease: "linear" }}
+                className="toast-progress"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* LEFT SIDE: PREMIUM PROFILE PREVIEW */}
         <motion.div 
@@ -120,8 +157,6 @@ export default function Profile() {
                 <span className="p-val">₹{form.budget || "0"}</span>
              </div>
           </div>
-
-          {msg && <p className="profile-msg">{msg}</p>}
 
           <div className="preview-actions">
              <button className="btn-main-save" onClick={saveProfile}>Save Changes</button>

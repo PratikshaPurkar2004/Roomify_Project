@@ -5,6 +5,7 @@ import "../styles/Home.css";
 
 import Login from "./auth/Login";
 import Registration from "./auth/Registration";
+import HomeNavbar from "../Component/HomeNavbar";
 
 export default function Home() {
 
@@ -12,6 +13,7 @@ const navigate = useNavigate();
 const [showLogin, setShowLogin] = useState(false);
 const [showRegister, setShowRegister] = useState(false);
 const [activeTab,setActiveTab] = useState("rent");
+const [propertyFilter, setPropertyFilter] = useState("All");
 const [cities, setCities] = useState([]);
 
 useEffect(() => {
@@ -23,7 +25,6 @@ useEffect(() => {
       }
     } catch (error) {
       console.error("Error fetching cities:", error);
-      // Fallback to static cities if API fails
       setCities(['Mumbai', 'Pune', 'Nashik', 'Hyderabad']);
     }
   };
@@ -33,7 +34,7 @@ useEffect(() => {
 const rentSteps = [
 "Fill up a form with the basic details about your apartment",
 "Sign up and complete your profile",
-"Post your properties and connect with roomamtes"
+"Post your properties and connect with roommates"
 ];
 
 const findSteps = [
@@ -42,48 +43,92 @@ const findSteps = [
 "Move into your new shared space"
 ];
 
-const popularProfiles = [
+const popularProperties = [
   {
-    name: "Aanya Sharma",
+    title: "Spacious 2BHK in Bandra",
     city: "Mumbai",
-    description: "Looking for a quiet and friendly roommate near Bandra.",
-    image: "https://images.pexels.com/photos/1181682/pexels-photo-1181682.jpeg",
-    popularity: 98,
-    views: 452,
+    rent: "₹18,000",
+    period: "/mo",
+    type: "Apartment",
+    image: "https://images.pexels.com/photos/1918291/pexels-photo-1918291.jpeg",
+    amenities: ["WiFi", "AC", "Parking"],
+    rating: 4.8,
+    reviews: 42,
     isVerified: true,
-    tags: ["Student", "Non-Smoker"]
+    isHot: true,
+    beds: 2,
+    baths: 1,
+    sqft: "950 sq.ft"
   },
   {
-    name: "Rohan Mehta",
+    title: "Modern Studio near Hinjewadi",
     city: "Pune",
-    description: "Young professional seeking a flatmate in Hinjewadi.",
-    image: "https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg",
-    popularity: 91,
-    views: 389,
+    rent: "₹12,500",
+    period: "/mo",
+    type: "Studio",
+    image: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
+    amenities: ["Furnished", "Gym", "WiFi"],
+    rating: 4.6,
+    reviews: 28,
     isVerified: true,
-    tags: ["Designer", "Night Owl"]
+    isHot: false,
+    beds: 1,
+    baths: 1,
+    sqft: "550 sq.ft"
   },
   {
-    name: "Neha Kulkarni",
+    title: "Cozy Room in Hitech City",
     city: "Hyderabad",
-    description: "Friendly and social person looking for a shared apartment.",
-    image: "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg",
-    popularity: 87,
-    views: 344,
+    rent: "₹9,000",
+    period: "/mo",
+    type: "Shared Room",
+    image: "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg",
+    amenities: ["Laundry", "Kitchen", "WiFi"],
+    rating: 4.5,
+    reviews: 19,
     isVerified: false,
-    tags: ["IT Prof.", "Pet Lover"]
+    isHot: false,
+    beds: 1,
+    baths: 1,
+    sqft: "320 sq.ft"
   },
   {
-    name: "Karan Patel",
+    title: "Premium Flat in Nashik Road",
     city: "Nashik",
-    description: "Clean and organized person seeking a comfortable stay.",
-    image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg",
-    popularity: 82,
-    views: 298,
+    rent: "₹8,500",
+    period: "/mo",
+    type: "Apartment",
+    image: "https://images.pexels.com/photos/1648776/pexels-photo-1648776.jpeg",
+    amenities: ["Balcony", "AC", "Parking"],
+    rating: 4.7,
+    reviews: 35,
     isVerified: true,
-    tags: ["Banker", "Early Bird"]
+    isHot: true,
+    beds: 2,
+    baths: 1,
+    sqft: "850 sq.ft"
+  },
+  {
+    title: "Luxury 1BHK in Andheri",
+    city: "Mumbai",
+    rent: "₹22,000",
+    period: "/mo",
+    type: "Apartment",
+    image: "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg",
+    amenities: ["Pool", "Gym", "Security"],
+    rating: 4.9,
+    reviews: 56,
+    isVerified: true,
+    isHot: true,
+    beds: 1,
+    baths: 1,
+    sqft: "680 sq.ft"
   }
 ];
+
+const filteredProperties = propertyFilter === "All" 
+  ? popularProperties 
+  : popularProperties.filter(p => p.city === propertyFilter);
 
 return(
 
@@ -91,16 +136,7 @@ return(
 
 {/* NAVBAR */}
 
-<nav className="navbar">
-
-<div className="logo">Roomify</div>
-
-<div className="nav-buttons">
-<button onClick={()=>setShowLogin(true)} className="login">Login</button>
-<button onClick={()=>setShowRegister(true)} className="signup">Get Started</button>
-</div>
-
-</nav>
+<HomeNavbar onLoginClick={() => setShowLogin(true)} onRegisterClick={() => setShowRegister(true)} />
 
 
 {/* HERO */}
@@ -146,7 +182,6 @@ alt="roommate"
 <div onClick={()=>setShowRegister(true)} className="city-grid">
 
 {cities.map((city, index) => {
-  // Use sequential placeholder images for cities
   const imgIds = ["2409953", "439391", "1051075", "210243", "460672", "374870"];
   const imgId = imgIds[index % imgIds.length];
   
@@ -162,7 +197,7 @@ alt="roommate"
 
 </section>
 
-{/* ROOM PREVIEW */}
+{/* EXPLORE ROOMS */}
 
 <section className="rooms">
 
@@ -194,31 +229,53 @@ alt="roommate"
 
 </section>
 
-<section className="popular-profiles">
+{/* POPULAR PROPERTIES — SHORT & SWEET */}
 
-<h2>Popular Profiles</h2>
-<p>These roommate profiles are currently the most viewed and highly rated by our community.</p>
-
-<div onClick={()=>setShowRegister(true)} className="profile-grid">
-  {popularProfiles.map((profile, index) => (
-    <div key={index} className="profile-card-minimal">
-      <div className="profile-avatar">
-        <img src={`${profile.image}?auto=compress&cs=tinysrgb&dpr=2&h=200&w=200`} alt={profile.name} />
+<section className="pp-section">
+  <div className="pp-header">
+    <div className="pp-title-row">
+      <div>
+        <h2>Popular Properties</h2>
+        <p>Trending spaces our community loves</p>
       </div>
-      <div className="profile-info-minimal">
-        <h3>{profile.name} {profile.isVerified && <span className="verified-dot"></span>}</h3>
-        <p className="profile-city-minimal">{profile.city}</p>
-        
-        <div className="profile-tags-minimal">
-          {profile.tags.slice(0, 2).map((tag, i) => <span key={i} className="tag-minimal">{tag}</span>)}
-        </div>
-
-        <button className="profile-connect-btn">Connect Now</button>
-      </div>
+      <button className="pp-browse-all" onClick={()=>setShowRegister(true)}>View All →</button>
     </div>
-  ))}
-</div>
+  </div>
 
+  <div onClick={()=>setShowRegister(true)} className="pp-showcase">
+    {popularProperties.slice(0, 4).map((property, index) => (
+      <div key={index} className="pp-card-container">
+        <div className="pp-showcase-card" style={{ animationDelay: `${index * 0.1}s` }}>
+          <div className="pp-img-wrapper">
+            <img src={`${property.image}?auto=compress&cs=tinysrgb&w=600`} alt={property.title} />
+            <div className="pp-showcase-overlay"></div>
+            {property.isHot && <span className="pp-hot-tag">Trending 🔥</span>}
+            <div className="pp-price-float">
+              <span>{property.rent}</span>
+              <small>{property.period}</small>
+            </div>
+          </div>
+          
+          <div className="pp-card-content">
+            <span className="pp-type-label">{property.type}</span>
+            <h3>{property.title}</h3>
+            <div className="pp-loc">
+              <span>📍 {property.city}</span>
+              <span className="pp-rating">⭐ {property.rating}</span>
+            </div>
+            
+            <div className="pp-features">
+              <span>🛏️ {property.beds} Bed</span>
+              <span>🚿 {property.baths} Bath</span>
+              <span>📏 {property.sqft}</span>
+            </div>
+            
+            <button className="pp-view-btn">Check Availability</button>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
 </section>
 
 <section className="why">

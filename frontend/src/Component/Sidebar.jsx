@@ -105,6 +105,7 @@ import {
   FaComments,
   FaSignOutAlt,
   FaDoorOpen,
+  FaHeart,
 } from "react-icons/fa";
 
 import "../styles/Sidebar.css";
