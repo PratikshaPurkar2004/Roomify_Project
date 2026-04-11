@@ -104,7 +104,8 @@ import {
   FaEnvelope,
   FaComments,
   FaSignOutAlt,
-  FaPuzzlePiece
+  FaPuzzlePiece,
+  FaDoorOpen,
 } from "react-icons/fa";
 
 import "../styles/Sidebar.css";
@@ -147,8 +148,12 @@ function Sidebar() {
           <FaUser /> <span>Profile</span>
         </NavLink>
 
+        <NavLink to="/dashboard/find-rooms" className="menu-item">
+          <FaDoorOpen /> <span>Find Rooms</span>
+        </NavLink>
+
         <NavLink to="/dashboard/find-roommates" className="menu-item">
-          <FaSearch /> <span>Find Roommate/Rooms</span>
+          <FaSearch /> <span>Find Roommates</span>
         </NavLink>
 
 

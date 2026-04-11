@@ -69,8 +69,8 @@ const register = async (req, res) => {
     const { dob } = req.body;
 
     const [result] = await db.query(
-      `INSERT INTO users (name, email, occupation, password, user_type, gender) VALUES (?, ?, ?, ?, ?, ?)`,
-      [name, normalizedEmail, occupation, hashedPassword, user_type, gender]
+      `INSERT INTO users (name, email, occupation, password, user_type, gender, DOB) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [name, normalizedEmail, occupation, hashedPassword, user_type, gender, dob || null]
     );
 
     console.log("User inserted successfully", { email: normalizedEmail, insertId: result.insertId });
