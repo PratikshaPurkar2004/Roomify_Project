@@ -71,7 +71,8 @@ router.get("/contacts/:userId", async (req, res) => {
         u.name,
         u.city,
         u.gender,
-        u.email
+        u.email,
+        r.id as roomid
       FROM requests r
       JOIN users u ON (
         (r.sender_id = ? AND u.user_id = r.receiver_id) OR

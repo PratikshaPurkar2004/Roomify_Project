@@ -50,7 +50,6 @@ const Login = ({ onClose, onSwitch }) => {
 
   useEffect(() => {
     if (user) {
-<<<<<<< HEAD
       const p = user.preferences;
       // Comprehensive check for missing or empty preferences
       const noPreferences = !p || 
@@ -62,10 +61,6 @@ const Login = ({ onClose, onSwitch }) => {
                             (typeof p === 'object' && !Array.isArray(p) && Object.keys(p).length === 0);
 
       if (noPreferences) {
-=======
-      const prefs = user.preferences;
-      if (!prefs || prefs === "" || prefs === "null" || prefs === "[]" || prefs === "skipped") {
->>>>>>> df264d1 (updated room/roomates)
         navigate("/preferences");
       } else {
         navigate("/dashboard");

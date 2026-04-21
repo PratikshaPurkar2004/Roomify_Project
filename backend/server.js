@@ -33,6 +33,7 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+
 // Inject Socket.io into requests
 app.use((req, res, next) => {
   req.io = io;
@@ -74,5 +75,5 @@ app.get("/health", async (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT} with Socket.io support`);
 });

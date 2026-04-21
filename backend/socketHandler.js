@@ -1,27 +1,48 @@
+const db = require("./config/db");
+
 const socketHandler = (io) => {
   io.on("connection", (socket) => {
-    console.log("New client connected:", socket.id);
+    console.log(`User connected: ${socket.id}`);
 
-    // Join a private room for the user
-    socket.on("join", (userId) => {
-      socket.join(`user_${userId}`);
-      console.log(`User ${userId} joined their private room.`);
+    // Join a specific room (based on roomid)
+    socket.on("join_room", (data) => {
+      const { roomid, userid } = data;
+      socket.join(roomid);
+      console.log(`User ${userid} joined room: ${roomid}`);
     });
 
-    // Handle sending messages
-    socket.on("sendMessage", (data) => {
-       const { senderId, receiverId, message } = data;
-       // Emit to the receiver's private room
-       io.to(`user_${receiverId}`).emit("newMessage", data);
-    });
+    // Handle sending message
+    socket.on("send_message", async (data) => {
+      const { roomid, senderid, receiverid, content } = data;
 
-    // Handle typing status
-    socket.on("typing", (data) => {
-      io.to(`user_${data.receiverId}`).emit("userTyping", { senderId: data.senderId });
+      try {
+        // 1. Save to Database
+        const [result] = await db.query(
+          "INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)",
+          [senderid, receiverid, content]
+        );
+
+        const newMessage = {
+          id: result.insertId,
+          sender_id: senderid,
+          receiver_id: receiverid,
+          content: content,
+          created_at: new Date(),
+          roomid: roomid // Adding roomid for frontend tracking
+        };
+
+        // 2. Emit to the room
+        console.log(`Message sent in room ${roomid} by ${senderid}`);
+        io.to(roomid).emit("receive_message", newMessage);
+
+      } catch (err) {
+        console.error("Error saving/sending message via socket:", err);
+        socket.emit("error", { message: "Failed to send message" });
+      }
     });
 
     socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
+      console.log(`User disconnected: ${socket.id}`);
     });
   });
 };

@@ -57,7 +57,6 @@ function Routing() {
         <Route path="requests" element={<Requests />} />
         <Route path="find-rooms" element={<FindRooms />} />
         <Route path="find-roommates" element={<FindRoommates />} />
-        <Route path="find-rooms" element={<FindRooms />} />
         <Route path="subscription" element={<Subscription />} />
         <Route path="chat" element={<Chat />} />
 
