@@ -210,17 +210,7 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
                 style={{ backgroundImage: `url(${img.url})` }}
               >
                 {/* Floating Card (Only on first slide for effect) */}
-                {index === 0 && (
-                  <div className="floating-cards-container">
-                    <div className="floating-card fc-2">
-                      <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop" alt="user" />
-                      <div>
-                        <p>Mike T.</p>
-                        <span>Listed a room 🏠</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
+
                 
                 <div className="glass-overlay">
                   <h2>{img.title}</h2>

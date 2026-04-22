@@ -48,7 +48,16 @@ const Login = ({ onClose, onSwitch }) => {
     setFormError({});
   }, []);
 
-  // Auto-redirect removed to prevent the login modal from force-quitting before successful login
+  useEffect(() => {
+    if (user) {
+      const prefs = user.preferences;
+      if (!prefs || prefs === "" || prefs === "null" || prefs === "[]" || prefs === "skipped") {
+        navigate("/preferences");
+      } else {
+        navigate("/dashboard");
+      }
+    }
+  }, [user, navigate]);
 
   const validate = (data = formData) => {
     let errors = {};

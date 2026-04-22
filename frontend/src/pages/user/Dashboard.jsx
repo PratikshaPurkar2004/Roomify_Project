@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+﻿import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Dashboard.css";
 import { Users, Home, FileText, UserPlus, UserSearch, Plus, MapPin, DollarSign, X, TrendingUp, Activity, Search } from "lucide-react";
@@ -11,29 +11,34 @@ function Dashboard() {
     users: 0,
     rooms: 0,
     requests: 0,
-    hosts: 0,
-    finders: 0,
     views: 0,
+    matches: 0,
   });
 
   const [users, setUsers] = useState([]);
   const [myPreferences, setMyPreferences] = useState([]);
-  const [myRooms, setMyRooms] = useState([]);
-  const [showAddRoomModal, setShowAddRoomModal] = useState(false);
-  const [showEditRoomModal, setShowEditRoomModal] = useState(false);
-  const [showViewRoomModal, setShowViewRoomModal] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [newRoom, setNewRoom] = useState({ location: "", rent: "", image: null });
-  const [editRoom, setEditRoom] = useState({ location: "", rent: "", availability: "", image: null });
+  const [activeMetric, setActiveMetric] = useState("requests");
+  const [graphData, setGraphData] = useState(() => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push({
+        name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        requests: 0,
+        matches: 0,
+        views: 0
+      });
+    }
+    return days;
+  });
+
 
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
-  const isHost = currentUser.user_type === "Host";
 
-  const hosts = users.filter((u) => u.user_type === "Host");
-  const finders = users.filter((u) => u.user_type === "Finder");
 
   const phrases = [
-    "Find your ideal room and the perfect roommate to share it with.",
+    "Find your ideal room/roommate to share it with.",
     "Matching verified rooms with the best roommate for you.",
     "The simplest way to find premium spaces and verified roommates.",
     "Connecting modern professionals to verified rooms and great roommates.",
@@ -80,7 +85,7 @@ function Dashboard() {
 
   const handleTouchStart = (e) => {
     touchStartRef.current = e.touches[0].clientX;
-  };
+  };ī
 
   const handleTouchMove = (e) => {
     touchEndRef.current = e.touches[0].clientX;
@@ -95,12 +100,13 @@ function Dashboard() {
   };
 
   const chartData = [
-    { name: 'Mon', views: Math.floor((stats.views || 0) * 0.4), matches: Math.floor((stats.views || 0) * 0.2) },
-    { name: 'Tue', views: Math.floor((stats.views || 0) * 0.6), matches: Math.floor((stats.views || 0) * 0.3) },
-    { name: 'Wed', views: Math.floor((stats.views || 0) * 0.8), matches: Math.floor((stats.views || 0) * 0.5) },
-    { name: 'Thu', views: Math.floor((stats.views || 0) * 0.7), matches: Math.floor((stats.views || 0) * 0.4) },
-    { name: 'Fri', views: Math.floor((stats.views || 0) * 0.9), matches: Math.floor((stats.views || 0) * 0.6) },
-    { name: 'Sat', views: (stats.views || 0), matches: Math.floor((stats.views || 0) * 0.7) },
+    { name: 'Mon', views: Math.floor((stats.views || 0) * 0.4) + 12, matches: Math.floor((stats.matches || 0) * 0.3) + 5 },
+    { name: 'Tue', views: Math.floor((stats.views || 0) * 0.6) + 18, matches: Math.floor((stats.matches || 0) * 0.5) + 8 },
+    { name: 'Wed', views: Math.floor((stats.views || 0) * 0.8) + 24, matches: Math.floor((stats.matches || 0) * 0.7) + 12 },
+    { name: 'Thu', views: Math.floor((stats.views || 0) * 0.7) + 21, matches: Math.floor((stats.matches || 0) * 0.6) + 10 },
+    { name: 'Fri', views: Math.floor((stats.views || 0) * 0.9) + 29, matches: Math.floor((stats.matches || 0) * 0.8) + 15 },
+    { name: 'Sat', views: (stats.views || 0) + 35, matches: Math.floor((stats.matches || 0) * 0.9) + 18 },
+    { name: 'Sun', views: Math.floor((stats.views || 0) * 0.85) + 31, matches: (stats.matches || 0) + 16 },
   ];
 
   const getGreeting = () => {
@@ -110,7 +116,7 @@ function Dashboard() {
     return "Good Evening";
   };
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     const userId = localStorage.getItem("userId");
     const userIdParams = userId ? `?userId=${userId}` : "";
 
@@ -121,157 +127,70 @@ function Dashboard() {
 
     fetch("http://localhost:5000/api/dashboard/users")
       .then((res) => res.json())
-      .then((data) => {
-        const userList = data.users || [];
-        setUsers(userList);
-
-        const hostCount = userList.filter((u) => u.user_type === "Host").length;
-        const finderCount = userList.filter((u) => u.user_type === "Finder").length;
-
-        setStats((prev) => ({
-          ...prev,
-          hosts: hostCount,
-          finders: finderCount,
-        }));
-      })
+      .then((data) => setUsers(data.users || []))
       .catch((err) => console.error(err));
 
-    if (userId) {
-      fetch(`http://localhost:5000/api/preferences/${userId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.preferences) {
-            setMyPreferences(data.preferences.split(",").map(p => p.trim()));
+    fetch(`http://localhost:5000/api/dashboard/graph-data${userIdParams}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          const last7Days = [];
+          const now = new Date();
+          
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - i);
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+            
+            // Generate YYYY-MM-DD in LOCAL time
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+            
+            const dayData = data.find(item => {
+              return item.name === dayName || item.date === dateStr;
+            });
+            
+            last7Days.push({
+              name: dayName,
+              date: dateStr,
+              requests: dayData ? parseInt(dayData.requests || 0) : 0,
+              matches: dayData ? parseInt(dayData.matches || 0) : 0,
+              views: dayData ? parseInt(dayData.views || 0) : 0
+            });
           }
-        })
-        .catch(err => console.error(err));
 
-      if (isHost) {
-        fetch(`http://localhost:5000/api/rooms/host/${userId}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              setMyRooms(data.rooms);
-            }
-          })
-          .catch(err => console.error(err));
-      }
-    }
-  }, [isHost]);
+          // --- SMART SYNC LOGIC ---
+          // Ensure graph matches global stats if daily mapping fails due to timezone
+          const totalMatches = last7Days.reduce((a, b) => a + b.matches, 0);
+          const totalReqs = last7Days.reduce((a, b) => a + b.requests, 0);
+          
+          if (totalMatches === 0 && stats.matches > 0) {
+            last7Days[last7Days.length - 1].matches = parseInt(stats.matches);
+          }
+          if (totalReqs === 0 && stats.requests > 0) {
+            last7Days[last7Days.length - 1].requests = parseInt(stats.requests);
+          }
+          // -------------------------
 
-  const handleDeleteRoom = (roomId) => {
-    if (!window.confirm("Are you sure you want to delete this room?")) return;
-    const userId = localStorage.getItem("userId");
+          setGraphData(last7Days);
 
-    fetch(`http://localhost:5000/api/rooms/delete/${roomId}`, {
-      method: "DELETE",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          fetch(`http://localhost:5000/api/rooms/host/${userId}`)
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.success) setMyRooms(data.rooms);
-            });
         }
       })
-      .catch((err) => console.error(err));
-  };
 
-  const handleEditRoomSubmit = (e) => {
-    e.preventDefault();
-    const userId = localStorage.getItem("userId");
-    if (!userId || !selectedRoom) return;
+      .catch(err => console.error("Graph Data Fetch Error:", err));
+  }, []);
 
-    const formData = new FormData();
-    formData.append("location", editRoom.location);
-    formData.append("address", editRoom.address || "");
-    formData.append("rent", editRoom.rent);
-    formData.append("availability", editRoom.availability || "available");
-    formData.append("max_tenants", editRoom.max_tenants || "");
-    formData.append("furnishing", editRoom.furnishing || "Unfurnished");
-    formData.append("amenities", editRoom.amenities || "");
-    if (editRoom.image) {
-      formData.append("image", editRoom.image);
-    }
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 30000); // Auto refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
-    fetch(`http://localhost:5000/api/rooms/edit/${selectedRoom.room_id}`, {
-      method: "PUT",
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setShowEditRoomModal(false);
-          setSelectedRoom(null);
-          // Refresh rooms
-          fetch(`http://localhost:5000/api/rooms/host/${userId}`)
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.success) setMyRooms(data.rooms);
-            });
-        }
-      })
-      .catch((err) => console.error(err));
-  };
 
-  const openEditModal = (room) => {
-    setSelectedRoom(room);
-    setEditRoom({
-      location: room.location,
-      address: room.address || "",
-      rent: room.rent,
-      availability: room.availability || "available",
-      max_tenants: room.max_tenants || "",
-      furnishing: room.furnishing || "Unfurnished",
-      amenities: room.amenities || "",
-      image: null
-    });
-    setShowEditRoomModal(true);
-  };
 
-  const openViewModal = (room) => {
-    setSelectedRoom(room);
-    setShowViewRoomModal(true);
-  };
 
-  const handleAddRoom = (e) => {
-    e.preventDefault();
-    const userId = localStorage.getItem("userId");
-    if (!userId) return;
-
-    const formData = new FormData();
-    formData.append("host_id", userId);
-    formData.append("location", newRoom.location);
-    formData.append("address", newRoom.address || "");
-    formData.append("rent", newRoom.rent);
-    formData.append("max_tenants", newRoom.max_tenants || "");
-    formData.append("furnishing", newRoom.furnishing || "Unfurnished");
-    formData.append("amenities", newRoom.amenities || "");
-    if (newRoom.image) {
-      formData.append("image", newRoom.image);
-    }
-
-    fetch("http://localhost:5000/api/rooms/add", {
-      method: "POST",
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setShowAddRoomModal(false);
-          setNewRoom({ location: "", rent: "", image: null });
-          // Refresh rooms
-          fetch(`http://localhost:5000/api/rooms/host/${userId}`)
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) setMyRooms(data.rooms);
-            });
-        }
-      })
-      .catch((err) => console.error(err));
-  };
 
   return (
     <div className="dashboard">
@@ -282,6 +201,8 @@ function Dashboard() {
         <div className="dashboard-hero-premium">
           <div className="hero-main-content">
             <div className="hero-text-overlay">
+              <span className="hero-badge">WELCOME BACK, {currentUser.name || "USER"}</span>
+              <h1>Find your perfect <span className="text-gradient">room/roommate</span></h1>
               <span className="hero-badge">WELCOME BACK, {currentUser.name || "SAYALI"}</span>
               <h1>Find your perfect <span className="text-gradient">room/roommate</span></h1>
               <p>
@@ -296,6 +217,8 @@ function Dashboard() {
                   <UserSearch size={20} /> Find Roommates
                 </button>
               </div>
+
+
 
               <div className="hero-stats-bar">
                 <div className="stat-item">
@@ -313,11 +236,13 @@ function Dashboard() {
                   <span className="stat-desc">#Requests</span>
                 </div>
                 <div className="stat-divider"></div>
-                <div className="stat-item clickable" onClick={() => navigate("/dashboard/find-roommates")}>
-                  <span className="stat-num">{stats.rooms || myRooms.length}</span>
+                <div className="stat-item clickable" onClick={() => navigate("/dashboard/find-rooms")}>
+                  <span className="stat-num">{stats.total_rooms || stats.rooms || 0}</span>
                   <span className="stat-desc">#Rooms</span>
                 </div>
               </div>
+
+
             </div>
             <div
               className="hero-image-container"
@@ -356,6 +281,8 @@ function Dashboard() {
         </div>
 
 
+
+
         {/* Global Activity Analytics */}
         <div className="finder-analytics-section-premium">
           <div className="analytics-card-glass">
@@ -366,362 +293,67 @@ function Dashboard() {
                 </div>
                 <div>
                   <h3>Performance Analytics</h3>
-                  <p>Overview of platform engagement and total views</p>
+                  <div className="analytics-toggles">
+                    <button
+                      className={`toggle-btn ${activeMetric === 'views' ? 'active' : ''}`}
+                      onClick={() => setActiveMetric('views')}
+                    >Views</button>
+                    <button
+                      className={`toggle-btn ${activeMetric === 'requests' ? 'active' : ''}`}
+                      onClick={() => setActiveMetric('requests')}
+                    >Requests</button>
+                    <button
+                      className={`toggle-btn ${activeMetric === 'matches' ? 'active' : ''}`}
+                      onClick={() => setActiveMetric('matches')}
+                    >Matches</button>
+                  </div>
                 </div>
               </div>
               <div className="stats-pill-green">
-                <TrendingUp size={16} /> <span>Engagement {stats.views > 0 ? ((stats.requests / stats.views) * 100).toFixed(1) : "0.0"}%</span>
+                <TrendingUp size={16} /> <span>{activeMetric.charAt(0).toUpperCase() + activeMetric.slice(1)} {stats.views > 0 ? ((stats[activeMetric] / stats.views) * 100).toFixed(1) : "0.0"}%</span>
               </div>
             </div>
 
-            <div className="chart-wrapper-premium">
-              <ResponsiveContainer width="100%" height={320}>
+            <div className="chart-wrapper-premium" style={{ height: '400px', width: '100%', background: '#fff', borderRadius: '24px', padding: '20px', border: '1px solid #edf2f7' }}>
+              <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={chartData}
+                  data={graphData}
                   margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
                 >
-                  <defs>
-                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#a855f7" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
-                  <YAxis hide />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} width={30} domain={[0, 'auto']} />
                   <Tooltip
                     contentStyle={{
-                      borderRadius: '16px',
+                      borderRadius: '12px',
                       border: 'none',
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-                      background: 'rgba(255,255,255,0.9)',
-                      backdropFilter: 'blur(10px)'
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                      background: 'white',
                     }}
                   />
                   <Area
                     type="monotone"
-                    dataKey="views"
-                    stroke="#6366f1"
-                    strokeWidth={4}
-                    fillOpacity={1}
-                    fill="url(#colorViews)"
-                    name="Total Views"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="matches"
-                    stroke="#a855f7"
-                    strokeWidth={4}
-                    fillOpacity={1}
-                    fill="url(#colorEngagement)"
-                    name="Total Engagement"
+                    dataKey={activeMetric}
+                    stroke={activeMetric === 'matches' ? '#a855f7' : '#6366f1'}
+                    strokeWidth={3}
+                    fill={activeMetric === 'matches' ? '#a855f7' : '#6366f1'}
+                    fillOpacity={0.2}
+                    isAnimationActive={false}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+
+
           </div>
         </div>
 
-        {/* Host Room Management Header */}
-        {isHost && (
-          <div className="room-management-section">
-            <div className="room-management-header">
-              <h2>Your Managed Listings</h2>
-            </div>
 
-            <div className="host-rooms-grid">
-              {myRooms.length > 0 ? (
-                myRooms.map((room) => (
-                  <div key={room.room_id} className="room-card">
-                    {room.image_url ? (
-                      <img src={`http://localhost:5000${room.image_url}`} alt="Room" className="room-image" />
-                    ) : (
-                      <div className="room-image-placeholder">No Image</div>
-                    )}
-                    <div className="room-card-content">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <h3>Room in {room.location.split(',')[0]}</h3>
-                        <span className={`room-status ${room.availability}`}>{room.availability}</span>
-                      </div>
-                      <div className="room-details">
-                        <p className="room-price">₹{room.rent}</p>
-                        <p className="room-location">
-                          <MapPin size={14} /> {room.location}
-                        </p>
-                        <div className="room-sub-details" style={{ fontSize: '12px', marginTop: '8px', opacity: 0.8 }}>
-                          <p><strong>Address:</strong> {room.address || "N/A"}</p>
-                          <p><strong>Tenants:</strong> {room.max_tenants || 1} | <strong>Status:</strong> {room.furnishing}</p>
-                        </div>
-                      </div>
-
-                      <div className="room-card-actions-row">
-                        <button className="room-action-btn view" onClick={() => openViewModal(room)}>View</button>
-                        <button className="room-action-btn edit" onClick={() => openEditModal(room)}>Edit</button>
-                        <button className="room-action-btn delete" onClick={() => handleDeleteRoom(room.room_id)}>Delete</button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="empty-state-card">
-                  <Home size={40} />
-                  <p>You haven't added any rooms yet.</p>
-                  <button className="add-room-btn-inline" onClick={() => setShowAddRoomModal(true)}>Add Your First Room</button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
 
       </div>
 
-      {/* Add Room Modal */}
-      {showAddRoomModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3>Add New Room</h3>
-              <X size={24} onClick={() => setShowAddRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
-            </div>
-            <form onSubmit={handleAddRoom}>
-              <div className="form-group">
-                <label>Area/City</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Pune, Maharashtra"
-                  value={newRoom.location}
-                  onChange={(e) => setNewRoom({ ...newRoom, location: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Complete Address</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Flat 101, Sunshine Apartments, MG Road"
-                  value={newRoom.address || ""}
-                  onChange={(e) => setNewRoom({ ...newRoom, address: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group-row" style={{ display: 'flex', gap: '16px' }}>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label>Monthly Rent (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 5000"
-                    value={newRoom.rent}
-                    onChange={(e) => setNewRoom({ ...newRoom, rent: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label>No. of Tenants</label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 2"
-                    value={newRoom.max_tenants || ""}
-                    onChange={(e) => setNewRoom({ ...newRoom, max_tenants: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Furnishing Status</label>
-                <select
-                  value={newRoom.furnishing || "Unfurnished"}
-                  onChange={(e) => setNewRoom({ ...newRoom, furnishing: e.target.value })}
-                  className="modal-select"
-                >
-                  <option value="Unfurnished">Unfurnished</option>
-                  <option value="Semi-Furnished">Semi-Furnished</option>
-                  <option value="Fully-Furnished">Fully-Furnished</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Amenities (Gym, WiFi, AC, etc.)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. WiFi, AC, Laundry"
-                  value={newRoom.amenities || ""}
-                  onChange={(e) => setNewRoom({ ...newRoom, amenities: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Room Photo</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setNewRoom({ ...newRoom, image: e.target.files[0] })}
-                />
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="cancel-btn" onClick={() => setShowAddRoomModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="save-btn">
-                  Add Room
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {/* Edit Room Modal */}
-      {showEditRoomModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3>Edit Room</h3>
-              <X size={24} onClick={() => setShowEditRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
-            </div>
-            <form onSubmit={handleEditRoomSubmit}>
-              <div className="form-group">
-                <label>Area/City</label>
-                <input
-                  type="text"
-                  value={editRoom.location}
-                  onChange={(e) => setEditRoom({ ...editRoom, location: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Complete Address</label>
-                <input
-                  type="text"
-                  value={editRoom.address || ""}
-                  onChange={(e) => setEditRoom({ ...editRoom, address: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group-row" style={{ display: 'flex', gap: '16px' }}>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label>Monthly Rent (₹)</label>
-                  <input
-                    type="number"
-                    value={editRoom.rent}
-                    onChange={(e) => setEditRoom({ ...editRoom, rent: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label>No. of Tenants</label>
-                  <input
-                    type="number"
-                    value={editRoom.max_tenants || ""}
-                    onChange={(e) => setEditRoom({ ...editRoom, max_tenants: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Furnishing Status</label>
-                <select
-                  value={editRoom.furnishing || "Unfurnished"}
-                  onChange={(e) => setEditRoom({ ...editRoom, furnishing: e.target.value })}
-                  className="modal-select"
-                >
-                  <option value="Unfurnished">Unfurnished</option>
-                  <option value="Semi-Furnished">Semi-Furnished</option>
-                  <option value="Fully-Furnished">Fully-Furnished</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Amenities</label>
-                <input
-                  type="text"
-                  value={editRoom.amenities || ""}
-                  onChange={(e) => setEditRoom({ ...editRoom, amenities: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Availability</label>
-                <select
-                  value={editRoom.availability}
-                  onChange={(e) => setEditRoom({ ...editRoom, availability: e.target.value })}
-                  className="modal-select"
-                >
-                  <option value="available">Available</option>
-                  <option value="booked">Booked</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Update Photo (Optional)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setEditRoom({ ...editRoom, image: e.target.files[0] })}
-                />
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="cancel-btn" onClick={() => setShowEditRoomModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="save-btn">
-                  Update Room
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* View Room Modal */}
-      {showViewRoomModal && selectedRoom && (
-        <div className="modal-overlay">
-          <div className="modal-content view-room-modal">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3>Room Details</h3>
-              <X size={24} onClick={() => setShowViewRoomModal(false)} style={{ cursor: 'pointer', color: '#64748b' }} />
-            </div>
-            <div className="view-room-details">
-              {selectedRoom.image_url ? (
-                <img src={`http://localhost:5000${selectedRoom.image_url}`} alt="Room" className="detail-room-img" />
-              ) : (
-                <div className="detail-room-img-placeholder">No Image Available</div>
-              )}
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <span className="label">Area/City:</span>
-                  <span className="value">{selectedRoom.location}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Complete Address:</span>
-                  <span className="value">{selectedRoom.address || "Not provided"}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Monthly Rent:</span>
-                  <span className="value">₹{selectedRoom.rent}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">No. of Tenants:</span>
-                  <span className="value">{selectedRoom.max_tenants || "Not specified"}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Furnishing:</span>
-                  <span className="value">{selectedRoom.furnishing || "Unfurnished"}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Amenities:</span>
-                  <span className="value">{selectedRoom.amenities || "None available"}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Status:</span>
-                  <span className={`value status-badge ${selectedRoom.availability}`}>{selectedRoom.availability}</span>
-                </div>
-              </div>
-            </div>
-            <div className="modal-actions" style={{ justifyContent: 'center' }}>
-              <button className="save-btn" onClick={() => setShowViewRoomModal(false)}>Close</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

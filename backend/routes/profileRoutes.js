@@ -46,7 +46,9 @@ router.put("/:id", async (req, res) => {
   `;
 
   try {
-    await db.query(userSql, [name, dob, occupation, area, budget, gender, userId]);
+    const finalDob = dob ? dob : null;
+    const finalBudget = budget ? budget : null;
+    await db.query(userSql, [name, finalDob, occupation, area, finalBudget, gender, userId]);
     res.json({ message: "Profile Updated Successfully" });
   } catch (err) {
     console.log("USER UPDATE ERROR:", err);

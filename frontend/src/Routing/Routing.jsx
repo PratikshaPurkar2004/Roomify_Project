@@ -26,6 +26,8 @@ import FindRooms from "../pages/user/FindRooms";
 import Preference from "../pages/user/Preference";
 import Subscription from "../pages/Subscription";
 import Chat from "../pages/user/Chat";
+import MyRooms from "../pages/user/MyRooms";
+
 
 /* Auth & Preference Guard */
 function AuthGuard() {
@@ -84,6 +86,8 @@ function Routing() {
         <Route path="find-roommates" element={<FindRoommates />} />
         <Route path="subscription" element={<Subscription />} />
         <Route path="chat" element={<Chat />} />
+        <Route path="my-rooms" element={<MyRooms />} />
+
 
       </Route>
 

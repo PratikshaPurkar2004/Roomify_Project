@@ -24,10 +24,11 @@ router.get('/', async (req, res) => {
       }
     }
 
-    // Return exactly 4 cities for the popular cities grid
+    // Return exactly 4 cities for the popular cities grid by default, or all if ?all=true
+    const isAll = req.query.all === 'true';
     res.json({
       success: true,
-      cities: cities.slice(0, 4)
+      cities: isAll ? cities : cities.slice(0, 4)
     });
 
   } catch (error) {
@@ -62,6 +63,21 @@ router.get('/all', async (req, res) => {
     console.error("Fetch all cities error:", error);
     res.status(500).json({ success: false, message: "Database error" });
   }
+});
+
+// GET all states
+router.get('/states', (req, res) => {
+  const states = [
+    'Maharashtra', 'Delhi', 'Karnataka', 'Telangana', 'Gujarat', 
+    'Tamil Nadu', 'Uttar Pradesh', 'West Bengal', 'Rajasthan', 'Punjab'
+  ];
+  res.json({ success: true, states });
+});
+
+// GET countries
+router.get('/countries', (req, res) => {
+  const countries = ['India', 'USA', 'UK', 'Canada', 'Australia'];
+  res.json({ success: true, countries });
 });
 
 module.exports = router;
