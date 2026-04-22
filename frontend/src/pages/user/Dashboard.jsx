@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Dashboard.css";
 import { Users, Home, FileText, UserPlus, UserSearch, Plus, MapPin, DollarSign, X, TrendingUp, Activity, Search } from "lucide-react";
@@ -203,8 +203,7 @@ function Dashboard() {
             <div className="hero-text-overlay">
               <span className="hero-badge">WELCOME BACK, {currentUser.name || "USER"}</span>
               <h1>Find your perfect <span className="text-gradient">room/roommate</span></h1>
-              <span className="hero-badge">WELCOME BACK, {currentUser.name || "SAYALI"}</span>
-              <h1>Find your perfect <span className="text-gradient">room/roommate</span></h1>
+
               <p>
                 Our ecosystem simplifies your search for verified listings and compatible roommates. {randomPhrase}
               </p>

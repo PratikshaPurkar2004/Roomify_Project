@@ -126,7 +126,7 @@ export default function FindRoommates() {
     if (city) result = result.filter(u => String(u.location || "").toLowerCase().includes(city.toLowerCase()));
     if (budget) result = result.filter(u => u.rent == null || Number(u.rent) <= Number(budget));
     if (gender) result = result.filter(u => String(u.gender || "").toLowerCase() === gender.toLowerCase());
-
+    
     // Sorting by Match Percentage Descending
     result.sort((a, b) => b.matchPercentage - a.matchPercentage);
 
@@ -200,7 +200,7 @@ export default function FindRoommates() {
 
       {loadingRooms ? (
         <div style={{ textAlign: "center", marginTop: "100px", color: "#64748b" }}>
-          Loading your discovery feed...
+           Loading your discovery feed...
         </div>
       ) : showGate ? (
         <div className="rm2-gated-section">
@@ -228,8 +228,6 @@ export default function FindRoommates() {
         </div>
       ) : (
         <div style={{ animation: 'rm2fadeIn 0.5s ease' }}>
-
-
           {/* Filter Bar */}
           <div className="rm2-filter-bar">
             <div className="rm2-filter-label"><Filter size={16} /> Filters</div>
@@ -247,6 +245,8 @@ export default function FindRoommates() {
                 placeholder="Max Budget (₹)"
                 value={budget}
                 onChange={e => setBudget(e.target.value)}
+                step="100"
+                min="0"
               />
             </div>
             <div className="rm2-filter-group">
@@ -271,11 +271,11 @@ export default function FindRoommates() {
               </div>
             ) : (
               filtered.map(person => {
-                const match = person.matchPercentage;
-                const hasSent = sentRequests.includes(person.id);
+                const match    = person.matchPercentage;
+                const hasSent  = sentRequests.includes(person.id);
                 const accepted = acceptedIds.includes(person.id);
                 const matchColor = getMatchColor(match);
-                const initial = person.name?.charAt(0)?.toUpperCase() || "?";
+                const initial  = person.name?.charAt(0)?.toUpperCase() || "?";
 
                 return (
                   <div className="rm2-card" key={person.id}>
@@ -426,6 +426,7 @@ export default function FindRoommates() {
                     <option value="Independent House">Independent House</option>
                     <option value="Bungalow / Villa">Bungalow / Villa</option>
                     <option value="PG / Hostel">PG / Hostel</option>
+                    <option value="Gated Society">Gated Society</option>
                   </select>
                 </div>
               </div>

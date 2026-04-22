@@ -65,6 +65,7 @@ router.get('/all', async (req, res) => {
   }
 });
 
+
 // GET all states
 router.get('/states', (req, res) => {
   const states = [

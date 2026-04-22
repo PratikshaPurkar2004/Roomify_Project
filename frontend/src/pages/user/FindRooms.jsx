@@ -67,20 +67,36 @@ export default function FindRooms() {
     setActiveImgIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
+  const openDetailModal = (room) => {
+    setSelectedRoom(room);
+    setActiveImgIndex(0);
+    setShowDetailModal(true);
+
+    // Log the view
+    const userId = localStorage.getItem("userId");
+    fetch(`http://localhost:5000/api/rooms/${room.room_id}/view`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ viewerId: userId })
+    }).catch(err => console.error("Error logging view:", err));
+  };
+
   useEffect(() => {
     fetch("http://localhost:5000/api/cities?all=true")
       .then(r => r.json())
-      .then(d => { if (d.success) setDbCities(d.cities); });
+      .then(d => { if (d.success) setDbCities(d.cities); })
+      .catch(() => {});
 
     fetch("http://localhost:5000/api/cities/states")
       .then(r => r.json())
-      .then(d => { if (d.success) setDbStates(d.states); });
+      .then(d => { if (d.success) setDbStates(d.states); })
+      .catch(() => {});
 
     fetch("http://localhost:5000/api/cities/countries")
       .then(r => r.json())
-      .then(d => { if (d.success) setDbCountries(d.countries); });
+      .then(d => { if (d.success) setDbCountries(d.countries); })
+      .catch(() => {});
   }, []);
-
 
   return (
     <div className="fr-page">
@@ -154,7 +170,6 @@ export default function FindRooms() {
             </select>
           </div>
           <button className="fr-search-btn">
-
             <Search size={16} /> Search
           </button>
         </div>
@@ -171,7 +186,7 @@ export default function FindRooms() {
         ) : (
           filtered.map(room => (
             <div className="fr-card-modern" key={room.room_id}>
-              <div className="fr-card-img-wrap-modern" onClick={() => { setSelectedRoom(room); setShowDetailModal(true); }} style={{ cursor: 'pointer' }}>
+              <div className="fr-card-img-wrap-modern" onClick={() => openDetailModal(room)} style={{ cursor: 'pointer' }}>
                 {(() => {
                   let images = [];
                   try {
