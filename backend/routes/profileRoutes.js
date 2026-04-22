@@ -58,8 +58,10 @@ router.delete("/:id", async (req, res) => {
   const userId = req.params.id;
 
   try {
-    await db.query("DELETE FROM users WHERE user_id=?", [userId]);
-    res.json({ message: "Account Deleted Successfully" });
+    // Instagram-like deletion: Mark for deletion (deactivate)
+    // The account will be permanently deleted after 30 days by the background cleanup task.
+    await db.query("UPDATE users SET deletion_date = CURRENT_TIMESTAMP WHERE user_id=?", [userId]);
+    res.json({ message: "Account deactivated. It will be permanently deleted in 30 days. Log in before then to reactivate." });
   } catch (err) {
     console.log("DELETE ERROR:", err);
     res.status(500).json({ message: "Server error" });

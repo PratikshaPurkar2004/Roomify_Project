@@ -66,42 +66,60 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
   const validate = (data = formData) => {
     let newErrors = {};
 
-    // Name Validation: No numbers allowed
+    // Name Validation: No numbers or special characters allowed
     if (!data.name.trim()) {
       newErrors.name = "Name is required";
     } else if (/\d/.test(data.name)) {
       newErrors.name = "Numbers are not allowed in name";
+    } else if (/[^a-zA-Z\s]/.test(data.name)) {
+      newErrors.name = "Special characters are not allowed in name";
     }
 
-    // Email Validation: Exactly one @, not only numbers
+    // Strict Email Validation (RFC Standards)
     if (!data.email) {
       newErrors.email = "Email is required";
     } else {
-      const emailValue = data.email.trim();
-      const atCount = (emailValue.match(/@/g) || []).length;
-      const isOnlyNumbers = /^\d+$/.test(emailValue.replace(/[@.]/g, ""));
+      const emailValue = data.email;
+      const parts = emailValue.split("@");
       
-      if (atCount !== 1) {
+      if (emailValue.length > 320) {
+        newErrors.email = "Email cannot exceed 320 characters";
+      } else if (emailValue.includes(" ")) {
+        newErrors.email = "Email cannot contain spaces";
+      } else if (parts.length !== 2) {
         newErrors.email = "Email must contain exactly one @ symbol";
-      } else if (isOnlyNumbers) {
-        newErrors.email = "Email cannot be only numbers";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-        newErrors.email = "Invalid email format";
+      } else {
+        const [localPart, domainPart] = parts;
+        
+        if (localPart.length > 64) {
+          newErrors.email = "Local part cannot exceed 64 characters";
+        } else if (domainPart.length > 255) {
+          newErrors.email = "Domain part cannot exceed 255 characters";
+        } else if (localPart.startsWith(".") || localPart.endsWith(".")) {
+          newErrors.email = "Local part cannot start or end with a dot";
+        } else if (domainPart.startsWith(".") || domainPart.endsWith(".")) {
+          newErrors.email = "Domain part cannot start or end with a dot";
+        } else if (emailValue.includes("..")) {
+          newErrors.email = "Email cannot contain consecutive dots";
+        } else if (!/^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(emailValue)) {
+          newErrors.email = "Invalid email format";
+        }
       }
     }
 
-    // Password Validation: Mix of letter, number, and special character
+    // Password Validation: At least one uppercase, one lowercase, one digit, and one special character
     const password = data.password || "";
-    const hasLetter = /[a-zA-Z]/.test(password);
-    const hasNumber = /\d/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasDigit = /\d/.test(password);
     const hasSpecial = /[@$!%*?&]/.test(password);
 
     if (!password) {
       newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    } else if (!(hasLetter && hasNumber && hasSpecial)) {
-      newErrors.password = "Include letters, numbers & special characters";
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    } else if (!(hasLowercase && hasUppercase && hasDigit && hasSpecial)) {
+      newErrors.password = "Password must include at least one uppercase letter, one lowercase letter, one digit, and one special character";
     }
 
     // Confirm Password
@@ -339,7 +357,11 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
                 </div>
               </div>
 
-              <button type="submit" className="register-btn">
+              <button 
+                type="submit" 
+                className="register-btn"
+                disabled={loading}
+              >
                 {loading ? "Registering..." : "Create Account"}
               </button>
 

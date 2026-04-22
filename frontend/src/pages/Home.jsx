@@ -12,36 +12,10 @@ export default function Home() {
 const navigate = useNavigate();
 const [showLogin, setShowLogin] = useState(false);
 const [showRegister, setShowRegister] = useState(false);
+const [showPlans, setShowPlans] = useState(false);
 const [activeTab,setActiveTab] = useState("rent");
 const [propertyFilter, setPropertyFilter] = useState("All");
 const [cities, setCities] = useState([]);
-
-useEffect(() => {
-  const fetchCities = async () => {
-    try {
-      const { data } = await axios.get("http://localhost:5000/api/cities");
-      if (data.success && data.cities) {
-        setCities(data.cities);
-      }
-    } catch (error) {
-      console.error("Error fetching cities:", error);
-      setCities(['Mumbai', 'Pune', 'Nashik', 'Hyderabad']);
-    }
-  };
-  fetchCities();
-}, []);
-
-const rentSteps = [
-"Fill up a form with the basic details about your apartment",
-"Sign up and complete your profile",
-"Post your properties and connect with roommates"
-];
-
-const findSteps = [
-"Browse rooms or roommates by city",
-"Contact the roommate or landlord",
-"Move into your new shared space"
-];
 
 const popularProperties = [
   {
@@ -107,28 +81,37 @@ const popularProperties = [
     beds: 2,
     baths: 1,
     sqft: "850 sq.ft"
-  },
-  {
-    title: "Luxury 1BHK in Andheri",
-    city: "Mumbai",
-    rent: "₹22,000",
-    period: "/mo",
-    type: "Apartment",
-    image: "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg",
-    amenities: ["Pool", "Gym", "Security"],
-    rating: 4.9,
-    reviews: 56,
-    isVerified: true,
-    isHot: true,
-    beds: 1,
-    baths: 1,
-    sqft: "680 sq.ft"
   }
 ];
 
-const filteredProperties = propertyFilter === "All" 
-  ? popularProperties 
-  : popularProperties.filter(p => p.city === propertyFilter);
+const [activeProperty, setActiveProperty] = useState(popularProperties[0]);
+
+useEffect(() => {
+  const fetchCities = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:5000/api/cities");
+      if (data.success && data.cities) {
+        setCities(data.cities);
+      }
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      setCities(['Mumbai', 'Pune', 'Nashik', 'Hyderabad']);
+    }
+  };
+  fetchCities();
+}, []);
+
+const rentSteps = [
+"Fill up a form with the basic details about your apartment",
+"Sign up and complete your profile",
+"Post your properties and connect with roommates"
+];
+
+const findSteps = [
+"Browse rooms or roommates by city",
+"Contact the roommate or landlord",
+"Move into your new shared space"
+];
 
 return(
 
@@ -145,7 +128,7 @@ return(
 
 <div className="hero-text">
 
-<h1>Find Your Perfect Roommate Match</h1>
+<h1>Find Your Perfect Rooms/Roommate.</h1>
 
 <p>
 Roomify connects students and professionals to
@@ -197,84 +180,37 @@ alt="roommate"
 
 </section>
 
-{/* EXPLORE ROOMS */}
 
-<section className="rooms">
+{/* SIMPLE & SWEET PROPERTIES */}
 
-<h2>Explore Rooms</h2>
-
-<div onClick={()=>setShowRegister(true)} className="room-slider">
-
-<div className="room-card">
-<img src="https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg"/>
-<p>Modern Apartment</p>
-</div>
-
-<div className="room-card">
-<img src="https://images.pexels.com/photos/1648776/pexels-photo-1648776.jpeg"/>
-<p>Luxury Bedroom</p>
-</div>
-
-<div className="room-card">
-<img src="https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"/>
-<p>Shared Living Room</p>
-</div>
-
-<div className="room-card">
-<img src="https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"/>
-<p>Budget Friendly Room</p>
-</div>
-
-</div>
-
-</section>
-
-{/* POPULAR PROPERTIES — SHORT & SWEET */}
-
-<section className="pp-section">
-  <div className="pp-header">
-    <div className="pp-title-row">
-      <div>
-        <h2>Popular Properties</h2>
-        <p>Trending spaces our community loves</p>
-      </div>
-      <button className="pp-browse-all" onClick={()=>setShowRegister(true)}>View All →</button>
-    </div>
+<section className="simple-properties">
+  <div className="sp-header">
+    <h2>Popular Properties</h2>
+    <p>Discover the most loved spaces.</p>
   </div>
 
-  <div onClick={()=>setShowRegister(true)} className="pp-showcase">
-    {popularProperties.slice(0, 4).map((property, index) => (
-      <div key={index} className="pp-card-container">
-        <div className="pp-showcase-card" style={{ animationDelay: `${index * 0.1}s` }}>
-          <div className="pp-img-wrapper">
-            <img src={`${property.image}?auto=compress&cs=tinysrgb&w=600`} alt={property.title} />
-            <div className="pp-showcase-overlay"></div>
-            {property.isHot && <span className="pp-hot-tag">Trending 🔥</span>}
-            <div className="pp-price-float">
-              <span>{property.rent}</span>
-              <small>{property.period}</small>
-            </div>
-          </div>
-          
-          <div className="pp-card-content">
-            <span className="pp-type-label">{property.type}</span>
-            <h3>{property.title}</h3>
-            <div className="pp-loc">
-              <span>📍 {property.city}</span>
-              <span className="pp-rating">⭐ {property.rating}</span>
-            </div>
-            
-            <div className="pp-features">
-              <span>🛏️ {property.beds} Bed</span>
-              <span>🚿 {property.baths} Bath</span>
-              <span>📏 {property.sqft}</span>
-            </div>
-            
-            <button className="pp-view-btn">Check Availability</button>
+  <div className="sp-grid">
+    {popularProperties.slice(0, 4).map((prop, idx) => (
+      <div key={idx} className="sp-card" onClick={()=>setShowRegister(true)}>
+        <div className="sp-img-wrapper">
+          <img src={prop.image} alt={prop.title} />
+          <div className="sp-price">{prop.rent}<span>{prop.period}</span></div>
+        </div>
+        <div className="sp-info">
+          <h3>{prop.title}</h3>
+          <p>📍 {prop.city} • {prop.type}</p>
+          <div className="sp-amenities">
+            {prop.amenities && prop.amenities.map((amenity, i) => (
+              <span key={i} className="sp-amenity">{amenity}</span>
+            ))}
           </div>
         </div>
       </div>
     ))}
+  </div>
+  
+  <div className="sp-footer">
+    <button className="sp-view-all" onClick={()=>setShowRegister(true)}>Explore All Properties</button>
   </div>
 </section>
 
@@ -374,7 +310,7 @@ alt="illustration"
     <div className="banner-content">
       <h2>Unlock Roomify <span>Pro</span></h2>
       <p>Take your roommate search to the next level. Get unlimited messaging, verified badges, and priority placement.</p>
-      <button className="pro-btn" onClick={()=>setShowRegister(true)}>View Plans <span className="arrow">→</span></button>
+      <button className="pro-btn" onClick={() => setShowPlans(true)}>View Plans <span className="arrow">→</span></button>
     </div>
     <div className="banner-illustration">
       <div className="glass-card">
@@ -417,17 +353,17 @@ your lifestyle and preferences. Safe, smart, and simple.
 
 <div>
 <h3>Platform</h3>
-<ul>
-<li>Dashboard</li>
-<li>Find Roommate</li>
-<li>Profile</li>
-<li>Requests</li>
+<ul className="platform-col">
+<li onClick={() => setShowRegister(true)}>Dashboard</li>
+<li onClick={() => setShowRegister(true)}>Find Roommate</li>
+<li onClick={() => setShowRegister(true)}>Profile</li>
+<li onClick={() => setShowRegister(true)}>Requests</li>
 </ul>
 </div>
 
 <div>
 <h3>Features</h3>
-<ul>
+<ul className="features-col">
 <li>Room Matching</li>
 <li>Preference Filter</li>
 <li>Chat System</li>
@@ -463,6 +399,45 @@ your lifestyle and preferences. Safe, smart, and simple.
     onClose={() => setShowRegister(false)} 
     onSwitch={() => { setShowRegister(false); setShowLogin(true); }} 
   />
+)}
+
+{showPlans && (
+  <div className="plans-modal-overlay" onClick={() => setShowPlans(false)}>
+    <div className="plans-modal" onClick={e => e.stopPropagation()}>
+      <button className="close-plan-btn" onClick={() => setShowPlans(false)}>✕</button>
+      <div className="plans-modal-header">
+        <h2>Choose Your Plan</h2>
+        <p>Upgrade to Pro for more features and verified roommates.</p>
+      </div>
+      <div className="plans-cards-container">
+        
+        <div className="plan-card basic">
+          <h3>Basic</h3>
+          <div className="plan-price">Free</div>
+          <ul className="plan-features">
+            <li>Browse Rooms</li>
+            <li>Limited Contact</li>
+            <li>Standard Support</li>
+          </ul>
+          <button className="plan-select-btn" onClick={() => {setShowPlans(false); setShowRegister(true)}}>Select Basic</button>
+        </div>
+
+        <div className="plan-card pro">
+          <div className="plan-badge">Most Popular</div>
+          <h3>Roomify Pro</h3>
+          <div className="plan-price">₹499<span>/mo</span></div>
+          <ul className="plan-features">
+            <li>Unlimited Chats</li>
+            <li>Verified Badge ✓</li>
+            <li>Priority Listing</li>
+            <li>AI Smart Matches</li>
+          </ul>
+          <button className="plan-select-btn pro-select" onClick={() => {setShowPlans(false); setShowRegister(true)}}>Get Pro</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 )}
 
 </div>

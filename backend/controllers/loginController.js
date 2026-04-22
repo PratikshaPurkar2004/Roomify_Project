@@ -21,7 +21,25 @@ const login = async (req, res) => {
 
     const user = rows[0];
 
-    console.log("Login attempt:", { email: normalizedEmail, storedPasswordType: typeof user.password, storedPasswordLength: user.password ? user.password.length : 0 });
+    // Check if account is marked for deletion (deactivated)
+    if (user.deletion_date) {
+      const deletionDate = new Date(user.deletion_date);
+      const now = new Date();
+      const diffDays = Math.ceil((now - deletionDate) / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 30) {
+        // Reactivate account automatically on login
+        await db.query("UPDATE users SET deletion_date = NULL WHERE user_id = ?", [user.user_id]);
+        user.deletion_date = null;
+        console.log(`Reactivated account for: ${user.email}`);
+      } else {
+        // Should have been deleted by background task
+        return res.status(401).json({
+          success: false,
+          message: "Account permanently deleted"
+        });
+      }
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
 

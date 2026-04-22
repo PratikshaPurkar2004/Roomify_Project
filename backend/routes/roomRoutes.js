@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
       SELECT r.*, u.name as host_name, u.email as host_email 
       FROM rooms r 
       JOIN users u ON r.host_id = u.user_id 
-      WHERE r.availability = 'available'
+      WHERE r.availability = 'available' AND u.deletion_date IS NULL
     `);
     res.json({
       success: true,

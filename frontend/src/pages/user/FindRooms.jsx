@@ -11,6 +11,7 @@ export default function FindRooms() {
 
   const [rooms, setRooms] = useState([]);
   const [filtered, setFiltered] = useState([]);
+  const [allCities, setAllCities] = useState([]);
   const [city, setCity] = useState("");
   const [budget, setBudget] = useState("");
   const [furnishing, setFurnishing] = useState("");
@@ -36,6 +37,9 @@ export default function FindRooms() {
 
   useEffect(() => {
     fetchRooms();
+    fetch("http://localhost:5000/api/cities/all")
+      .then(r => r.json())
+      .then(d => { if (d.success) setAllCities(d.cities); });
   }, []);
 
   useEffect(() => {
@@ -70,7 +74,6 @@ export default function FindRooms() {
     }
   };
 
-  const cities = [...new Set(rooms.map(r => r.location).filter(Boolean))];
 
   return (
     <div className="fr-page">
@@ -97,7 +100,7 @@ export default function FindRooms() {
             <span>Available</span>
           </div>
           <div className="fr-stat-pill">
-            <span className="fr-stat-num">{cities.length}</span>
+            <span className="fr-stat-num">{allCities.length}</span>
             <span>Cities</span>
           </div>
         </div>

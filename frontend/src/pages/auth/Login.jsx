@@ -48,58 +48,45 @@ const Login = ({ onClose, onSwitch }) => {
     setFormError({});
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      const p = user.preferences;
-      // Comprehensive check for missing or empty preferences
-      const noPreferences = !p || 
-                            p === "" || 
-                            p === "null" || 
-                            p === "[]" || 
-                            p === "skipped" || 
-                            (Array.isArray(p) && p.length === 0) ||
-                            (typeof p === 'object' && !Array.isArray(p) && Object.keys(p).length === 0);
-
-      if (noPreferences) {
-        navigate("/preferences");
-      } else {
-        navigate("/dashboard");
-      }
-    }
-  }, [user, navigate]);
+  // Auto-redirect removed to prevent the login modal from force-quitting before successful login
 
   const validate = (data = formData) => {
     let errors = {};
 
-    // Email Validation: Exactly one @, not only numbers
+    // Strict Email Validation (RFC Standards)
     if (!data.email) {
       errors.email = "Email is required";
     } else {
       const emailValue = data.email.trim();
-      const atCount = (emailValue.match(/@/g) || []).length;
-      const isOnlyNumbers = /^\d+$/.test(emailValue.replace(/[@.]/g, ""));
+      const parts = emailValue.split("@");
       
-      if (atCount !== 1) {
+      if (emailValue.length > 320) {
+        errors.email = "Email cannot exceed 320 characters";
+      } else if (emailValue.includes(" ")) {
+        errors.email = "Email cannot contain spaces";
+      } else if (parts.length !== 2) {
         errors.email = "Email must contain exactly one @ symbol";
-      } else if (isOnlyNumbers) {
-        errors.email = "Email cannot be only numbers";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-        errors.email = "Invalid email format";
+      } else {
+        const [localPart, domainPart] = parts;
+        
+        if (localPart.length > 64) {
+          errors.email = "Local part cannot exceed 64 characters";
+        } else if (domainPart.length > 255) {
+          errors.email = "Domain part cannot exceed 255 characters";
+        } else if (localPart.startsWith(".") || localPart.endsWith(".")) {
+          errors.email = "Local part cannot start or end with a dot";
+        } else if (domainPart.startsWith(".") || domainPart.endsWith(".")) {
+          errors.email = "Domain part cannot start or end with a dot";
+        } else if (emailValue.includes("..")) {
+          errors.email = "Email cannot contain consecutive dots";
+        } else if (!/^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(emailValue)) {
+          errors.email = "Invalid email format";
+        }
       }
     }
 
-    // Password Validation: Mix of letter, number, and special character
-    const password = data.password || "";
-    const hasLetter = /[a-zA-Z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    const hasSpecial = /[@$!%*?&]/.test(password);
-
-    if (!password) {
+    if (!data.password) {
       errors.password = "Password is required";
-    } else if (password.length < 6) {
-      errors.password = "At least 6 characters";
-    } else if (!(hasLetter && hasNumber && hasSpecial)) {
-      errors.password = "Letters, numbers & specials required";
     }
 
     return errors;
@@ -125,7 +112,17 @@ const Login = ({ onClose, onSwitch }) => {
     setFormError(errors);
 
     if (Object.keys(errors).length === 0) {
-      dispatch(loginUser(formData));
+      dispatch(loginUser(formData))
+        .unwrap()
+        .then(() => {
+          navigate("/preferences");
+          if (onClose) {
+            setTimeout(() => onClose(), 100);
+          }
+        })
+        .catch(() => {
+          // Backend rejection handled by authslice
+        });
     }
   };
 
@@ -204,7 +201,11 @@ const Login = ({ onClose, onSwitch }) => {
               <Link to="/forgot-password">Forgot Password?</Link>
             </div>
 
-            <button type="submit" className="login-btn" disabled={loading}>
+            <button 
+              type="submit" 
+              className="login-btn" 
+              disabled={loading}
+            >
               {loading ? "Signing in..." : "Sign In"}
             </button>
 

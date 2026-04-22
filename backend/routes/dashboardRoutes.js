@@ -70,7 +70,7 @@ router.get("/users", async (req, res) => {
   try {
     console.log("Fetching users from database...");
     const [users] = await db.query(
-      "SELECT user_id, name, email, city, user_type, preferences FROM users LIMIT 20"
+      "SELECT user_id, name, email, city, user_type, preferences FROM users WHERE deletion_date IS NULL LIMIT 20"
     );
     console.log(`Retrieved ${users.length} users`);
 

@@ -10,6 +10,7 @@ export default function FindRoommates() {
 
   const [roommates, setRoommates] = useState([]);
   const [filtered, setFiltered]   = useState([]);
+  const [allCities, setAllCities] = useState([]);
   const [city, setCity]           = useState("");
   const [budget, setBudget]       = useState("");
   const [gender, setGender]       = useState("");
@@ -27,10 +28,16 @@ export default function FindRoommates() {
   useEffect(() => {
     if (!userId) return;
 
+    fetch("http://localhost:5000/api/cities/all")
+      .then(r => r.json())
+      .then(d => { if (d.success) setAllCities(d.cities); });
+
     fetch(`http://localhost:5000/api/preferences/${userId}`)
       .then(r => r.json())
       .then(d => {
-        if (d?.preferences) setMyPreferences(d.preferences.split(",").map(p => p.trim()));
+        if (d?.preferences && d.preferences !== "skipped") {
+           setMyPreferences(d.preferences.split(",").map(p => p.trim()).filter(Boolean));
+        }
       });
 
     fetch(`http://localhost:5000/api/requests/sent/${userId}`)
@@ -48,8 +55,10 @@ export default function FindRoommates() {
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) {
-          setRoommates(data);
-          setFiltered(data);
+          // Filter out the logged-in user from the list
+          const others = data.filter(u => String(u.id) !== String(userId));
+          setRoommates(others);
+          setFiltered(others);
         }
       })
       .catch(() => { setRoommates([]); setFiltered([]); });
@@ -92,8 +101,6 @@ export default function FindRoommates() {
     return "#94a3b8";
   };
 
-  const cities = [...new Set(roommates.map(u => u.location).filter(Boolean))];
-
   return (
     <div className="rm2-page">
       {/* Blobs */}
@@ -119,7 +126,7 @@ export default function FindRoommates() {
           <MapPin size={15} className="rm2-filter-icon" />
           <select value={city} onChange={e => setCity(e.target.value)}>
             <option value="">All Cities</option>
-            {cities.map(c => <option key={c}>{c}</option>)}
+            {allCities.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div className="rm2-filter-group">
@@ -134,7 +141,8 @@ export default function FindRoommates() {
         <div className="rm2-filter-group">
           <User size={15} className="rm2-filter-icon" />
           <select value={gender} onChange={e => setGender(e.target.value)}>
-            <option value="">Any Gender</option>
+            <option value=""disabled>Gender</option>
+            <option value=" Other">Other</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
           </select>
@@ -167,15 +175,24 @@ export default function FindRoommates() {
 
             return (
               <div className="rm2-card" key={person.id}>
-                {/* Match badge */}
-                <div className="rm2-match-ring" style={{ "--mc": matchColor }}>
-                  <div className="rm2-avatar-wrap">
-                    <div className="rm2-avatar">{initial}</div>
+                {/* Match badge - Only show if current user has set preferences and it's not a '0' result */}
+                {myPreferences.length > 0 && match > 0 && (
+                  <div className="rm2-match-ring" style={{ "--mc": matchColor }}>
+                    <div className="rm2-avatar-wrap">
+                      <div className="rm2-avatar">{initial}</div>
+                    </div>
+                    <span className="rm2-match-label" style={{ color: matchColor }}>
+                      {match}% match
+                    </span>
                   </div>
-                  <span className="rm2-match-label" style={{ color: matchColor }}>
-                    {match}% match
-                  </span>
-                </div>
+                )}
+                
+                {/* Fallback avatar if no match percentage is shown or match is 0 */}
+                {(myPreferences.length === 0 || match === 0) && (
+                  <div className="rm2-avatar-wrap" style={{marginBottom: '15px', display: 'flex', justifyContent: 'center'}}>
+                    <div className="rm2-avatar" style={{width: '60px', height: '60px', fontSize: '24px', background: '#f1f5f9', color: '#64748b', border: '2px solid #e2e8f0'}}>{initial}</div>
+                  </div>
+                )}
 
                 <div className="rm2-card-info-modern">
                   
@@ -236,7 +253,7 @@ export default function FindRoommates() {
                     title={accepted ? "Chat" : "Connect first to chat"}
                   >
                     <MessageCircle size={15} />
-                    {accepted ? "Chat" : "Connect to Chat"}
+                    {accepted ? "Chat" : "Chat"}
                   </button>
 
                   <button
@@ -245,7 +262,7 @@ export default function FindRoommates() {
                     onClick={() => !hasSent && handleRequest(person.id, person.name)}
                   >
                     <UserPlus size={15} />
-                    {hasSent ? "Sent" : "Connect"}
+                    {hasSent ? "Sent" : "Request"}
                   </button>
                 </div>
               </div>

@@ -154,4 +154,16 @@ router.put("/:id/status", async (req, res) => {
   }
 });
 
+// DELETE (unsend) a request
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.query("DELETE FROM requests WHERE id = ?", [id]);
+    res.json({ success: true, message: "Request cancelled successfully! ✅" });
+  } catch (err) {
+    console.error("Database error (requests DELETE):", err);
+    res.status(500).json({ success: false, message: "Database error" });
+  }
+});
+
 module.exports = router;

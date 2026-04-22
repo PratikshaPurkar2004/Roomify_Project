@@ -27,6 +27,25 @@ import Preference from "../pages/user/Preference";
 import Subscription from "../pages/Subscription";
 import Chat from "../pages/user/Chat";
 
+/* Auth & Preference Guard */
+function AuthGuard() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  
+  if (!user) return <Navigate to="/" />;
+
+  const p = user.preferences;
+  const noPreferences = !p || 
+                        p === "" || 
+                        p === "null" || 
+                        p === "[]" || 
+                        p === "None" ||
+                        (Array.isArray(p) && p.length === 0);
+
+  if (noPreferences) return <Navigate to="/preferences" />;
+
+  return <Outlet />;
+}
+
 /* Dashboard Layout */
 function DashboardLayout() {
   return (
@@ -35,7 +54,7 @@ function DashboardLayout() {
       <div className="layout">
         <Sidebar />
         <div className="content">
-          <Outlet />
+          <AuthGuard />
         </div>
       </div>
       <Footer />
@@ -61,8 +80,8 @@ function Routing() {
         <Route index element={<Dashboard />} />
         <Route path="profile" element={<Profile />} />
         <Route path="requests" element={<Requests />} />
-        <Route path="find-rooms" element={<FindRoommates />} />
-        <Route path="find-roommates" element={<FindRooms />} />
+        <Route path="find-rooms" element={<FindRooms />} />
+        <Route path="find-roommates" element={<FindRoommates />} />
         <Route path="subscription" element={<Subscription />} />
         <Route path="chat" element={<Chat />} />
 
