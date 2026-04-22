@@ -31,7 +31,12 @@ import MyRooms from "../pages/user/MyRooms";
 
 /* Auth & Preference Guard */
 function AuthGuard() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("user"));
+  } catch (e) {
+    console.error("AuthGuard: Error parsing user from localStorage", e);
+  }
   
   if (!user) return <Navigate to="/" />;
 

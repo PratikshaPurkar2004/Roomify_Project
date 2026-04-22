@@ -34,7 +34,13 @@ function Dashboard() {
   });
 
 
-  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || {};
+    } catch {
+      return {};
+    }
+  })();
 
 
   const phrases = [
@@ -85,7 +91,7 @@ function Dashboard() {
 
   const handleTouchStart = (e) => {
     touchStartRef.current = e.touches[0].clientX;
-  };ī
+  };
 
   const handleTouchMove = (e) => {
     touchEndRef.current = e.touches[0].clientX;
