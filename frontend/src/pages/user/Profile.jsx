@@ -273,7 +273,7 @@ export default function Profile() {
           </div>
 
           <div className="form-section">
-             <h3>Preferences & Location</h3>
+             <h3>Location & Budget</h3>
              <div className="input-group-grid">
                 <div className="input-box">
                    <label>City / Location</label>
@@ -285,49 +285,50 @@ export default function Profile() {
                 </div>
              </div>
           </div>
+
+          <div className="profile-separator-inner"></div>
+
+          <div className="profile-preferences-section">
+            <h3>My Lifestyle Preferences</h3>
+            <p className="profile-pref-subtitle">
+              These tags help us find you the most compatible roommates.
+            </p>
+
+            {prefMsg.text && (
+              <div className={`pref-msg-inline pref-msg-${prefMsg.type}`}>
+                {prefMsg.text}
+              </div>
+            )}
+
+            <div className="profile-pref-grid">
+              {allPreferences.map((item) => {
+                const isActive = selected.includes(item.name);
+                return (
+                  <div
+                    key={item.id}
+                    className={`profile-pref-card ${isActive ? "active" : ""}`}
+                    onClick={() => togglePreference(item.name)}
+                  >
+                    <div className="profile-pref-icon">{item.icon}</div>
+                    <p>{item.name}</p>
+                    {isActive && <div className="profile-pref-check">✓</div>}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="profile-pref-actions">
+              <button
+                className="btn-save-pref"
+                onClick={handleUpdatePreferences}
+                disabled={prefSaving || !hasPrefChanges}
+              >
+                {prefSaving ? "Saving..." : hasPrefChanges ? "Update Preferences" : "No Changes"}
+              </button>
+            </div>
+          </div>
         </motion.div>
 
-        <div className="profile-separator"></div>
-
-        <div className="profile-preferences-section">
-          <h3>My Lifestyle Preferences</h3>
-          <p className="profile-pref-subtitle">
-            These tags help us find you the most compatible roommates.
-          </p>
-
-          {prefMsg.text && (
-            <div className={`pref-msg-inline pref-msg-${prefMsg.type}`}>
-              {prefMsg.text}
-            </div>
-          )}
-
-          <div className="profile-pref-grid">
-            {allPreferences.map((item) => {
-              const isActive = selected.includes(item.name);
-              return (
-                <div
-                  key={item.id}
-                  className={`profile-pref-card ${isActive ? "active" : ""}`}
-                  onClick={() => togglePreference(item.name)}
-                >
-                  <div className="profile-pref-icon">{item.icon}</div>
-                  <p>{item.name}</p>
-                  {isActive && <div className="profile-pref-check">✓</div>}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="profile-pref-actions">
-            <button
-              className="btn-save-pref"
-              onClick={handleUpdatePreferences}
-              disabled={prefSaving || !hasPrefChanges}
-            >
-              {prefSaving ? "Saving..." : hasPrefChanges ? "Update Preferences" : "No Changes"}
-            </button>
-          </div>
-        </div>
 
       </div>
 
