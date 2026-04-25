@@ -1,41 +1,15 @@
-// const express = require("express");
-// const cors = require("cors");
-// require("dotenv").config();
-
-// const authRoutes = require("./routes/authRoutes");
-// const cityRoutes = require("./routes/cityRoutes");
-// const dashboardRoutes = require("./routes/dashboardRoutes");
-// const profileRoutes = require("./routes/profileRoutes");
-
-// const app = express();
-
-// app.use(cors());
-// app.use(express.json());
-
-// // Routes
-// app.use("/api/auth", authRoutes);
-// app.use("/api/cities", cityRoutes);
-// app.use("/api/dashboard", dashboardRoutes);
-// app.use("/api/profile", profileRoutes);
-
-// app.get("/", (req, res) => {
-//   res.send("Backend Running 🚀");
-// });
-
-// const PORT = process.env.PORT || 5000;
-
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
-
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
+const http = require("http");
+const { Server } = require("socket.io");
 const db = require("./config/db");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+const socketHandler = require("./socketHandler");
+
+// Load .env from backend directory
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 const authRoutes = require("./routes/authRoutes");
-
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const roommateRoutes = require("./routes/roommateRoutes");
@@ -45,16 +19,32 @@ const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const cityRoutes = require("./routes/cityRoutes");
+const matchRoutes = require("./routes/matchRoutes");
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  },
+});
 
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
+// Inject Socket.io into requests
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
+// Initialize Socket Handler
+socketHandler(io);
+
 // Routes
 app.use("/api/auth", authRoutes);
-
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/roommates", roommateRoutes);
@@ -64,6 +54,7 @@ app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/cities", cityRoutes);
+app.use("/api/matches", matchRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend Running 🚀");
@@ -83,6 +74,6 @@ app.get("/health", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT} with Socket.io support`);
 });

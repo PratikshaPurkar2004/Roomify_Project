@@ -21,8 +21,6 @@ const login = async (req, res) => {
 
     const user = rows[0];
 
-    console.log("Login attempt:", { email: normalizedEmail, storedPasswordType: typeof user.password, storedPasswordLength: user.password ? user.password.length : 0 });
-
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {

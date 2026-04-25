@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/Chat.css";
 import { MessageCircle, Send, MapPin, Users } from "lucide-react";
+import { io } from "socket.io-client";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function Chat() {
   const FREE_LIMIT = 5;
 
   const messagesBodyRef = useRef(null);
+  const socket = useRef(null);
   const userId = localStorage.getItem("userId");
 
   // Check subscription on mount
@@ -43,6 +45,30 @@ export default function Chat() {
       })
       .catch(err => console.error("Error:", err))
       .finally(() => setIsLoading(false));
+
+    // Initialize Socket Connection
+    socket.current = io("http://localhost:5000");
+
+    socket.current.on("receive_message", (message) => {
+      // Check if message belongs to current chat
+      const time = new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const formatted = {
+        id: message.id,
+        text: message.content,
+        sender: String(message.sender_id) === String(userId) ? "me" : "them",
+        time
+      };
+      
+      setMessages(prev => {
+        // Prevent duplicates if sender is 'me' (since it might be added locally already)
+        if (prev.find(msg => msg.id === message.id)) return prev;
+        return [...prev, formatted];
+      });
+    });
+
+    return () => {
+      if (socket.current) socket.current.disconnect();
+    };
   }, [userId, navigate]);
 
   // Auto-select contact if navigated from FindRoommates
@@ -79,18 +105,14 @@ export default function Chat() {
   const handleSelectContact = (contact) => {
     setSelectedContact(contact);
     fetchMessages(contact.id);
+    
+    // Join the socket room
+    if (socket.current && contact.roomid) {
+      socket.current.emit("join_room", { roomid: contact.roomid, userid: userId });
+    }
   };
 
-  // Poll for messages
-  useEffect(() => {
-    if (!selectedContact) return;
-    const interval = setInterval(() => {
-      fetchMessages(selectedContact.id);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [selectedContact, userId]);
-
-  // Scroll only the messages container to bottom when messages update
+  // Auto-scroll to bottom
   useEffect(() => {
     if (messagesBodyRef.current) {
       messagesBodyRef.current.scrollTop = messagesBodyRef.current.scrollHeight;
@@ -109,30 +131,28 @@ export default function Chat() {
       localStorage.setItem(`freeMessages_${userId}`, usedMessages + 1);
     }
 
-    try {
-      const res = await fetch("http://localhost:5000/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sender_id: userId,
-          receiver_id: selectedContact.id,
-          content: textToSend
-        })
+    // Emit via Socket
+    if (socket.current && selectedContact.roomid) {
+      socket.current.emit("send_message", {
+        roomid: selectedContact.roomid,
+        senderid: userId,
+        receiverid: selectedContact.id,
+        content: textToSend
       });
-      const data = await res.json();
-      
-      if (data.success) {
-        const m = data.message;
-        const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        setMessages(prev => [
-          ...prev,
-          { id: m.id, text: m.content, sender: "me", time }
-        ]);
-      }
-    } catch (err) {
-      console.error("Error sending message:", err);
     }
+
+    // Optional: Keep the REST API call if you want 100% redundancy or for simpler message history management
+    // But since our socket handler already saves to DB, we don't strictly need it here.
+    // However, if we remove it, we should ensure the UI updates via the socket's 'receive_message'.
+  };
+
+  const handleSend = () => {
+    sendMessage(newMessage);
+    setNewMessage(""); 
+  };
+
+  const handleSendIcebreaker = (text) => {
+    sendMessage(text);
   };
 
   const handleSend = () => {

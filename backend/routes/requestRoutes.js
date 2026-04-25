@@ -9,13 +9,11 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ success: false, message: "Missing sender or receiver ID" });
   }
 
-  // Check if they are the same user
   if (sender_id === receiver_id) {
     return res.status(400).json({ success: false, message: "You cannot request yourself." });
   }
 
   try {
-    // Check if request already exists
     const [existing] = await db.query(
       "SELECT id FROM requests WHERE sender_id = ? AND receiver_id = ?",
       [sender_id, receiver_id]
@@ -58,14 +56,13 @@ router.get("/:userId", async (req, res) => {
 
   try {
     const [results] = await db.query(sql, [userId]);
-    // Format response to match the frontend expected structure
     const formatted = results.map(row => ({
       id: row.request_id,
       senderId: row.sender_id,
       name: row.name,
       city: row.city,
       gender: row.gender,
-      budget: row.rent, // Use actual rent if exists, else budget
+      budget: row.rent, 
       status: row.status
     }));
 
@@ -143,7 +140,7 @@ router.get("/accepted-ids/:userId", async (req, res) => {
 // Update status of request (PUT)
 router.put("/:id/status", async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body; // 'accepted' or 'rejected'
+  const { status } = req.body; 
   
   try {
     await db.query("UPDATE requests SET status = ? WHERE id = ?", [status, id]);

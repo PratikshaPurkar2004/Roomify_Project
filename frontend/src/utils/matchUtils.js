@@ -1,20 +1,45 @@
-export const calculateMatchPercentage = (currentUserPrefs, otherUserPrefs) => {
-  if (!currentUserPrefs || !otherUserPrefs) return 0;
+/**
+ * Calculates a match percentage between two users based on lifestyle preferences,
+ * budget compatibility, and location.
+ */
+export const calculateMatchPercentage = (currentUser, otherUser) => {
+  if (!currentUser || !otherUser) return 0;
 
-  const currentArray = Array.isArray(currentUserPrefs) 
-    ? currentUserPrefs 
-    : currentUserPrefs.split(",").map(p => p.trim()).filter(p => p !== "");
-    
-  const otherArray = Array.isArray(otherUserPrefs)
-    ? otherUserPrefs
-    : otherUserPrefs.split(",").map(p => p.trim()).filter(p => p !== "");
+  // Extract preferences (handles both string and array formats)
+  const getPrefs = (user) => {
+    if (!user.preferences) return [];
+    if (Array.isArray(user.preferences)) return user.preferences;
+    return user.preferences.split(",").map(p => p.trim()).filter(Boolean);
+  };
 
-  if (currentArray.length === 0 || otherArray.length === 0) return 0;
+  const prefs1 = getPrefs(currentUser);
+  const prefs2 = getPrefs(otherUser);
 
-  const common = otherArray.filter(pref => currentArray.includes(pref));
+  if (prefs1.length === 0 || prefs2.length === 0) return 0;
+
+  // Jaccard Similarity for preferences
+  const intersection = prefs1.filter(p => prefs2.includes(p));
+  const union = [...new Set([...prefs1, ...prefs2])];
   
-  // Calculate percentage based on how many of CURRENT user's preferences are met by the OTHER user
-  // Or vice versa. Usually, it's the intersection relative to the union or one of them.
-  // The original logic used myPreferences.length as denominator.
-  return Math.round((common.length / currentArray.length) * 100);
+  let score = (intersection.length / union.length) * 100;
+
+  // Bonus for same city
+  if (currentUser.city && otherUser.location && currentUser.city.toLowerCase() === otherUser.location.toLowerCase()) {
+    score += 10;
+  } else if (currentUser.city && otherUser.city && currentUser.city.toLowerCase() === otherUser.city.toLowerCase()) {
+    score += 10;
+  }
+
+  // Budget compatibility (Finder looking at Host/Room)
+  if (currentUser.user_type === 'Finder' && otherUser.user_type === 'Host') {
+    const budget = Number(currentUser.budget || 0);
+    const rent = Number(otherUser.rent || 0);
+    if (rent > 0 && rent <= budget) {
+        score += 15;
+    } else if (rent > budget) {
+        score -= 20;
+    }
+  }
+
+  return Math.max(0, Math.min(100, Math.round(score)));
 };

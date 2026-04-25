@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/FindRoommates.css";
 import { calculateMatchPercentage } from "../../utils/matchUtils";
-import { Search, MapPin, Wallet, User, MessageCircle, UserPlus, Star, Filter } from "lucide-react";
+import { Search, MapPin, Wallet, User, MessageCircle, UserPlus, Filter, Zap } from "lucide-react";
 
 export default function FindRoommates() {
   const navigate = useNavigate();
@@ -17,6 +17,11 @@ export default function FindRoommates() {
   const [sentRequests, setSentRequests]   = useState([]);
   const [acceptedIds, setAcceptedIds]     = useState([]);
   const [toast, setToast] = useState("");
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 3000);
+  };
 
   const showToast = (msg) => {
     setToast(msg);
@@ -55,7 +60,6 @@ export default function FindRoommates() {
       .catch(() => { setRoommates([]); setFiltered([]); });
   }, []);
 
-  // Filter
   useEffect(() => {
     let result = roommates;
     if (city) result = result.filter(u => String(u.location || "").toLowerCase().includes(city.toLowerCase()));
@@ -78,8 +82,6 @@ export default function FindRoommates() {
       if (data.success) {
         showToast(`Request sent to ${name} ✅`);
         setSentRequests(prev => [...prev, receiverId]);
-      } else {
-        showToast(data.message || "Failed to send request");
       }
     } catch {
       showToast("Error sending request");
@@ -96,14 +98,12 @@ export default function FindRoommates() {
 
   return (
     <div className="rm2-page">
-      {/* Blobs */}
       <div className="rm2-blob rm2-blob-1" />
       <div className="rm2-blob rm2-blob-2" />
       <div className="rm2-blob rm2-blob-3" />
 
       {toast && <div className="rm2-toast">{toast}</div>}
 
-      {/* Hero */}
       <div className="rm2-hero">
         <div className="rm2-hero-content">
           <span className="rm2-hero-badge">👥 Find Roommates</span>
@@ -112,7 +112,6 @@ export default function FindRoommates() {
         </div>
       </div>
 
-      {/* Filter Bar */}
       <div className="rm2-filter-bar">
         <div className="rm2-filter-label"><Filter size={16} /> Filters</div>
         <div className="rm2-filter-group">
@@ -139,17 +138,12 @@ export default function FindRoommates() {
             <option value="female">Female</option>
           </select>
         </div>
-        <button className="rm2-search-btn">
-          <Search size={16} /> Search
-        </button>
       </div>
 
-      {/* Results Count */}
       <div className="rm2-results-label">
         {filtered.length} roommate{filtered.length !== 1 ? "s" : ""} found
       </div>
 
-      {/* Cards Grid */}
       <div className="rm2-grid">
         {filtered.length === 0 ? (
           <div className="rm2-empty">
@@ -167,7 +161,6 @@ export default function FindRoommates() {
 
             return (
               <div className="rm2-card" key={person.id}>
-                {/* Match badge */}
                 <div className="rm2-match-ring" style={{ "--mc": matchColor }}>
                   <div className="rm2-avatar-wrap">
                     <div className="rm2-avatar">{initial}</div>
@@ -178,53 +171,27 @@ export default function FindRoommates() {
                 </div>
 
                 <div className="rm2-card-info-modern">
-                  
                   <div className="rm2-card-row">
                     <span className="rm2-card-label">Name</span>
                     <span className="rm2-card-value rm2-font-bold">{person.name}</span>
                   </div>
-                  
-                  {person.age && (
-                  <div className="rm2-card-row">
-                    <span className="rm2-card-label">Age</span>
-                    <span className="rm2-card-value">{person.age}</span>
-                  </div>
-                  )}
-
-                  {person.occupation && (
-                  <div className="rm2-card-row">
-                    <span className="rm2-card-label">Occupation</span>
-                    <span className="rm2-card-value">{person.occupation}</span>
-                  </div>
-                  )}
-                  
                   <div className="rm2-card-row">
                     <span className="rm2-card-label">Location</span>
                     <span className="rm2-card-value">{person.location || "Not specified"}</span>
                   </div>
-                  
-                  <div className="rm2-card-row">
-                    <span className="rm2-card-label">Gender</span>
-                    <span className="rm2-card-value">{person.gender || "Any"}</span>
-                  </div>
-                  
                   <div className="rm2-card-row">
                     <span className="rm2-card-label">Rent Budget</span>
                     <span className="rm2-card-value rm2-text-green">
                       {person.rent ? `₹${Number(person.rent).toLocaleString()}` : "N/A"}
                     </span>
                   </div>
-
                   {person.preferences && person.preferences !== "skipped" && (
-                    <div className="rm2-pref-section">
-                      <span className="rm2-pref-title">Preferences</span>
-                      <div className="rm2-pref-tags">
-                        {person.preferences.split(",").filter(Boolean).slice(0, 3).map((pref, i) => (
-                          <span key={i} className={`rm2-pref-tag ${myPreferences.includes(pref.trim()) ? "rm2-pref-match" : ""}`}>
-                            {pref.trim()}
-                          </span>
-                        ))}
-                      </div>
+                    <div className="rm2-pref-tags">
+                      {person.preferences.split(",").slice(0, 3).map((pref, i) => (
+                        <span key={i} className={`rm2-pref-tag ${myPreferences.includes(pref.trim()) ? "rm2-pref-match" : ""}`}>
+                          {pref.trim()}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -233,10 +200,9 @@ export default function FindRoommates() {
                   <button
                     className={`rm2-action-btn ${accepted ? "rm2-btn-chat" : "rm2-btn-locked"}`}
                     onClick={() => accepted && navigate("/dashboard/chat", { state: { selectedUserId: person.id } })}
-                    title={accepted ? "Chat" : "Connect first to chat"}
                   >
                     <MessageCircle size={15} />
-                    {accepted ? "Chat" : "Connect to Chat"}
+                    {accepted ? "Chat" : "Connect first"}
                   </button>
 
                   <button

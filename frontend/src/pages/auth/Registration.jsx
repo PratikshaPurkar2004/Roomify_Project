@@ -4,15 +4,14 @@ import { registerUser, clearMessage } from "../../redux/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import "../../styles/Registration.css";
 
-const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch();
+const Registration = ({ onClose, onSwitch }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { loading, error, success } = useSelector((state) => state.auth);
 
   const [showPassword, setShowPassword] = useState(false);
-
   const [errors, setErrors] = useState({});
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -43,10 +42,7 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
   ];
 
   useEffect(() => {
-    // Clear any previous error messages when the component mounts
     dispatch(clearMessage());
-    
-    // Reset local form data explicitly just in case
     setFormData({
       name: "",
       email: "",
@@ -65,52 +61,36 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
 
   const validate = (data = formData) => {
     let newErrors = {};
-
-    // Name Validation: No numbers allowed
     if (!data.name.trim()) {
       newErrors.name = "Name is required";
     } else if (/\d/.test(data.name)) {
       newErrors.name = "Numbers are not allowed in name";
     }
 
-    // Email Validation: Exactly one @, not only numbers
     if (!data.email) {
       newErrors.email = "Email is required";
     } else {
       const emailValue = data.email.trim();
       const atCount = (emailValue.match(/@/g) || []).length;
-      const isOnlyNumbers = /^\d+$/.test(emailValue.replace(/[@.]/g, ""));
-      
       if (atCount !== 1) {
         newErrors.email = "Email must contain exactly one @ symbol";
-      } else if (isOnlyNumbers) {
-        newErrors.email = "Email cannot be only numbers";
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
         newErrors.email = "Invalid email format";
       }
     }
 
-    // Password Validation: Mix of letter, number, and special character
     const password = data.password || "";
-    const hasLetter = /[a-zA-Z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    const hasSpecial = /[@$!%*?&]/.test(password);
-
     if (!password) {
       newErrors.password = "Password is required";
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
-    } else if (!(hasLetter && hasNumber && hasSpecial)) {
-      newErrors.password = "Include letters, numbers & special characters";
     }
 
-    // Confirm Password
     if (data.confirmPassword && password !== data.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    if (!data.gender && data.gender !== undefined)
-      newErrors.gender = "Select gender";
+    if (!data.gender) newErrors.gender = "Select gender";
 
     return newErrors;
   };
@@ -118,10 +98,7 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updatedData = { ...formData, [name]: value };
-    
     setFormData(updatedData);
-
-    // Real-time Validation
     const validationErrors = validate(updatedData);
     setErrors((prev) => ({
       ...prev,
@@ -138,24 +115,17 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
   };
 
   const handleGender = (value) => {
-    const updatedData = { ...formData, gender: value };
-    setFormData(updatedData);
-
-    setErrors((prev) => ({
-      ...prev,
-      gender: undefined,
-    }));
+    setFormData({ ...formData, gender: value });
+    setErrors((prev) => ({ ...prev, gender: undefined }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const validationErrors = validate();
-
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-
     dispatch(registerUser(formData));
   };
 
@@ -191,35 +161,12 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
                 className={`auth-slide ${index === currentImage ? 'active' : ''}`}
                 style={{ backgroundImage: `url(${img.url})` }}
               >
-                {/* Floating Card (Only on first slide for effect) */}
-                {index === 0 && (
-                  <div className="floating-cards-container">
-                    <div className="floating-card fc-2">
-                      <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop" alt="user" />
-                      <div>
-                        <p>Mike T.</p>
-                        <span>Listed a room 🏠</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
                 <div className="glass-overlay">
                   <h2>{img.title}</h2>
                   <p>{img.desc}</p>
                 </div>
               </div>
             ))}
-
-            <div className="auth-slider-dots">
-              {registerImages.map((_, index) => (
-                <span 
-                  key={index} 
-                  className={`dot ${index === currentImage ? 'active' : ''}`}
-                  onClick={() => setCurrentImage(index)}
-                ></span>
-              ))}
-            </div>
           </div>
           
           <div className="register-form-side">
@@ -230,113 +177,39 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
             {error && <p className="error">{error}</p>}
 
             <form onSubmit={handleSubmit} autoComplete="off">
-              <div className="input-row">
-                <div className="input-group">
-                  <label>Full Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    autoComplete="chrome-off"
-                    placeholder="Your Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                  />
-                  {errors.name && <p className="field-error">{errors.name}</p>}
-                </div>
-                
-                <div className="input-group">
-                  <label>Email Address</label>
-                  <input
-                    type="email"
-                    name="email"
-                    autoComplete="chrome-off"
-                    placeholder="Email Address"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                  {errors.email && <p className="field-error">{errors.email}</p>}
-                </div>
+              <div className="input-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} />
+                {errors.name && <p className="field-error">{errors.name}</p>}
+              </div>
+              
+              <div className="input-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} />
+                {errors.email && <p className="field-error">{errors.email}</p>}
               </div>
 
               <div className="input-row">
                 <div className="input-group">
                   <label>Password</label>
-                  <div className="password-wrapper">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      autoComplete="new-password"
-                      placeholder="Password"
-                      value={formData.password}
-                      onChange={handleChange}
-                    />
-                    <span
-                      className="toggle-password"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      👁
-                    </span>
-                  </div>
+                  <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" value={formData.password} onChange={handleChange} />
                   {errors.password && <p className="field-error">{errors.password}</p>}
                 </div>
 
                 <div className="input-group">
                   <label>Confirm</label>
-                  <div className="password-wrapper">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      autoComplete="new-password"
-                      placeholder="Confirm Password"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                    />
-                    <span
-                      className="toggle-password"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      👁
-                    </span>
-                  </div>
-                  
-                  {errors.confirmPassword && (
-                    <p className="field-error">{errors.confirmPassword}</p>
-                  )}
+                  <input type={showPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm" value={formData.confirmPassword} onChange={handleChange} />
+                  {errors.confirmPassword && <p className="field-error">{errors.confirmPassword}</p>}
                 </div>
               </div>
 
-              <div className="input-row">
-                <div className="input-group">
-                  <label>Occupation</label>
-                  <input
-                    type="text"
-                    name="occupation"
-                    placeholder="Your Occupation"
-                    value={formData.occupation}
-                    onChange={handleChange}
-                  />
+              <div className="input-group">
+                <label>Gender</label>
+                <div className="gender">
+                  <button type="button" className={formData.gender === "Male" ? "active" : ""} onClick={() => handleGender("Male")}>Male</button>
+                  <button type="button" className={formData.gender === "Female" ? "active" : ""} onClick={() => handleGender("Female")}>Female</button>
                 </div>
-                
-                <div className="input-group">
-                  <label>Gender</label>
-                  <div className="gender">
-                    <button
-                      type="button"
-                      className={formData.gender === "Male" ? "active" : ""}
-                      onClick={() => handleGender("Male")}
-                    >
-                      Male
-                    </button>
-                    <button
-                      type="button"
-                      className={formData.gender === "Female" ? "active" : ""}
-                      onClick={() => handleGender("Female")}
-                    >
-                      Female
-                    </button>
-                  </div>
-                  {errors.gender && <p className="field-error">{errors.gender}</p>}
-                </div>
+                {errors.gender && <p className="field-error">{errors.gender}</p>}
               </div>
 
               <button type="submit" className="register-btn">
