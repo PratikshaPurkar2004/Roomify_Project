@@ -65,6 +65,8 @@ const Registration = ({ onClose, onSwitch }) => {
       newErrors.name = "Name is required";
     } else if (/\d/.test(data.name)) {
       newErrors.name = "Numbers are not allowed in name";
+    } else if (/[^a-zA-Z\s]/.test(data.name)) {
+      newErrors.name = "Special characters are not allowed in name";
     }
 
     if (!data.email) {
@@ -212,7 +214,11 @@ const Registration = ({ onClose, onSwitch }) => {
                 {errors.gender && <p className="field-error">{errors.gender}</p>}
               </div>
 
-              <button type="submit" className="register-btn">
+              <button 
+                type="submit" 
+                className="register-btn"
+                disabled={loading}
+              >
                 {loading ? "Registering..." : "Create Account"}
               </button>
 

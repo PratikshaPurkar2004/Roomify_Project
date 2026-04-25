@@ -71,7 +71,7 @@ function Dashboard() {
   }, [heroImages.length]);
 
   const phrases = [
-    "Find your ideal room and the perfect roommate to share it with.",
+    "Find your ideal room/roommate to share it with.",
     "Matching verified rooms with the best roommate for you.",
     "The simplest way to find premium spaces and verified roommates.",
     "Connecting modern professionals to verified rooms and great roommates.",
@@ -149,18 +149,18 @@ function Dashboard() {
         .then(data => { if (data.success) setMyRooms(data.rooms); })
         .catch(err => console.error(err));
 
-      if (isHost) {
-        fetch(`http://localhost:5000/api/rooms/host/${userId}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              setMyRooms(data.rooms);
-            }
-          })
-          .catch(err => console.error(err));
-      }
-    }
-  }, [isHost]);
+          // --- SMART SYNC LOGIC ---
+          // Ensure graph matches global stats if daily mapping fails due to timezone
+          const totalMatches = last7Days.reduce((a, b) => a + b.matches, 0);
+          const totalReqs = last7Days.reduce((a, b) => a + b.requests, 0);
+          
+          if (totalMatches === 0 && stats.matches > 0) {
+            last7Days[last7Days.length - 1].matches = parseInt(stats.matches);
+          }
+          if (totalReqs === 0 && stats.requests > 0) {
+            last7Days[last7Days.length - 1].requests = parseInt(stats.requests);
+          }
+          // -------------------------
 
   const handleDeleteRoom = (roomId) => {
     if (!window.confirm("Are you sure?")) return;
@@ -238,6 +238,8 @@ function Dashboard() {
                 </button>
               </div>
 
+
+
               <div className="hero-stats-bar">
                 <div className="stat-item">
                   <span className="stat-num">{stats.views}</span>
@@ -254,6 +256,8 @@ function Dashboard() {
                   <span className="stat-desc">#Requests</span>
                 </div>
               </div>
+
+
             </div>
             
             <div className="hero-image-container">

@@ -69,6 +69,24 @@ export default function Requests() {
   const acceptRequest = (id) => updateStatus(id, "accepted");
   const rejectRequest = (id) => updateStatus(id, "rejected");
 
+  const unsendRequest = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/requests/${id}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      if (data.success) {
+        setToastMessage("Request cancelled successfully! ✅");
+        setSentRequests(prev => prev.filter(r => (r.id || r.request_id) !== id));
+      } else {
+        setToastMessage("Failed to cancel request.");
+      }
+    } catch (err) {
+      setToastMessage("Error cancelling request.");
+    }
+    setTimeout(() => setToastMessage(""), 3000);
+  };
+
   const displayList = activeTab === "incoming" ? requests : sentRequests;
 
   return (
@@ -207,14 +225,36 @@ export default function Requests() {
                       </>
                     )
                   ) : (
-                    <button
-                      className="req-btn"
-                      style={{ width: '100%', background: req.status === 'accepted' ? 'linear-gradient(135deg, #0ea5e9, #3b82f6)' : '#f1f5f9', color: req.status === 'accepted' ? 'white' : '#94a3b8', cursor: req.status === 'accepted' ? 'pointer' : 'not-allowed' }}
-                      onClick={() => req.status === 'accepted' && navigate("/dashboard/chat", { state: { selectedUserId: req.peer_id } })}
-                      disabled={req.status !== 'accepted'}
-                    >
-                      {req.status === 'accepted' ? <><MessageCircle size={18} /><span>Chat with {req.name}</span></> : <span>Waiting for approval</span>}
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                      {req.status === 'pending' ? (
+                        <button
+                          className="req-btn req-btn-reject"
+                          style={{ width: '100%' }}
+                          onClick={() => unsendRequest(req.id || req.request_id)}
+                        >
+                          <XCircle size={18} />
+                          <span>Unsend / Cancel</span>
+                        </button>
+                      ) : (
+                        <button
+                          className="req-btn"
+                          style={{ 
+                            width: '100%', 
+                            background: req.status === 'accepted' ? 'linear-gradient(135deg, #0ea5e9, #3b82f6)' : '#f1f5f9', 
+                            color: req.status === 'accepted' ? 'white' : '#94a3b8', 
+                            cursor: req.status === 'accepted' ? 'pointer' : 'not-allowed' 
+                          }}
+                          onClick={() => req.status === 'accepted' && navigate("/dashboard/chat", { state: { selectedUserId: req.peer_id } })}
+                          disabled={req.status !== 'accepted'}
+                        >
+                          {req.status === 'accepted' ? (
+                            <><MessageCircle size={18} /><span>Chat with {req.name}</span></>
+                          ) : (
+                            <span>Request {req.status}</span>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

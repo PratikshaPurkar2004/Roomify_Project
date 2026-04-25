@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
       SELECT r.*, u.name as host_name, u.email as host_email 
       FROM rooms r 
       JOIN users u ON r.host_id = u.user_id 
-      WHERE r.availability = 'available'
+      WHERE r.availability = 'available' AND u.deletion_date IS NULL
     `);
     res.json({
       success: true,
@@ -55,10 +55,17 @@ router.get("/host/:hostId", async (req, res) => {
   }
 });
 
-// POST to add a new room with image
-router.post("/add", upload.single("image"), async (req, res) => {
-  const { host_id, location, address, rent, max_tenants, furnishing, amenities } = req.body;
-  const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+// POST to add a new room with multiple images
+router.post("/add", upload.array("images", 5), async (req, res) => {
+  const { host_id, location, address, state, country, rent, max_tenants, required_tenants, property_type, furnishing, amenities } = req.body;
+  
+  // Handle multiple images
+  let image_url = null;
+  if (req.files && req.files.length > 0) {
+    const paths = req.files.map(file => `/uploads/${file.filename}`);
+    image_url = JSON.stringify(paths);
+  }
+
 
   if (!host_id || !location || !rent) {
     return res.status(400).json({ success: false, message: "Please provide all required fields (host_id, location, rent)" });
@@ -66,8 +73,8 @@ router.post("/add", upload.single("image"), async (req, res) => {
 
   try {
     const [result] = await db.query(
-      "INSERT INTO rooms (host_id, location, address, rent, max_tenants, furnishing, amenities, availability, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)",
-      [host_id, location, address, rent, max_tenants || 1, furnishing || "Unfurnished", amenities || "", image_url]
+      "INSERT INTO rooms (host_id, location, address, state, country, rent, max_tenants, required_tenants, property_type, furnishing, amenities, availability, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)",
+      [host_id, location, address, state || null, country || null, rent, max_tenants || 1, required_tenants || 1, property_type || null, furnishing || "Unfurnished", amenities || "", image_url]
     );
 
     res.json({
@@ -99,19 +106,22 @@ router.delete("/delete/:roomId", async (req, res) => {
 });
 
 // UPDATE a room (Edit)
-router.put("/edit/:roomId", upload.single("image"), async (req, res) => {
+router.put("/edit/:roomId", upload.array("images", 5), async (req, res) => {
   const { roomId } = req.params;
   const { location, address, rent, availability, max_tenants, furnishing, amenities } = req.body;
-  const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+
 
   try {
     let query = "UPDATE rooms SET location = ?, address = ?, rent = ?, availability = ?, max_tenants = ?, furnishing = ?, amenities = ?";
     let params = [location, address, rent, availability, max_tenants, furnishing, amenities];
 
-    if (image_url) {
+    if (req.files && req.files.length > 0) {
+      const paths = req.files.map(file => `/uploads/${file.filename}`);
+      const image_url = JSON.stringify(paths);
       query += ", image_url = ?";
       params.push(image_url);
     }
+
 
     query += " WHERE room_id = ?";
     params.push(roomId);
@@ -129,4 +139,27 @@ router.put("/edit/:roomId", upload.single("image"), async (req, res) => {
   }
 });
 
+// Log Room View
+router.post("/:id/view", async (req, res) => {
+  const roomId = req.params.id;
+  const viewerId = req.body.viewerId;
+
+  try {
+    // Get host_id for this room
+    const [rooms] = await db.query("SELECT host_id FROM rooms WHERE room_id = ?", [roomId]);
+    if (rooms.length === 0) return res.status(404).json({ error: "Room not found" });
+    
+    const hostId = rooms[0].host_id;
+
+    // Log the view
+    await db.query("INSERT INTO views_log (user_id, viewer_id) VALUES (?, ?)", [hostId, viewerId || null]);
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error("View Log Error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;
+

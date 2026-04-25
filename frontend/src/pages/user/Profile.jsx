@@ -223,16 +223,7 @@ export default function Profile() {
              <span className="occupation-badge">{form.occupation || "Occupation"}</span>
           </div>
 
-          <div className="preview-stats">
-             <div className="p-stat">
-                <span className="p-label">City</span>
-                <span className="p-val">{form.city || "Not set"}</span>
-             </div>
-             <div className="p-stat">
-                <span className="p-label">Budget</span>
-                <span className="p-val">₹{form.budget || "0"}</span>
-             </div>
-          </div>
+
 
           <div className="preview-actions">
              <button className="btn-main-save" onClick={saveProfile}>Save Changes</button>
@@ -348,11 +339,11 @@ export default function Profile() {
                 <AlertTriangle size={40} />
               </div>
               <h2>Delete Account?</h2>
-              <p>This action is permanent and cannot be undone. All your data, roommates, and requests will be lost forever.</p>
+              <p>Your account will be deactivated and hidden immediately. After 30 days, it will be permanently deleted. You can cancel the deletion by logging back in within 30 days.</p>
               
               <div className="modal-action-btns">
                 <button className="confirm-delete-btn" onClick={deleteProfile}>
-                  <Trash2 size={18} /> Delete Forever
+                  <Trash2 size={18} /> Deactivate Account
                 </button>
                 <button className="cancel-delete-btn" onClick={() => setShowDeleteModal(false)}>
                   I'll stay

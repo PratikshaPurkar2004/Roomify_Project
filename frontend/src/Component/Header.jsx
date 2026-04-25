@@ -1,15 +1,31 @@
 import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/authSlice";
 import "../styles/Header.css";
 
 function Header() {
-
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+
+  // Determine page title based on path
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path === "/dashboard") return "Home Dashboard";
+    if (path === "/dashboard/profile") return "My Profile";
+    if (path === "/dashboard/find-rooms") return "Find Perfect Rooms";
+    if (path === "/dashboard/find-roommates") return "Meet Your Perfect Roommate";
+    if (path === "/dashboard/requests") return "Connection Requests";
+    if (path === "/dashboard/chat") return "Messages";
+    if (path === "/dashboard/subscription") return "Premium Subscription";
+    return "Roomify";
+  };
+
+  // Redux state guarantees immediate updates upon login
+  const { user } = useSelector(state => state.auth);
 
   const [userState, setUserState] = useState(() => {
     try {
@@ -34,12 +50,15 @@ function Header() {
 
   let userName = "User";
   let profileImage = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; // default
-  if (userState) {
-    userName = userState.name || userState.fullname || userState.username || "User";
-    if (userState.profile_image) {
-      profileImage = `http://localhost:5000${userState.profile_image}`;
-    } else if (userState.gender) {
-      const gender = userState.gender.toLowerCase();
+  
+  const activeUser = user || userState;
+
+  if (activeUser) {
+    userName = activeUser.name || activeUser.fullname || activeUser.username || "User";
+    if (activeUser.profile_image) {
+      profileImage = `http://localhost:5000${activeUser.profile_image}`;
+    } else if (activeUser.gender) {
+      const gender = activeUser.gender.toLowerCase();
       if (gender === "male" || gender === "m") {
         profileImage = "https://cdn-icons-png.flaticon.com/512/2922/2922510.png"; // distinct male avatar
       } else if (gender === "female" || gender === "f") {
@@ -63,7 +82,7 @@ function Header() {
 
       {/* LEFT */}
       <div className="header-left">
-        
+        <h2 className="page-title">{getPageTitle()}</h2>
       </div>
 
       {/* RIGHT */}

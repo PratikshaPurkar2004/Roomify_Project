@@ -19,6 +19,7 @@ router.get("/", async (req, res) => {
     FROM users
     LEFT JOIN rooms 
     ON users.user_id = rooms.host_id
+    WHERE users.deletion_date IS NULL
   `;
 
   try {

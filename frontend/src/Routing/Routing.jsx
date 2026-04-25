@@ -22,6 +22,33 @@ import FindRoommates from "../pages/user/FindRoommates";
 import FindRooms from "../pages/user/FindRooms";
 import Subscription from "../pages/Subscription";
 import Chat from "../pages/user/Chat";
+import MyRooms from "../pages/user/MyRooms";
+
+
+/* Auth & Preference Guard */
+function AuthGuard() {
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("user"));
+  } catch (e) {
+    console.error("AuthGuard: Error parsing user from localStorage", e);
+  }
+  
+  if (!user) return <Navigate to="/" />;
+
+  const p = user.preferences;
+  const noPreferences = !p || 
+                        p === "" || 
+                        p === "null" || 
+                        p === "[]" || 
+                        p === "None" ||
+                        (Array.isArray(p) && p.length === 0);
+
+  if (noPreferences) return <Navigate to="/preferences" />;
+
+  return <Outlet />;
+}
+
 
 /* Dashboard Layout */
 function DashboardLayout() {
@@ -31,7 +58,7 @@ function DashboardLayout() {
       <div className="layout">
         <Sidebar />
         <div className="content">
-          <Outlet />
+          <AuthGuard />
         </div>
       </div>
       <Footer />
@@ -59,6 +86,8 @@ function Routing() {
         <Route path="find-roommates" element={<FindRoommates />} />
         <Route path="subscription" element={<Subscription />} />
         <Route path="chat" element={<Chat />} />
+        <Route path="my-rooms" element={<MyRooms />} />
+
 
       </Route>
 

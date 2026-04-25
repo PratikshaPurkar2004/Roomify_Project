@@ -293,6 +293,20 @@ body {
   box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
 }
 
+.register-btn:disabled {
+  background: linear-gradient(135deg, #CBD5E1, #A1A5AD);
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.register-btn:disabled:hover {
+  background: linear-gradient(135deg, #CBD5E1, #A1A5AD);
+  transform: none;
+  box-shadow: none;
+}
+
 .login-link {
   text-align: center;
   margin-top: 18px;
@@ -340,12 +354,17 @@ body {
 
 .field-error {
   color: #EF4444;
-  font-size: 11px;
-  margin-top: 4px;
-  margin-bottom: 4px;
+  font-size: 12px;
+  margin-top: 6px;
+  margin-bottom: 8px;
   font-weight: 600;
   display: block;
   text-align: left;
+  background: #FEF2F2;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border-left: 3px solid #EF4444;
+  line-height: 1.4;
 }
 
 .error {
