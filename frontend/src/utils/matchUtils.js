@@ -8,8 +8,9 @@ export const calculateMatchPercentage = (currentUser, otherUser) => {
   // Extract preferences (handles both string and array formats)
   const getPrefs = (user) => {
     if (!user.preferences) return [];
-    if (Array.isArray(user.preferences)) return user.preferences;
-    return user.preferences.split(",").map(p => p.trim()).filter(Boolean);
+    const raw = Array.isArray(user.preferences) ? user.preferences : user.preferences.split(",");
+    return raw.map(p => String(p).trim())
+      .filter(p => p && p.toLowerCase() !== "none" && p.toLowerCase() !== "skipped");
   };
 
   const prefs1 = getPrefs(currentUser);

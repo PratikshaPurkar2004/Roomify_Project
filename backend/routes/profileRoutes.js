@@ -13,7 +13,10 @@ router.get("/:id", async (req, res) => {
       occupation,
       area,
       budget,
-      gender
+      gender,
+      preferences,
+      user_type,
+      city
     FROM users
     WHERE user_id = ?
   `;

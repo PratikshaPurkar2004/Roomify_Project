@@ -13,7 +13,7 @@ export default function FindRoommates() {
   const [city, setCity]           = useState("");
   const [budget, setBudget]       = useState("");
   const [gender, setGender]       = useState("");
-  const [myPreferences, setMyPreferences] = useState([]);
+  const [myProfile, setMyProfile]         = useState(null);
   const [sentRequests, setSentRequests]   = useState([]);
   const [acceptedIds, setAcceptedIds]     = useState([]);
   const [toast, setToast] = useState("");
@@ -26,10 +26,16 @@ export default function FindRoommates() {
   useEffect(() => {
     if (!userId) return;
 
-    fetch(`http://localhost:5000/api/preferences/${userId}`)
+    fetch(`http://localhost:5000/api/profile/${userId}`)
       .then(r => r.json())
       .then(d => {
-        if (d?.preferences) setMyPreferences(d.preferences.split(",").map(p => p.trim()));
+        if (d) {
+          setMyProfile({
+            ...d,
+            city: d.city || d.area, // Handle both since we just migrated
+            preferences: d.preferences ? d.preferences.split(",").map(p => p.trim()) : []
+          });
+        }
       });
 
     fetch(`http://localhost:5000/api/requests/sent/${userId}`)
@@ -54,14 +60,28 @@ export default function FindRoommates() {
   }, []);
 
   useEffect(() => {
-    let result = roommates;
+    let result = [...roommates];
+    
+    // Applying Filters
     if (city) result = result.filter(u => String(u.location || "").toLowerCase().includes(city.toLowerCase()));
     if (budget) result = result.filter(u => u.rent == null || Number(u.rent) <= Number(budget));
     if (gender) result = result.filter(u => String(u.gender || "").toLowerCase() === gender.toLowerCase());
-    setFiltered(result);
-  }, [city, budget, gender, roommates]);
 
-  const getMatch = (prefs) => calculateMatchPercentage(myPreferences, prefs || "");
+    // Calculate Match and Sort
+    const scored = result.map(u => ({
+      ...u,
+      match: calculateMatchPercentage(myProfile, u)
+    }));
+
+    scored.sort((a, b) => b.match - a.match);
+    
+    setFiltered(scored);
+  }, [city, budget, gender, roommates, myProfile]);
+
+  const getMatch = (person) => {
+    if (!myProfile || !person) return 0;
+    return calculateMatchPercentage(myProfile, person);
+  };
 
   const handleRequest = async (receiverId, name) => {
     if (!userId) { showToast("Please login first!"); return; }
@@ -146,7 +166,7 @@ export default function FindRoommates() {
           </div>
         ) : (
           filtered.map(person => {
-            const match    = getMatch(person.preferences);
+            const match    = person.match || 0;
             const hasSent  = sentRequests.includes(person.id);
             const accepted = acceptedIds.includes(person.id);
             const matchColor = getMatchColor(match);
@@ -181,7 +201,7 @@ export default function FindRoommates() {
                   {person.preferences && person.preferences !== "skipped" && (
                     <div className="rm2-pref-tags">
                       {person.preferences.split(",").slice(0, 3).map((pref, i) => (
-                        <span key={i} className={`rm2-pref-tag ${myPreferences.includes(pref.trim()) ? "rm2-pref-match" : ""}`}>
+                        <span key={i} className={`rm2-pref-tag ${myProfile?.preferences?.includes(pref.trim()) ? "rm2-pref-match" : ""}`}>
                           {pref.trim()}
                         </span>
                       ))}
