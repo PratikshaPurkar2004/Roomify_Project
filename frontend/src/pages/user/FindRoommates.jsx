@@ -39,12 +39,22 @@ export default function FindRoommates() {
     setTimeout(() => setToast(""), 3000);
   };
 
+  const [hostRooms, setHostRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
   const fetchHostRooms = async () => {
+    if (!userId) return;
+    setLoadingRooms(true);
     try {
       const res = await fetch(`http://localhost:5000/api/rooms/host/${userId}`);
       const data = await res.json();
       if (data.success) setHostRooms(data.rooms);
-    } catch (err) { console.error("Error fetching host rooms:", err); }
+    } catch (err) {
+      console.error("Error fetching host rooms:", err);
+    } finally {
+      setLoadingRooms(false);
+    }
   };
 
   // Fetch initial data
@@ -422,7 +432,7 @@ export default function FindRoommates() {
               </div>
 
               <div className="fr-form-row">
-                <div className="fr-form-group">
+                <div className="fr-form-group" style={{ width: '100%' }}>
                   <label>Furnishing</label>
                   <select value={newRoom.furnishing} onChange={e => setNewRoom({ ...newRoom, furnishing: e.target.value })}>
                     <option>Unfurnished</option>
@@ -430,9 +440,58 @@ export default function FindRoommates() {
                     <option>Fully-Furnished</option>
                   </select>
                 </div>
-                <div className="fr-form-group">
-                  <label>Amenities</label>
-                  <input placeholder="WiFi, AC, Gym..." value={newRoom.amenities} onChange={e => setNewRoom({ ...newRoom, amenities: e.target.value })} />
+              </div>
+
+              <div className="fr-form-group">
+                <label>Amenities & Features</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px', marginBottom: '16px' }}>
+                  {featureAmenities.map(am => {
+                    const isSelected = newRoom.amenities?.includes(am);
+                    return (
+                      <span key={am} onClick={() => {
+                        let arr = newRoom.amenities ? newRoom.amenities.split(',').map(s=>s.trim()).filter(Boolean) : [];
+                        if (isSelected) arr = arr.filter(a => a !== am); else arr.push(am);
+                        setNewRoom({...newRoom, amenities: arr.join(', ')});
+                      }}
+                      style={{ padding: '6px 12px', border: isSelected ? '1.5px solid #6366f1' : '1.5px solid #e2e8f0', borderRadius: '50px', fontSize: '12px', fontWeight: 600, color: isSelected ? '#4f46e5' : '#64748b', background: isSelected ? '#eff6ff' : 'white', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
+                        {am}
+                      </span>
+                    )
+                  })}
+                </div>
+
+                <label>House Rules</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px', marginBottom: '16px' }}>
+                  {ruleAmenities.map(am => {
+                    const isSelected = newRoom.amenities?.includes(am);
+                    return (
+                      <span key={am} onClick={() => {
+                        let arr = newRoom.amenities ? newRoom.amenities.split(',').map(s=>s.trim()).filter(Boolean) : [];
+                        if (isSelected) arr = arr.filter(a => a !== am); else arr.push(am);
+                        setNewRoom({...newRoom, amenities: arr.join(', ')});
+                      }}
+                      style={{ padding: '6px 12px', border: isSelected ? '1.5px solid #ef4444' : '1.5px solid #e2e8f0', borderRadius: '50px', fontSize: '12px', fontWeight: 600, color: isSelected ? '#dc2626' : '#64748b', background: isSelected ? '#fef2f2' : 'white', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
+                        {am}
+                      </span>
+                    )
+                  })}
+                </div>
+
+                <label>Tenant Preferences</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px', marginBottom: '8px' }}>
+                  {prefAmenities.map(am => {
+                    const isSelected = newRoom.amenities?.includes(am);
+                    return (
+                      <span key={am} onClick={() => {
+                        let arr = newRoom.amenities ? newRoom.amenities.split(',').map(s=>s.trim()).filter(Boolean) : [];
+                        if (isSelected) arr = arr.filter(a => a !== am); else arr.push(am);
+                        setNewRoom({...newRoom, amenities: arr.join(', ')});
+                      }}
+                      style={{ padding: '6px 12px', border: isSelected ? '1.5px solid #10b981' : '1.5px solid #e2e8f0', borderRadius: '50px', fontSize: '12px', fontWeight: 600, color: isSelected ? '#059669' : '#64748b', background: isSelected ? '#ecfdf5' : 'white', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
+                        {am}
+                      </span>
+                    )
+                  })}
                 </div>
               </div>
 

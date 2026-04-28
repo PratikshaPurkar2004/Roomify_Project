@@ -23,6 +23,7 @@ import FindRooms from "../pages/user/FindRooms";
 import Subscription from "../pages/Subscription";
 import Chat from "../pages/user/Chat";
 import MyRooms from "../pages/user/MyRooms";
+import RoomDetails from "../pages/user/RoomDetails";
 
 
 /* Auth & Preference Guard */
@@ -87,6 +88,7 @@ function Routing() {
         <Route path="subscription" element={<Subscription />} />
         <Route path="chat" element={<Chat />} />
         <Route path="my-rooms" element={<MyRooms />} />
+        <Route path="room-details/:id" element={<RoomDetails />} />
 
 
       </Route>

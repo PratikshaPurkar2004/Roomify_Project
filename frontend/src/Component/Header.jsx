@@ -21,6 +21,8 @@ function Header() {
     if (path === "/dashboard/requests") return "Connection Requests";
     if (path === "/dashboard/chat") return "Messages";
     if (path === "/dashboard/subscription") return "Premium Subscription";
+    if (path === "/dashboard/my-rooms") return "My Rooms";
+    if (path.startsWith("/dashboard/room-details/")) return "Room Details";
     return "Roomify";
   };
 

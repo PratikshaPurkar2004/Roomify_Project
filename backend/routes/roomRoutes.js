@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
       SELECT r.*, u.name as host_name, u.email as host_email 
       FROM rooms r 
       JOIN users u ON r.host_id = u.user_id 
-      WHERE r.availability = 'available' AND u.deletion_date IS NULL
+      WHERE r.availability = 'available'
     `);
     res.json({
       success: true,
@@ -36,6 +36,28 @@ router.get("/", async (req, res) => {
     });
   } catch (error) {
     console.error("Fetch all rooms error:", error);
+    res.status(500).json({ success: false, message: "Database error" });
+  }
+});
+
+// GET a single room by ID
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rooms] = await db.query(`
+      SELECT r.*, u.name as host_name, u.email as host_email
+      FROM rooms r 
+      JOIN users u ON r.host_id = u.user_id 
+      WHERE r.room_id = ?
+    `, [id]);
+    
+    if (rooms.length > 0) {
+      res.json({ success: true, room: rooms[0] });
+    } else {
+      res.status(404).json({ success: false, message: "Room not found" });
+    }
+  } catch (error) {
+    console.error("Fetch room detail error:", error);
     res.status(500).json({ success: false, message: "Database error" });
   }
 });

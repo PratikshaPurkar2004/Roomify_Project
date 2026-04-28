@@ -68,17 +68,7 @@ export default function FindRooms() {
   };
 
   const openDetailModal = (room) => {
-    setSelectedRoom(room);
-    setActiveImgIndex(0);
-    setShowDetailModal(true);
-
-    // Log the view
-    const userId = localStorage.getItem("userId");
-    fetch(`http://localhost:5000/api/rooms/${room.room_id}/view`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ viewerId: userId })
-    }).catch(err => console.error("Error logging view:", err));
+    navigate(`/dashboard/room-details/${room.room_id}`);
   };
 
   useEffect(() => {
@@ -106,28 +96,7 @@ export default function FindRooms() {
 
       {toast && <div className="fr-toast">{toast}</div>}
 
-      {/* Hero Banner */}
-      <div className="fr-hero">
-        <div className="fr-hero-text">
-          <span className="fr-hero-badge">🏠 Available Rooms</span>
-          <h1>Find Your Perfect <span className="fr-gradient-text">Room</span></h1>
-          <p>Browse verified listings from trusted hosts. Filter by city, budget & furnishing.</p>
-        </div>
-        <div className="fr-hero-stats">
-          <div className="fr-stat-pill">
-            <span className="fr-stat-num">{rooms.length}</span>
-            <span>Listings</span>
-          </div>
-          <div className="fr-stat-pill">
-            <span className="fr-stat-num">{rooms.filter(r => r.availability === "available").length}</span>
-            <span>Available</span>
-          </div>
-          <div className="fr-stat-pill">
-            <span className="fr-stat-num">{allCities.length}</span>
-            <span>Cities</span>
-          </div>
-        </div>
-      </div>
+
 
       {/* Filter + Add Bar */}
       <div className="fr-toolbar">
@@ -266,145 +235,6 @@ export default function FindRooms() {
           ))
         )}
       </div>
-
-      {/* Room Detail Modal */}
-      {showDetailModal && selectedRoom && (
-        <div className="fr-modal-overlay" onClick={() => setShowDetailModal(false)}>
-          <div className="fr-modal fr-detail-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '800px' }}>
-            <div className="fr-modal-header">
-              <h3>Room Details</h3>
-              <X size={22} className="fr-modal-close" onClick={() => setShowDetailModal(false)} />
-            </div>
-            
-            <div className="fr-detail-content" style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-              <div className="fr-detail-visuals">
-                {(() => {
-                  let images = [];
-                  try {
-                    images = JSON.parse(selectedRoom.image_url);
-                    if (!Array.isArray(images)) images = [selectedRoom.image_url];
-                  } catch {
-                    images = selectedRoom.image_url ? [selectedRoom.image_url] : [];
-                  }
-
-                  if (images.length === 0) {
-                    return (
-                      <div className="fr-detail-main-img" style={{ borderRadius: '16px', height: '300px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Home size={80} color="#cbd5e1" />
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <>
-                      <div className="fr-detail-main-img" style={{ borderRadius: '16px', overflow: 'hidden', height: '300px', width: '100%', background: '#f8fafc', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', position: 'relative' }}>
-                        <img 
-                          src={`http://localhost:5000${images[activeImgIndex] || images[0]}`} 
-                          alt="Main" 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'all 0.3s' }} 
-                        />
-                        
-                        {images.length > 1 && (
-                          <>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); prevImg(images); }}
-                              style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.7)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                              &#8249;
-                            </button>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); nextImg(images); }}
-                              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.7)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                              &#8250;
-                            </button>
-                            <div style={{ position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.4)', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '10px', backdropFilter: 'blur(4px)' }}>
-                              {activeImgIndex + 1} / {images.length}
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="fr-detail-thumbnails" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginTop: '12px' }}>
-                        {images.map((img, i) => (
-                          <div 
-                            key={i} 
-                            onClick={() => setActiveImgIndex(i)}
-                            style={{ 
-                              height: '50px', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', 
-                              border: activeImgIndex === i ? '2px solid #6366f1' : '2px solid transparent',
-                              transition: 'all 0.2s'
-                            }}
-                          >
-                            <img src={`http://localhost:5000${img}`} alt={`Thumb ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  );
-                })()}
-
-
-                <div className="fr-detail-badges" style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
-                  <span className={`fr-badge-modern ${selectedRoom.availability}`} style={{ position: 'static' }}>
-                    {selectedRoom.availability === "available" ? "✓ AVAILABLE" : "BOOKED"}
-                  </span>
-                  <span className="fr-property-type-badge" style={{ position: 'static' }}>{selectedRoom.property_type || "Standard"}</span>
-                </div>
-              </div>
-
-              <div className="fr-detail-info">
-                <div className="fr-detail-header" style={{ marginBottom: '20px' }}>
-                  <h2 style={{ fontSize: '24px', color: '#0f172a', margin: '0 0 8px 0' }}>{selectedRoom.property_type || "Room"} in {selectedRoom.location?.split(",")[0]}</h2>
-                  <p style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '14px', margin: 0 }}>
-                    <MapPin size={16} /> {selectedRoom.address ? `${selectedRoom.address}, ` : ""}{selectedRoom.location}
-                  </p>
-                </div>
-
-                <div className="fr-detail-grid-compact" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f8fafc', padding: '20px', borderRadius: '16px', marginBottom: '20px' }}>
-                  <div className="fr-compact-item">
-                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Rent</span>
-                    <p style={{ margin: '4px 0 0', fontWeight: 800, color: '#10b981', fontSize: '18px' }}>₹{Number(selectedRoom.rent).toLocaleString()}<small style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500 }}> /mo</small></p>
-                  </div>
-                  <div className="fr-compact-item">
-                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Capacity</span>
-                    <p style={{ margin: '4px 0 0', fontWeight: 700, color: '#1e293b' }}>{selectedRoom.max_tenants} People</p>
-                  </div>
-                  <div className="fr-compact-item">
-                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Looking for</span>
-                    <p style={{ margin: '4px 0 0', fontWeight: 700, color: '#1e293b' }}>{selectedRoom.required_tenants} Roommate(s)</p>
-                  </div>
-                  <div className="fr-compact-item">
-                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Furnishing</span>
-                    <p style={{ margin: '4px 0 0', fontWeight: 700, color: '#1e293b' }}>{selectedRoom.furnishing || "Not set"}</p>
-                  </div>
-                </div>
-
-                <div className="fr-detail-amenities" style={{ marginBottom: '20px' }}>
-                  <p className="fr-section-title">Amenities</p>
-                  <div className="fr-amenity-tags" style={{ marginTop: '8px' }}>
-                    {selectedRoom.amenities ? selectedRoom.amenities.split(",").map((a, i) => (
-                      <span key={i} className="fr-amenity-tag">{a.trim()}</span>
-                    )) : <span className="fr-no-amenities">Basic essentials included</span>}
-                  </div>
-                </div>
-
-                <div className="fr-detail-host" style={{ borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
-                   <div className="fr-host-mini-info">
-                     <div className="fr-host-avatar-sm">{selectedRoom.host_name?.charAt(0)}</div>
-                     <div className="fr-host-text-sm">
-                       <span className="fr-host-posted">Listed by</span>
-                       <span className="fr-host-name-sm">{selectedRoom.host_name}</span>
-                     </div>
-                   </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
 
     </div>
   );
