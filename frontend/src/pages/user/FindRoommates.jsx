@@ -191,7 +191,7 @@ export default function FindRoommates() {
     return "#94a3b8";
   };
 
-  const cities = [...new Set(roommates.map(u => u.location).filter(Boolean))];
+
 
   return (
     <div className="rm2-page">
@@ -238,7 +238,7 @@ export default function FindRoommates() {
               <MapPin size={15} className="rm2-filter-icon" />
               <select value={city} onChange={e => setCity(e.target.value)}>
                 <option value="">All Cities</option>
-                {cities.map(c => <option key={c}>{c}</option>)}
+                {allCities.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="rm2-filter-group">
@@ -345,7 +345,7 @@ export default function FindRoommates() {
                         title={accepted ? "Chat" : "Connect first to chat"}
                       >
                         <MessageCircle size={15} />
-                        {accepted ? "Chat" : "Connect to Chat"}
+                        {accepted ? "Chat" : "Chat"}
                       </button>
 
                       <button
@@ -354,7 +354,7 @@ export default function FindRoommates() {
                         onClick={() => !hasSent && handleRequest(person.id, person.name)}
                       >
                         <UserPlus size={15} />
-                        {hasSent ? "Sent" : "Connect"}
+                        {hasSent ? "Sent" : "Request"}
                       </button>
                     </div>
                   </div>
