@@ -24,24 +24,26 @@ export default function FindRoommates() {
   // States for Add Room Modal
   const [showAddModal, setShowAddModal] = useState(false);
   const [hostRooms, setHostRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [dbCities, setDbCities] = useState([]);
   const [dbStates, setDbStates] = useState([]);
   const [dbCountries, setDbCountries] = useState([]);
+  
   const [newRoom, setNewRoom] = useState({
     location: "", address: "", state: "", country: "", rent: "",
     max_tenants: "", required_tenants: "", property_type: "Stand Alone Building",
     furnishing: "Unfurnished", amenities: "", image: null
   });
 
+  const featureAmenities = ["WiFi", "AC", "TV", "Washing Machine", "Geyser", "Fridge", "Water Purifier", "Maid", "Gym", "Parking", "Lift", "Power Backup"];
+  const ruleAmenities = ["No Smoking", "No Pets", "Veg Only", "Late Entry Allowed", "No Parties"];
+  const prefAmenities = ["Boys Only", "Girls Only", "Family Only", "Couples Allowed"];
+
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 3000);
   };
-
-  const [hostRooms, setHostRooms] = useState([]);
-  const [loadingRooms, setLoadingRooms] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
 
   const fetchHostRooms = async () => {
     if (!userId) return;
