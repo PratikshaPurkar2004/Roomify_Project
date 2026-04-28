@@ -4,7 +4,7 @@ import "../../styles/FindRoommates.css";
 // Re-using FindRooms styles for the modal
 import "../../styles/FindRooms.css";
 import { calculateMatchPercentage } from "../../utils/matchUtils";
-import { Search, MapPin, Wallet, User, MessageCircle, UserPlus, Filter, Zap, Star, X } from "lucide-react";
+import { Search, MapPin, Wallet, User, MessageCircle, UserPlus, Star, Filter, Plus, Home, X } from "lucide-react";
 
 export default function FindRoommates() {
   const navigate = useNavigate();
@@ -16,68 +16,67 @@ export default function FindRoommates() {
   const [city, setCity] = useState("");
   const [budget, setBudget] = useState("");
   const [gender, setGender] = useState("");
-  const [myProfile, setMyProfile] = useState(null);
+  const [myPreferences, setMyPreferences] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [acceptedIds, setAcceptedIds] = useState([]);
   const [toast, setToast] = useState("");
-  
-  // States for Add Room Modal
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [hostRooms, setHostRooms] = useState([]);
-  const [loadingRooms, setLoadingRooms] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [dbCities, setDbCities] = useState([]);
-  const [dbStates, setDbStates] = useState([]);
-  const [dbCountries, setDbCountries] = useState([]);
-  
-  const [newRoom, setNewRoom] = useState({
-    location: "", address: "", state: "", country: "", rent: "",
-    max_tenants: "", required_tenants: "", property_type: "Stand Alone Building",
-    furnishing: "Unfurnished", amenities: "", image: null
-  });
-
-  const featureAmenities = ["WiFi", "AC", "TV", "Washing Machine", "Geyser", "Fridge", "Water Purifier", "Maid", "Gym", "Parking", "Lift", "Power Backup"];
-  const ruleAmenities = ["No Smoking", "No Pets", "Veg Only", "Late Entry Allowed", "No Parties"];
-  const prefAmenities = ["Boys Only", "Girls Only", "Family Only", "Couples Allowed"];
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 3000);
   };
 
-  const fetchHostRooms = async () => {
+  const [hostRooms, setHostRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  // Add Room Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newRoom, setNewRoom] = useState({
+    location: "",
+    address: "",
+    state: "",
+    country: "",
+    rent: "",
+    max_tenants: "",
+    required_tenants: "",
+    property_type: "Stand Alone Building",
+    furnishing: "Unfurnished",
+    amenities: "",
+    image: null
+  });
+  const [dbCities, setDbCities] = useState([]);
+  const [dbStates, setDbStates] = useState([]);
+  const [dbCountries, setDbCountries] = useState([]);
+  const featureAmenities = ["WiFi", "AC", "TV", "Washing Machine", "Geyser", "Fridge", "Water Purifier", "Maid", "Gym", "Parking", "Lift", "Power Backup"];
+  const ruleAmenities = ["No Smoking", "No Pets", "Veg Only", "Late Entry Allowed", "No Parties"];
+  const prefAmenities = ["Boys Only", "Girls Only", "Family Only", "Couples Allowed"];
+
+  const fetchHostRooms = () => {
     if (!userId) return;
     setLoadingRooms(true);
-    try {
-      const res = await fetch(`http://localhost:5000/api/rooms/host/${userId}`);
-      const data = await res.json();
-      if (data.success) setHostRooms(data.rooms);
-    } catch (err) {
-      console.error("Error fetching host rooms:", err);
-    } finally {
-      setLoadingRooms(false);
-    }
+    fetch(`http://localhost:5000/api/rooms/host/${userId}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setHostRooms(d.rooms);
+        setLoadingRooms(false);
+      })
+      .catch(() => setLoadingRooms(false));
   };
 
   // Fetch initial data
   useEffect(() => {
     if (!userId) return;
 
-    // Fetch cities for filtering
     fetch("http://localhost:5000/api/cities/all")
       .then(r => r.json())
       .then(d => { if (d.success) setAllCities(d.cities); });
 
-    // Fetch user profile
-    fetch(`http://localhost:5000/api/profile/${userId}`)
+    fetch(`http://localhost:5000/api/preferences/${userId}`)
       .then(r => r.json())
       .then(d => {
-        if (d) {
-          setMyProfile({
-            ...d,
-            city: d.city || d.area, // Handle both since we just migrated
-            preferences: d.preferences ? d.preferences.split(",").map(p => p.trim()) : []
-          });
+        if (d?.preferences && d.preferences !== "skipped") {
+          setMyPreferences(d.preferences.split(",").map(p => p.trim()).filter(Boolean));
         }
       });
 
@@ -120,42 +119,24 @@ export default function FindRoommates() {
       .catch(() => { setRoommates([]); setFiltered([]); });
   }, []);
 
+  // Filter & Sort
   useEffect(() => {
-    let result = [...roommates];
-    
-    // Applying Filters
+    let result = roommates.map(u => ({
+      ...u,
+      matchPercentage: calculateMatchPercentage(myPreferences, u.preferences || "")
+    }));
+
     if (city) result = result.filter(u => String(u.location || "").toLowerCase().includes(city.toLowerCase()));
     if (budget) result = result.filter(u => u.rent == null || Number(u.rent) <= Number(budget));
     if (gender) result = result.filter(u => String(u.gender || "").toLowerCase() === gender.toLowerCase());
-
-    // Calculate Match and Sort
-    const scored = result.map(u => ({
-      ...u,
-      match: calculateMatchPercentage(myProfile, u)
-    }));
-
-    scored.sort((a, b) => b.match - a.match);
     
-    setFiltered(scored);
-  }, [city, budget, gender, roommates, myProfile]);
+    // Sorting by Match Percentage Descending
+    result.sort((a, b) => b.matchPercentage - a.matchPercentage);
 
-  const handleRequest = async (receiverId, name) => {
-    if (!userId) { showToast("Please login first!"); return; }
-    try {
-      const res = await fetch("http://localhost:5000/api/requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sender_id: userId, receiver_id: receiverId }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`Request sent to ${name} ✅`);
-        setSentRequests(prev => [...prev, receiverId]);
-      }
-    } catch {
-      showToast("Error sending request");
-    }
-  };
+    setFiltered(result);
+  }, [city, budget, gender, roommates, myPreferences]);
+
+  const showGate = !hasInteracted && hostRooms.length === 0;
 
   const handleAddRoom = async (e) => {
     e.preventDefault();
@@ -182,13 +163,35 @@ export default function FindRoommates() {
     }
   };
 
+  const getMatch = (prefs) => calculateMatchPercentage(myPreferences, prefs || "");
+
+  const handleRequest = async (receiverId, name) => {
+    if (!userId) { showToast("Please login first!"); return; }
+    try {
+      const res = await fetch("http://localhost:5000/api/requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sender_id: userId, receiver_id: receiverId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`Request sent to ${name} ✅`);
+        setSentRequests(prev => [...prev, receiverId]);
+      } else {
+        showToast(data.message || "Failed to send request");
+      }
+    } catch {
+      showToast("Error sending request");
+    }
+  };
+
   const getMatchColor = (match) => {
     if (match >= 70) return "#10b981";
     if (match >= 40) return "#f59e0b";
     return "#94a3b8";
   };
 
-  const showGate = !hasInteracted && hostRooms.length === 0;
+  const cities = [...new Set(roommates.map(u => u.location).filter(Boolean))];
 
   return (
     <div className="rm2-page">
@@ -198,15 +201,11 @@ export default function FindRoommates() {
 
       {toast && <div className="rm2-toast">{toast}</div>}
 
-      <div className="rm2-hero">
-        <div className="rm2-hero-content">
-          <span className="rm2-hero-badge">👥 Find Roommates</span>
-          <h1>Meet Your Perfect <span className="rm2-grad">Roommate</span></h1>
-          <p>Connect with verified, like-minded people based on lifestyle, budget & preferences.</p>
+      {loadingRooms ? (
+        <div style={{ textAlign: "center", marginTop: "100px", color: "#64748b" }}>
+           Loading your discovery feed...
         </div>
-      </div>
-
-      {showGate ? (
+      ) : showGate ? (
         <div className="rm2-gated-section">
           <div className="rm2-gated-card">
             <div className="rm2-gated-icon">
@@ -221,25 +220,25 @@ export default function FindRoommates() {
               <button className="rm2-primary-btn" onClick={() => setShowAddModal(true)}>
                 Add Your Property Now
               </button>
-              <button className="rm2-secondary-btn" onClick={() => setHasInteracted(true)}>
-                Maybe Later, Let Me Browse
-              </button>
+
             </div>
+            {hostRooms.length > 0 && (
+              <div className="rm2-success-mini">
+                ✓ You already have {hostRooms.length} room(s) listed!
+              </div>
+            )}
           </div>
         </div>
       ) : (
-        <>
+        <div style={{ animation: 'rm2fadeIn 0.5s ease' }}>
+          {/* Filter Bar */}
           <div className="rm2-filter-bar">
             <div className="rm2-filter-label"><Filter size={16} /> Filters</div>
             <div className="rm2-filter-group">
               <MapPin size={15} className="rm2-filter-icon" />
               <select value={city} onChange={e => setCity(e.target.value)}>
                 <option value="">All Cities</option>
-                {allCities.length > 0 ? (
-                  allCities.map(c => <option key={c} value={c}>{c}</option>)
-                ) : (
-                  [...new Set(roommates.map(u => u.location).filter(Boolean))].map(c => <option key={c} value={c}>{c}</option>)
-                )}
+                {cities.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div className="rm2-filter-group">
@@ -249,6 +248,8 @@ export default function FindRoommates() {
                 placeholder="Max Budget (₹)"
                 value={budget}
                 onChange={e => setBudget(e.target.value)}
+                step="100"
+                min="0"
               />
             </div>
             <div className="rm2-filter-group">
@@ -259,10 +260,9 @@ export default function FindRoommates() {
                 <option value="female">Female</option>
               </select>
             </div>
-          </div>
-
-          <div className="rm2-results-label">
-            {filtered.length} roommate{filtered.length !== 1 ? "s" : ""} found
+            <button className="rm2-search-btn">
+              <Search size={16} /> Search
+            </button>
           </div>
 
           <div className="rm2-grid">
@@ -274,7 +274,7 @@ export default function FindRoommates() {
               </div>
             ) : (
               filtered.map(person => {
-                const match    = person.match || 0;
+                const match    = person.matchPercentage;
                 const hasSent  = sentRequests.includes(person.id);
                 const accepted = acceptedIds.includes(person.id);
                 const matchColor = getMatchColor(match);
@@ -282,6 +282,7 @@ export default function FindRoommates() {
 
                 return (
                   <div className="rm2-card" key={person.id}>
+                    {/* Match badge */}
                     <div className="rm2-match-ring" style={{ "--mc": matchColor }}>
                       <div className="rm2-avatar-wrap">
                         <div className="rm2-avatar">{initial}</div>
@@ -327,8 +328,8 @@ export default function FindRoommates() {
                         <div className="rm2-pref-section">
                           <span className="rm2-pref-title">Preferences</span>
                           <div className="rm2-pref-tags">
-                            {person.preferences.split(",").filter(Boolean).slice(0, 4).map((pref, i) => (
-                              <span key={i} className={`rm2-pref-tag ${myProfile?.preferences?.includes(pref.trim()) ? "rm2-pref-match" : ""}`}>
+                            {person.preferences.split(",").filter(Boolean).slice(0, 3).map((pref, i) => (
+                              <span key={i} className={`rm2-pref-tag ${myPreferences.includes(pref.trim()) ? "rm2-pref-match" : ""}`}>
                                 {pref.trim()}
                               </span>
                             ))}
@@ -344,7 +345,7 @@ export default function FindRoommates() {
                         title={accepted ? "Chat" : "Connect first to chat"}
                       >
                         <MessageCircle size={15} />
-                        {accepted ? "Chat" : "Connect first"}
+                        {accepted ? "Chat" : "Connect to Chat"}
                       </button>
 
                       <button
@@ -361,7 +362,7 @@ export default function FindRoommates() {
               })
             )}
           </div>
-        </>
+        </div>
       )}
 
       {/* Add Room Modal - Reused from FindRooms */}
