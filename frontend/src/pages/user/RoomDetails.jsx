@@ -139,7 +139,6 @@ export default function RoomDetails() {
         .rd-host-name { font-size:17px; font-weight:800; color:#0f172a; margin:0; }
         .rd-host-sub { font-size:12px; color:#94a3b8; font-weight:600; margin-top:3px; }
         .rd-verified { display:flex; align-items:center; gap:6px; color:#10b981; font-size:13px; font-weight:700; margin-bottom:14px; }
-        .rd-safety { margin:0 22px 18px; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:12px 14px; font-size:12px; color:#92400e; font-weight:600; line-height:1.5; }
 
       `}</style>
 
@@ -156,32 +155,46 @@ export default function RoomDetails() {
           </span>
         </div>
 
-        {/* PHOTO GRID */}
-        {images.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: images.length > 1 ? '2fr 1fr' : '1fr', gap: '16px', height: '400px', marginBottom: '10px', borderRadius: '24px', overflow: 'hidden' }}>
-            {/* Main Photo */}
-            <div style={{ height: '100%' }}>
-              <img src={`http://localhost:5000${images[0]}`} alt="Main Room" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {/* SWIPABLE HERO CAROUSEL */}
+        {images.length > 0 ? (
+          <div 
+            className="rd-slider-wrap" 
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            style={{ borderRadius: '24px', marginBottom: '16px' }}
+          >
+            <div className="rd-slider-track" style={{ transform: `translateX(-${curIdx * 100}%)` }}>
+              {images.map((img, i) => (
+                <div key={i} className="rd-slide">
+                  <img src={`http://localhost:5000${img}`} alt={`Room ${i+1}`} />
+                  <div className="rd-slide-overlay"></div>
+                </div>
+              ))}
             </div>
-            
-            {/* Side Photos (if any) */}
-            {images.length > 1 && (
-              <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: '16px', height: '100%' }}>
-                {images.slice(1, 3).map((img, i) => (
-                  <div key={i} style={{ height: '100%', position: 'relative' }}>
-                    <img src={`http://localhost:5000${img}`} alt={`Room ${i+2}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    {i === 1 && images.length > 3 && (
-                      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '20px', fontWeight: 800 }}>
-                        +{images.length - 3} Photos
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {images.length === 2 && (
-                   <div style={{ height: '100%', background: '#e2e8f0' }}></div>
-                )}
-              </div>
+
+            {/* Arrows */}
+            {total > 1 && (
+              <>
+                <button className="rd-arrow-btn rd-arrow-l" onClick={goPrev}><ChevronLeft size={24} /></button>
+                <button className="rd-arrow-btn rd-arrow-r" onClick={goNext}><ChevronRight size={24} /></button>
+                <div className="rd-counter">{curIdx + 1} / {total}</div>
+              </>
             )}
+          </div>
+        ) : (
+          <div style={{ height: '400px', background: '#e2e8f0', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', marginBottom: '16px' }}>
+            <Home size={64} />
+          </div>
+        )}
+
+        {/* DOTS */}
+        {total > 1 && (
+          <div className="rd-dots" style={{ background: 'transparent', padding: '0 0 20px' }}>
+            {images.map((_, i) => (
+              <button key={i} className={`rd-dot ${i === curIdx ? 'active' : ''}`} onClick={() => goTo(i)}></button>
+            ))}
           </div>
         )}
       </div>
@@ -253,7 +266,6 @@ export default function RoomDetails() {
               </div>
               <div className="rd-verified"><Shield size={14} /> Identity Verified</div>
             </div>
-            <div className="rd-safety">🛡️ Never transfer money outside Roomify. We don't guarantee off-platform transactions.</div>
           </div>
         </div>
       </div>
