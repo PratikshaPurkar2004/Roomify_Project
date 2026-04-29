@@ -31,7 +31,6 @@ router.get("/:id", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  const { name, dob, occupation, area, budget, gender } = req.body;
   const userId = req.params.id;
   const { name, age_group, area, DOB, dob, occupation, city, budget, gender } = req.body;
   const finalDob = DOB || dob;

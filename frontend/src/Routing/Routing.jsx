@@ -8,6 +8,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import VerifyOtp from "../pages/auth/VerifyOtp";
 import ResetPassword from "../pages/auth/ResetPassword";
 import Registration from "../pages/auth/Registration";
+import Preference from "../pages/user/Preference";
 
 // Layout Components
 import Header from "../Component/Header";
@@ -77,6 +78,7 @@ function Routing() {
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/signup" element={<Registration />} />
+      <Route path="/preferences" element={<Preference />} />
 
       {/* Dashboard Routes */}
       <Route path="/dashboard" element={<DashboardLayout />}>

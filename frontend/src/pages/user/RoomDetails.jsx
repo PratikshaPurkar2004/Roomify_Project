@@ -82,8 +82,8 @@ export default function RoomDetails() {
         .rd-back-pill { position:absolute; top:20px; left:24px; z-index:20; display:flex; align-items:center; gap:7px; background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); color:white; border:1px solid rgba(255,255,255,0.3); padding:9px 18px; border-radius:50px; font-weight:700; font-size:14px; cursor:pointer; transition:background 0.2s; }
         .rd-back-pill:hover { background:rgba(255,255,255,0.28); }
         .rd-counter { position:absolute; top:20px; right:24px; z-index:20; background:rgba(0,0,0,0.5); color:white; padding:6px 14px; border-radius:50px; font-size:13px; font-weight:700; backdrop-filter:blur(6px); }
-        .rd-arrow-btn { position:absolute; top:50%; transform:translateY(-50%); z-index:20; background:rgba(255,255,255,0.18); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,0.3); color:white; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; }
-        .rd-arrow-btn:hover { background:rgba(255,255,255,0.38); transform:translateY(-50%) scale(1.05); }
+        .rd-arrow-btn { position:absolute; top:50%; transform:translateY(-50%); z-index:20; background:rgba(0,0,0,0.3); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.4); color:white; width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .rd-arrow-btn:hover { background:rgba(0,0,0,0.6); transform:translateY(-50%) scale(1.1); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
         .rd-arrow-l { left:20px; }
         .rd-arrow-r { right:20px; }
         .rd-hero-text { position:absolute; bottom:0; left:0; right:0; padding:22px 32px 28px; pointer-events:none; }

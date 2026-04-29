@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import "../styles/Home.css";
 
 import Login from "./auth/Login";
@@ -10,6 +11,14 @@ import HomeNavbar from "../Component/HomeNavbar";
 export default function Home() {
 
 const navigate = useNavigate();
+const { user } = useSelector((state) => state.auth);
+
+useEffect(() => {
+  if (user) {
+    navigate("/dashboard");
+  }
+}, [user, navigate]);
+
 const [showLogin, setShowLogin] = useState(false);
 const [showRegister, setShowRegister] = useState(false);
 const [showPlans, setShowPlans] = useState(false);

@@ -72,20 +72,6 @@ app.get("/health", async (req, res) => {
   }
 });
 
-// Permanent deletion background task (runs once a day)
-setInterval(async () => {
-    try {
-        const [result] = await db.query(
-            "DELETE FROM users WHERE deletion_date IS NOT NULL AND deletion_date < NOW() - INTERVAL 30 DAY"
-        );
-        if (result.affectedRows > 0) {
-            console.log(`Permanently deleted ${result.affectedRows} accounts after 30 days.`);
-        }
-    } catch (err) {
-        console.error("Cleanup Task Error:", err);
-    }
-}, 24 * 60 * 60 * 1000); // 24 hours
-
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {

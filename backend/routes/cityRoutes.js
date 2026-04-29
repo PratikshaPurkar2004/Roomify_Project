@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const db = require("../config/db");
 
 // Mock city data as requested by the frontend
 router.get("/", (req, res) => {

@@ -17,6 +17,7 @@ export default function FindRoommates() {
   const [budget, setBudget] = useState("");
   const [gender, setGender] = useState("");
   const [myPreferences, setMyPreferences] = useState([]);
+  const [myProfile, setMyProfile] = useState(null);
   const [sentRequests, setSentRequests] = useState([]);
   const [acceptedIds, setAcceptedIds] = useState([]);
   const [toast, setToast] = useState("");
@@ -43,7 +44,7 @@ export default function FindRoommates() {
     property_type: "Stand Alone Building",
     furnishing: "Unfurnished",
     amenities: "",
-    image: null
+    images: []
   });
   const [dbCities, setDbCities] = useState([]);
   const [dbStates, setDbStates] = useState([]);
@@ -72,11 +73,15 @@ export default function FindRoommates() {
       .then(r => r.json())
       .then(d => { if (d.success) setAllCities(d.cities); });
 
-    fetch(`http://localhost:5000/api/preferences/${userId}`)
+    // Fetch full profile for matching (City, Budget, Prefs)
+    fetch(`http://localhost:5000/api/profile/${userId}`)
       .then(r => r.json())
       .then(d => {
-        if (d?.preferences && d.preferences !== "skipped") {
-          setMyPreferences(d.preferences.split(",").map(p => p.trim()).filter(Boolean));
+        if (d) {
+          setMyProfile(d);
+          if (d.preferences && d.preferences !== "skipped") {
+            setMyPreferences(d.preferences.split(",").map(p => p.trim()).filter(Boolean));
+          }
         }
       });
 
@@ -121,9 +126,10 @@ export default function FindRoommates() {
 
   // Filter & Sort
   useEffect(() => {
+    console.log("Matching Debug - Current User:", myProfile);
     let result = roommates.map(u => ({
       ...u,
-      matchPercentage: calculateMatchPercentage(myPreferences, u.preferences || "")
+      matchPercentage: calculateMatchPercentage(myProfile || { preferences: myPreferences }, u)
     }));
 
     if (city) result = result.filter(u => String(u.location || "").toLowerCase().includes(city.toLowerCase()));
@@ -134,7 +140,7 @@ export default function FindRoommates() {
     result.sort((a, b) => b.matchPercentage - a.matchPercentage);
 
     setFiltered(result);
-  }, [city, budget, gender, roommates, myPreferences]);
+  }, [city, budget, gender, roommates, myPreferences, myProfile]);
 
   const showGate = !hasInteracted && hostRooms.length === 0;
 
@@ -152,7 +158,7 @@ export default function FindRoommates() {
       if (data.success) {
         showToast("Room added successfully! 🎉");
         setShowAddModal(false);
-        setNewRoom({ location: "", address: "", state: "", country: "", rent: "", max_tenants: "", required_tenants: "", property_type: "Stand Alone Building", furnishing: "Unfurnished", amenities: "", image: null });
+        setNewRoom({ location: "", address: "", state: "", country: "", rent: "", max_tenants: "", required_tenants: "", property_type: "Stand Alone Building", furnishing: "Unfurnished", amenities: "", images: [] });
         fetchHostRooms();
         setHasInteracted(true); // Reveal roommates after adding
       } else {
@@ -265,7 +271,7 @@ export default function FindRoommates() {
             </button>
           </div>
 
-          <div className="rm2-grid">
+          <div className="rm2-grid" key={myProfile ? 'loaded' : 'loading'}>
             {filtered.length === 0 ? (
               <div className="rm2-empty">
                 <User size={60} />
@@ -287,8 +293,8 @@ export default function FindRoommates() {
                       <div className="rm2-avatar-wrap">
                         <div className="rm2-avatar">{initial}</div>
                       </div>
-                      <span className="rm2-match-label" style={{ color: matchColor }}>
-                        {match}% match
+                      <span className="rm2-match-label" style={{ color: matchColor, fontWeight: 800, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {match}% Match
                       </span>
                     </div>
 
@@ -328,11 +334,14 @@ export default function FindRoommates() {
                         <div className="rm2-pref-section">
                           <span className="rm2-pref-title">Preferences</span>
                           <div className="rm2-pref-tags">
-                            {person.preferences.split(",").filter(Boolean).slice(0, 3).map((pref, i) => (
-                              <span key={i} className={`rm2-pref-tag ${myPreferences.includes(pref.trim()) ? "rm2-pref-match" : ""}`}>
-                                {pref.trim()}
-                              </span>
-                            ))}
+                            {person.preferences.split(",").filter(Boolean).slice(0, 5).map((pref, i) => {
+                              const isMatch = myPreferences.some(p => p.toLowerCase() === pref.trim().toLowerCase());
+                              return (
+                                <span key={i} className={`rm2-pref-tag ${isMatch ? "rm2-pref-match" : ""}`}>
+                                  {pref.trim()}
+                                </span>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -447,7 +456,7 @@ export default function FindRoommates() {
 
               <div className="fr-form-group">
                 <label>Amenities & Features</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px', marginBottom: '16px' }}>
                   {featureAmenities.map(am => {
                     const isSelected = newRoom.amenities?.includes(am);
                     return (
@@ -456,7 +465,7 @@ export default function FindRoommates() {
                         if (isSelected) arr = arr.filter(a => a !== am); else arr.push(am);
                         setNewRoom({...newRoom, amenities: arr.join(', ')});
                       }}
-                      style={{ padding: '6px 12px', border: isSelected ? '1.5px solid #6366f1' : '1.5px solid #e2e8f0', borderRadius: '50px', fontSize: '12px', fontWeight: 600, color: isSelected ? '#4f46e5' : '#64748b', background: isSelected ? '#eff6ff' : 'white', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
+                      style={{ padding: '7px 15px', border: '1px solid #e2e8f0', borderRadius: '50px', fontSize: '13px', fontWeight: 500, color: isSelected ? '#7c3aed' : '#64748b', background: isSelected ? '#f5f3ff' : 'white', border: isSelected ? '1px solid #7c3aed' : '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
                         {am}
                       </span>
                     )
@@ -464,7 +473,7 @@ export default function FindRoommates() {
                 </div>
 
                 <label>House Rules</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px', marginBottom: '16px' }}>
                   {ruleAmenities.map(am => {
                     const isSelected = newRoom.amenities?.includes(am);
                     return (
@@ -473,7 +482,7 @@ export default function FindRoommates() {
                         if (isSelected) arr = arr.filter(a => a !== am); else arr.push(am);
                         setNewRoom({...newRoom, amenities: arr.join(', ')});
                       }}
-                      style={{ padding: '6px 12px', border: isSelected ? '1.5px solid #ef4444' : '1.5px solid #e2e8f0', borderRadius: '50px', fontSize: '12px', fontWeight: 600, color: isSelected ? '#dc2626' : '#64748b', background: isSelected ? '#fef2f2' : 'white', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
+                      style={{ padding: '7px 15px', border: '1px solid #e2e8f0', borderRadius: '50px', fontSize: '13px', fontWeight: 500, color: isSelected ? '#ef4444' : '#64748b', background: isSelected ? '#fef2f2' : 'white', border: isSelected ? '1px solid #ef4444' : '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
                         {am}
                       </span>
                     )
@@ -481,7 +490,7 @@ export default function FindRoommates() {
                 </div>
 
                 <label>Tenant Preferences</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px', marginBottom: '16px' }}>
                   {prefAmenities.map(am => {
                     const isSelected = newRoom.amenities?.includes(am);
                     return (
@@ -490,7 +499,7 @@ export default function FindRoommates() {
                         if (isSelected) arr = arr.filter(a => a !== am); else arr.push(am);
                         setNewRoom({...newRoom, amenities: arr.join(', ')});
                       }}
-                      style={{ padding: '6px 12px', border: isSelected ? '1.5px solid #10b981' : '1.5px solid #e2e8f0', borderRadius: '50px', fontSize: '12px', fontWeight: 600, color: isSelected ? '#059669' : '#64748b', background: isSelected ? '#ecfdf5' : 'white', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
+                      style={{ padding: '7px 15px', border: '1px solid #e2e8f0', borderRadius: '50px', fontSize: '13px', fontWeight: 500, color: isSelected ? '#10b981' : '#64748b', background: isSelected ? '#ecfdf5' : 'white', border: isSelected ? '1px solid #10b981' : '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
                         {am}
                       </span>
                     )
@@ -499,8 +508,37 @@ export default function FindRoommates() {
               </div>
 
               <div className="fr-form-group">
-                <label>Room Photo</label>
-                <input type="file" accept="image/*" onChange={e => setNewRoom({ ...newRoom, image: e.target.files[0] })} />
+                <label>Room Photos (Max 5)</label>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  multiple 
+                  style={{ fontSize: '13px', color: '#64748b' }}
+                  onChange={(e) => {
+                    const newFiles = Array.from(e.target.files);
+                    const currentImages = newRoom.images || [];
+                    if (currentImages.length + newFiles.length > 5) {
+                      showToast("Maximum 5 images allowed in total! ⚠️");
+                      e.target.value = "";
+                      return;
+                    }
+                    setNewRoom({...newRoom, images: [...currentImages, ...newFiles]});
+                    e.target.value = "";
+                  }} 
+                />
+                
+                {/* Image Previews */}
+                {newRoom.images && newRoom.images.length > 0 && (
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '12px', overflowX: 'auto', padding: '4px' }}>
+                    {newRoom.images.map((file, idx) => (
+                      <div key={idx} style={{ position: 'relative', minWidth: '85px', height: '85px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                        <img src={URL.createObjectURL(file)} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button type="button" onClick={() => setNewRoom({ ...newRoom, images: newRoom.images.filter((_, i) => i !== idx) })} style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={12} /></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '6px' }}>{newRoom.images?.length || 0} of 5 photos selected</p>
               </div>
 
               <div className="fr-modal-actions">

@@ -49,15 +49,16 @@ const Login = ({ onClose, onSwitch }) => {
   }, []);
 
   useEffect(() => {
-    if (user) {
+    // Only auto-redirect on the standalone /login route, not when opened as a modal
+    if (user && !onClose) {
       const prefs = user.preferences;
-      if (!prefs || prefs === "" || prefs === "null" || prefs === "[]" || prefs === "skipped") {
+      if (!prefs || prefs === "" || prefs === "null" || prefs === "[]") {
         navigate("/preferences");
       } else {
         navigate("/dashboard");
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, onClose]);
 
   const validate = (data = formData) => {
     let errors = {};
@@ -123,8 +124,14 @@ const Login = ({ onClose, onSwitch }) => {
     if (Object.keys(errors).length === 0) {
       dispatch(loginUser(formData))
         .unwrap()
-        .then(() => {
-          navigate("/preferences");
+        .then((res) => {
+          const p = res.user.preferences;
+          const noPrefs = !p || p === "" || p === "null" || p === "[]";
+          if (noPrefs) {
+            navigate("/preferences");
+          } else {
+            navigate("/dashboard");
+          }
           if (onClose) {
             setTimeout(() => onClose(), 100);
           }
@@ -163,7 +170,7 @@ const Login = ({ onClose, onSwitch }) => {
 
           {error && (
             <p className="login-error">
-              {typeof error === "string" ? error : "Login failed"}
+              {error}
             </p>
           )}
 

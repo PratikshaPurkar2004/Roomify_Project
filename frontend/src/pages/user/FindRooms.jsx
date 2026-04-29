@@ -57,14 +57,32 @@ export default function FindRooms() {
   }, [city, budget, furnishing, propertyType, rooms]);
 
 
-  const [activeImgIndex, setActiveImgIndex] = useState(0);
+  const handleAddRoom = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("host_id", userId);
+    Object.entries(newRoom).forEach(([key, val]) => {
+      if (key === "images") {
+        val.forEach(file => formData.append("images", file));
+      } else if (val !== null && val !== "") {
+        formData.append(key, val);
+      }
+    });
 
-  const prevImg = (images) => {
-    setActiveImgIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const nextImg = (images) => {
-    setActiveImgIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
+    try {
+      const res = await fetch("http://localhost:5000/api/rooms/add", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        showToast("Room added successfully! 🎉");
+        setShowAddModal(false);
+        setNewRoom({ location: "", address: "", state: "", country: "", rent: "", max_tenants: "", required_tenants: "", property_type: "Stand Alone Building", furnishing: "Unfurnished", amenities: "", images: [] });
+        fetchRooms();
+      } else {
+        showToast(data.message || "Failed to add room");
+      }
+    } catch {
+      showToast("Error adding room");
+    }
   };
 
   const openDetailModal = (room) => {
@@ -154,84 +172,7 @@ export default function FindRooms() {
           </div>
         ) : (
           filtered.map(room => (
-            <div className="fr-card-modern" key={room.room_id}>
-              <div className="fr-card-img-wrap-modern" onClick={() => openDetailModal(room)} style={{ cursor: 'pointer' }}>
-                {(() => {
-                  let images = [];
-                  try {
-                    images = JSON.parse(room.image_url);
-                    if (!Array.isArray(images)) images = [room.image_url];
-                  } catch {
-                    images = room.image_url ? [room.image_url] : [];
-                  }
-                  
-                  if (images.length > 0) {
-                    return <img src={`http://localhost:5000${images[0]}`} alt="Room" />;
-                  }
-                  return <div className="fr-card-img-placeholder-modern"><Home size={40} /></div>;
-                })()}
-
-
-                <div className="fr-card-badges">
-                  <span className={`fr-badge-modern ${room.availability}`}>
-                    {room.availability === "available" ? "✓ AVAILABLE" : "BOOKED"}
-                  </span>
-                  <span className="fr-property-type-badge">{room.property_type || "Standard"}</span>
-                </div>
-                <div className="fr-rent-tag-modern">
-                  ₹{Number(room.rent).toLocaleString()}<span>/mo</span>
-                </div>
-              </div>
-
-              <div className="fr-card-body-modern">
-                <div className="fr-card-header-modern">
-                  <h3>{room.property_type || "Room"} in {room.location?.split(",")[0]}</h3>
-                  <p className="fr-card-addr">
-                    <MapPin size={14} /> {room.address ? `${room.address}, ` : ""}{room.location}
-                  </p>
-                </div>
-
-                <div className="fr-card-details-grid">
-                  <div className="fr-detail-row">
-                    <span className="fr-detail-label">Monthly Rent</span>
-                    <span className="fr-detail-value fr-text-price">₹{Number(room.rent).toLocaleString()}</span>
-                  </div>
-                  <div className="fr-detail-row">
-                    <span className="fr-detail-label">Total Capacity</span>
-                    <span className="fr-detail-value">{room.max_tenants || 1} People</span>
-                  </div>
-                  <div className="fr-detail-row">
-                    <span className="fr-detail-label">Looking For</span>
-                    <span className="fr-detail-value">{room.required_tenants || 1} Roommate(s)</span>
-                  </div>
-                  <div className="fr-detail-row">
-                    <span className="fr-detail-label">Furnishing</span>
-                    <span className="fr-detail-value">{room.furnishing || "Not set"}</span>
-                  </div>
-                </div>
-
-                <div className="fr-amenities-section">
-                   <p className="fr-section-title">Amenities</p>
-                   <div className="fr-amenity-tags">
-                      {room.amenities ? room.amenities.split(",").map((a, i) => (
-                        <span key={i} className="fr-amenity-tag">{a.trim()}</span>
-                      )) : <span className="fr-no-amenities">Basic essentials included</span>}
-                   </div>
-                </div>
-
-                <div className="fr-card-host-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  {room.host_name && (
-                    <div className="fr-host-mini-info">
-                      <div className="fr-host-avatar-sm">{room.host_name?.charAt(0)}</div>
-                      <div className="fr-host-text-sm">
-                        <span className="fr-host-posted">Posted by</span>
-                        <span className="fr-host-name-sm">{room.host_name}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <RoomCard key={room.room_id} room={room} onOpen={() => openDetailModal(room)} />
           ))
         )}
       </div>
@@ -239,3 +180,93 @@ export default function FindRooms() {
     </div>
   );
 }
+
+function RoomCard({ room, onOpen }) {
+  const [idx, setIdx] = useState(0);
+  let images = [];
+  try {
+    images = JSON.parse(room.image_url);
+    if (!Array.isArray(images)) images = [room.image_url];
+  } catch {
+    images = room.image_url ? [room.image_url] : [];
+  }
+
+  const next = (e) => { e.stopPropagation(); setIdx(i => (i + 1) % images.length); };
+  const prev = (e) => { e.stopPropagation(); setIdx(i => (i - 1 + images.length) % images.length); };
+
+  return (
+    <div className="fr-card-modern">
+      <div className="fr-card-img-wrap-modern" onClick={onOpen} style={{ cursor: 'pointer', position: 'relative' }}>
+        {images.length > 0 ? (
+          <>
+            <img src={`http://localhost:5000${images[idx]}`} alt="Room" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {images.length > 1 && (
+              <>
+                <button onClick={prev} className="fr-card-arrow-mini l" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.85)', border: 'none', borderRadius: '50%', width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}><ChevronLeft size={16} color="#0f172a" /></button>
+                <button onClick={next} className="fr-card-arrow-mini r" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.85)', border: 'none', borderRadius: '50%', width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}><ChevronRight size={16} color="#0f172a" /></button>
+                <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 4 }}>
+                  {images.map((_, i) => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: i === idx ? 'white' : 'rgba(255,255,255,0.5)' }} />)}
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div className="fr-card-img-placeholder-modern"><Home size={40} /></div>
+        )}
+        <div className="fr-card-badges">
+          <span className={`fr-badge-modern ${room.availability}`}>{room.availability === "available" ? "✓ AVAILABLE" : "BOOKED"}</span>
+          <span className="fr-property-type-badge">{room.property_type || "Standard"}</span>
+        </div>
+        <div className="fr-rent-tag-modern">₹{Number(room.rent).toLocaleString()}<span>/mo</span></div>
+      </div>
+
+      <div className="fr-card-body-modern">
+        <div className="fr-card-header-modern">
+          <h3 style={{ fontSize: '18px', fontWeight: 800 }}>{room.property_type || "Room"} in {room.location?.split(",")[0]}</h3>
+          <p className="fr-card-addr"><MapPin size={13} /> {room.address ? `${room.address}, ` : ""}{room.location}</p>
+        </div>
+        <div className="fr-card-details-grid" style={{ background:'#f8fafc', padding:'12px', borderRadius:'12px', marginTop:'12px' }}>
+          <div className="fr-detail-row" style={{ display:'flex', justifyContent:'space-between', fontSize:'13px', paddingBottom:6, borderBottom:'1px dashed #e2e8f0' }}>
+            <span style={{ color:'#94a3b8', fontWeight:600 }}>Rent</span>
+            <span style={{ color:'#10b981', fontWeight:700 }}>₹{Number(room.rent).toLocaleString()}</span>
+          </div>
+          <div className="fr-detail-row" style={{ display:'flex', justifyContent:'space-between', fontSize:'13px', padding: '6px 0', borderBottom:'1px dashed #e2e8f0' }}>
+            <span style={{ color:'#94a3b8', fontWeight:600 }}>Looking For</span>
+            <span style={{ color:'#1e293b', fontWeight:700 }}>{room.required_tenants || 1} Roommate(s)</span>
+          </div>
+          <div className="fr-detail-row" style={{ display:'flex', justifyContent:'space-between', fontSize:'13px', paddingTop: 6 }}>
+            <span style={{ color:'#94a3b8', fontWeight:600 }}>Furnishing</span>
+            <span style={{ color:'#4f46e5', fontWeight:700 }}>{room.furnishing || "Unfurnished"}</span>
+          </div>
+        </div>
+
+        <div className="fr-amenities-mini" style={{ marginTop: '14px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+          {room.amenities ? room.amenities.split(',').slice(0, 3).map((am, i) => (
+            <span key={i} style={{ fontSize: '10px', background: '#f1f5f9', color: '#64748b', padding: '4px 8px', borderRadius: '50px', fontWeight: 700 }}>
+              {am.trim()}
+            </span>
+          )) : <span style={{ fontSize: '10px', color: '#cbd5e1' }}>Standard Amenities</span>}
+          {room.amenities?.split(',').length > 3 && <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>+{room.amenities.split(',').length - 3} more</span>}
+        </div>
+        <div className="fr-card-host-footer" style={{ marginTop:'14px', paddingTop:'12px', borderTop:'1px solid #f1f5f9', display:'flex', alignItems:'center', gap:10 }}>
+          {room.host_name && (
+            <>
+              <div style={{ width:28, height:28, background:'linear-gradient(135deg,#6366f1,#a855f7)', color:'white', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'12px', fontWeight:800 }}>{room.host_name?.charAt(0)}</div>
+              <div style={{ display:'flex', flexDirection:'column' }}>
+                <span style={{ fontSize:'9px', color:'#94a3b8', fontWeight:700, textTransform:'uppercase' }}>Host</span>
+                <span style={{ fontSize:'12px', color:'#334155', fontWeight:700 }}>{room.host_name}</span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const ChevronLeft = ({ size, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+);
+const ChevronRight = ({ size, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+);

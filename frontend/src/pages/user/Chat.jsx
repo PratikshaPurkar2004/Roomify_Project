@@ -155,15 +155,6 @@ export default function Chat() {
     sendMessage(text);
   };
 
-  const handleSend = () => {
-    sendMessage(newMessage);
-    setNewMessage(""); 
-  };
-
-  const handleSendIcebreaker = (text) => {
-    sendMessage(text);
-  };
-
   const handleKeyPress = (e) => {
     if (e.key === "Enter") handleSend();
   };

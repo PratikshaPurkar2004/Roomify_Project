@@ -17,9 +17,9 @@ router.get("/stats", async (req, res) => {
         (SELECT COUNT(*) FROM views_log WHERE user_id = ?) AS views,
         (SELECT COUNT(*) FROM users WHERE user_type = 'Host') AS hosts,
         (SELECT COUNT(*) FROM users WHERE user_type = 'Finder') AS finders,
-        (SELECT COUNT(*) FROM requests WHERE (sender_id = ? OR receiver_id = ?) AND status = 'accepted') AS matches
+        (SELECT COUNT(*) FROM users u2 WHERE u2.user_id != ? AND (u2.city = (SELECT city FROM users WHERE user_id = ?) OR u2.preferences IS NOT NULL)) AS matches
     `;
-    params = [userId, userId, userId, userId, userId];
+    params = [userId, userId, userId, userId, userId, userId];
   } else {
     sql = `
       SELECT 

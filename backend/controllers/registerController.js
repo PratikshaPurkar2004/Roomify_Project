@@ -43,7 +43,7 @@ const db = require("../config/db");
 const bcrypt = require("bcryptjs");
 
 const register = async (req, res) => {
-  const { name, email, occupation, password,gender } = req.body;
+  const { name, email, occupation, password, gender, user_type } = req.body;
 
   console.log("Register request:", req.body);
 
