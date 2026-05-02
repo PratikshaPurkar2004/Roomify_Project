@@ -41,18 +41,99 @@
 
 const db = require("../config/db");
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
+
+// In-memory store for pending registration OTPs
+// map key: email, value: { otp, expiry }
+const registerOtps = new Map();
+
+const sendRegisterOtp = async (req, res) => {
+  const { email, name } = req.body;
+
+  if (!email || !name) {
+    return res.status(400).json({ message: "Name and email are required" });
+  }
+
+  const normalizedEmail = String(email).trim().toLowerCase();
+
+  try {
+    // 1. Check if user already exists
+    const [existingUsers] = await db.query(
+      "SELECT user_id FROM users WHERE email = ?",
+      [normalizedEmail]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // 2. Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const expiry = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+    // 3. Save to memory map
+    registerOtps.set(normalizedEmail, { otp, expiry });
+
+    // 4. Send email
+    // --- Log the OTP for debugging ---
+    console.log(`[DEBUG] Attempting to send Registration OTP for ${normalizedEmail} is: ${otp}`);
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: normalizedEmail,
+      subject: "Your Registration OTP for Roomify",
+      text: `Hello ${name},\n\nYour OTP for registration is: ${otp}\n\nIt is valid for 5 minutes.`
+    });
+
+    return res.json({ message: "OTP sent to email" });
+
+  } catch (error) {
+    console.error("Send Registration OTP Error:", error.message || error);
+    if (error.code === 'EAUTH') {
+      return res.status(500).json({
+        message: "Email authentication failed. Please check EMAIL_USER and EMAIL_PASS in .env"
+      });
+    }
+    return res.status(500).json({ message: "Failed to send OTP. Please try again." });
+  }
+};
 
 const register = async (req, res) => {
-  const { name, email, occupation, password, gender, user_type } = req.body;
+  const { name, email, occupation, password, gender, user_type, otp } = req.body;
 
-  console.log("Register request:", req.body);
+  console.log("Register request:", { ...req.body, password: "***" });
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: "Name, email and password are required" });
+  if (!name || !email || !password || !otp) {
+    return res.status(400).json({ message: "Name, email, password, and OTP are required" });
   }
 
   // Normalize email to avoid case/whitespace mismatch between register/login
   const normalizedEmail = String(email).trim().toLowerCase();
+
+  // Validate OTP
+  const record = registerOtps.get(normalizedEmail);
+  if (!record) {
+    return res.status(400).json({ message: "No OTP found for this email. Please request a new one." });
+  }
+
+  if (record.otp != otp) {
+    return res.status(400).json({ message: "Invalid OTP" });
+  }
+
+  if (Date.now() > record.expiry) {
+    registerOtps.delete(normalizedEmail);
+    return res.status(400).json({ message: "OTP expired. Please request a new one." });
+  }
 
   try {
     const [existingUsers] = await db.query(
@@ -75,6 +156,9 @@ const register = async (req, res) => {
 
     console.log("User inserted successfully", { email: normalizedEmail, insertId: result.insertId });
 
+    // Remove the OTP from map since it's now used
+    registerOtps.delete(normalizedEmail);
+
     return res.status(201).json({
       message: "User registered successfully",
       userId: result.insertId,
@@ -91,4 +175,4 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { register };
+module.exports = { register, sendRegisterOtp };

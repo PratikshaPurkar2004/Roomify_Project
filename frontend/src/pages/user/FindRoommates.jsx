@@ -142,7 +142,9 @@ export default function FindRoommates() {
     setFiltered(result);
   }, [city, budget, gender, roommates, myPreferences, myProfile]);
 
-  const showGate = !hasInteracted && hostRooms.length === 0;
+  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+  const isFinder = currentUser.user_type === "Finder";
+  const showGate = !hasInteracted && hostRooms.length === 0 && !isFinder;
 
   const handleAddRoom = async (e) => {
     e.preventDefault();
@@ -226,7 +228,23 @@ export default function FindRoommates() {
               <button className="rm2-primary-btn" onClick={() => setShowAddModal(true)}>
                 Add Your Property Now
               </button>
-
+              <button 
+                onClick={() => setHasInteracted(true)}
+                style={{ 
+                  marginTop: '10px', 
+                  padding: '12px 24px', 
+                  borderRadius: '12px', 
+                  backgroundColor: 'transparent', 
+                  border: '2px solid #a855f7', 
+                  color: '#a855f7', 
+                  fontWeight: '600', 
+                  cursor: 'pointer',
+                  width: '100%',
+                  fontSize: '15px'
+                }}
+              >
+                Skip for now
+              </button>
             </div>
             {hostRooms.length > 0 && (
               <div className="rm2-success-mini">

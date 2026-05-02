@@ -26,6 +26,9 @@ const forgotPassword = async (req, res) => {
       [otp, expiry, email]
     );
 
+    // --- Log the OTP for debugging ---
+    console.log(`[DEBUG] Attempting to send Password reset OTP for ${email} is: ${otp}`);
+
     // ✅ EMAIL SETUP (take values from .env)
     const transporter = nodemailer.createTransport({
       service: "gmail",
