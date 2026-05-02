@@ -27,9 +27,20 @@ function Preference() {
   const [toast, setToast] = useState(null);
 
   React.useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) {
+    const userStr = localStorage.getItem("user");
+    if (!userStr) {
       navigate("/");
+      return;
+    }
+
+    try {
+      const userObj = JSON.parse(userStr);
+      const prefs = userObj.preferences;
+      if (prefs && prefs !== "skipped" && prefs !== "None" && prefs !== "" && prefs !== "null") {
+        setSelected(prefs.split(","));
+      }
+    } catch (e) {
+      console.error("Error loading preferences", e);
     }
   }, [navigate]);
 
@@ -95,6 +106,22 @@ function Preference() {
   };
 
   const handleSkip = async () => {
+    const userStr = localStorage.getItem("user");
+    let hasExistingPrefs = false;
+    if (userStr) {
+      try {
+        const userObj = JSON.parse(userStr);
+        if (userObj.preferences && userObj.preferences !== "skipped" && userObj.preferences !== "None") {
+          hasExistingPrefs = true;
+        }
+      } catch (e) {}
+    }
+
+    if (hasExistingPrefs) {
+      navigate("/dashboard");
+      return;
+    }
+
     try {
       const userId = localStorage.getItem("userId");
       const skipPref = "skipped";
@@ -104,10 +131,10 @@ function Preference() {
         body: JSON.stringify({ userId: userId, preferences: [skipPref] })
       });
 
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
+      const userStrMod = localStorage.getItem("user");
+      if (userStrMod) {
         try {
-          const userObj = JSON.parse(userStr);
+          const userObj = JSON.parse(userStrMod);
           userObj.preferences = skipPref;
           localStorage.setItem("user", JSON.stringify(userObj));
         } catch (e) {}
@@ -173,7 +200,10 @@ function Preference() {
             Update Preferences
           </button>
           <button className="pref-btn btn-skip" onClick={handleSkip}>
-            Skip for Now
+            {JSON.parse(localStorage.getItem("user"))?.preferences && 
+             JSON.parse(localStorage.getItem("user"))?.preferences !== "skipped" && 
+             JSON.parse(localStorage.getItem("user"))?.preferences !== "None" 
+             ? "Continue to Dashboard" : "Skip for Now"}
           </button>
         </div>
 

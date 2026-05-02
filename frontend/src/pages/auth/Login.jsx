@@ -52,7 +52,7 @@ const Login = ({ onClose, onSwitch }) => {
     // Only auto-redirect on the standalone /login route, not when opened as a modal
     if (user && !onClose) {
       const prefs = user.preferences;
-      if (!prefs || prefs === "" || prefs === "null" || prefs === "[]") {
+      if (!prefs || prefs === "None" || prefs === "" || prefs === "null") {
         navigate("/preferences");
       } else {
         navigate("/dashboard");
@@ -124,9 +124,9 @@ const Login = ({ onClose, onSwitch }) => {
     if (Object.keys(errors).length === 0) {
       dispatch(loginUser(formData))
         .unwrap()
-        .then((res) => {
-          const p = res.user.preferences;
-          const noPrefs = !p || p === "" || p === "null" || p === "[]";
+        .then((payload) => {
+          const p = payload.user?.preferences;
+          const noPrefs = !p || p === "None" || p === "" || p === "null" || p === "[]";
           if (noPrefs) {
             navigate("/preferences");
           } else {
