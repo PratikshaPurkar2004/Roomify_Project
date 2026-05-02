@@ -32,19 +32,28 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   const userId = req.params.id;
-  const { name, age_group, area, DOB, dob, occupation, city, budget, gender } = req.body;
-  const finalDob = DOB || dob;
+  const { name, occupation, city, budget, gender, DOB, dob } = req.body;
+  const finalDob = DOB || dob || null;
 
   const userSql = `
     UPDATE users
-    SET name=?, age_group=?, area=?, DOB=?, occupation=?, city=?, budget=?, gender=?
+    SET name=?, DOB=?, occupation=?, city=?, budget=?, gender=?
     WHERE user_id=?
   `;
   try {
-    await db.query(userSql, [name, age_group, area, finalDob, occupation, city, budget, gender, userId]);
-    res.json({ message: "Profile Updated Successfully" });
+    await db.query(userSql, [
+      name || null, 
+      finalDob, 
+      occupation || null, 
+      city || null, 
+      budget || null, 
+      gender || null, 
+      userId
+    ]);
+    res.json({ success: true, message: "Profile Updated Successfully" });
   } catch (err) {
-    res.status(500).json({ message: "Server update error" });
+    console.error("Profile Update Error:", err.message);
+    res.status(500).json({ success: false, message: "Server update error", error: err.message });
   }
 });
 

@@ -62,7 +62,7 @@ export default function Profile() {
             name: res.data.name || "",
             dob: res.data.DOB ? res.data.DOB.split('T')[0] : "",
             occupation: res.data.occupation || "",
-            city: res.data.area || "",
+            city: res.data.city || "",
             budget: res.data.budget || "",
             gender: res.data.gender || ""
           });
@@ -99,12 +99,17 @@ export default function Profile() {
   };
 
   const saveProfile = () => {
+    if (!form.name || !form.name.trim()) {
+      showToast("Full Name is required! ⚠️", "error");
+      return;
+    }
+
     if (/\d/.test(form.name)) {
       showToast("Numbers are not allowed in name", "error");
       return;
     }
 
-    const payload = { ...form, area: form.city };
+    const payload = { ...form };
     
     axios
       .put(`http://localhost:5000/api/profile/${userId}`, payload)
@@ -118,7 +123,8 @@ export default function Profile() {
       })
       .catch((err) => {
         console.log(err);
-        showToast("Update Failed ❌", "error");
+        const errorMsg = err.response?.data?.message || "Update Failed ❌";
+        showToast(errorMsg, "error");
       });
   };
 

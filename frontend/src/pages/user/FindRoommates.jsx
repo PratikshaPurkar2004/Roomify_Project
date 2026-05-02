@@ -31,6 +31,15 @@ export default function FindRoommates() {
   const [loadingRooms, setLoadingRooms] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
+  // Roommate Review States
+  const [showRMReviewModal, setShowRMReviewModal] = useState(false);
+  const [selectedRM, setSelectedRM] = useState(null);
+  const [rmReviews, setRmReviews] = useState([]);
+  const [newRMRating, setNewRMRating] = useState(5);
+  const [newRMComment, setNewRMComment] = useState("");
+  const [submittingRM, setSubmittingRM] = useState(false);
+  const [loadingRMReviews, setLoadingRMReviews] = useState(false);
+
   // Add Room Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [newRoom, setNewRoom] = useState({
@@ -63,6 +72,51 @@ export default function FindRoommates() {
         setLoadingRooms(false);
       })
       .catch(() => setLoadingRooms(false));
+  };
+
+  const fetchRMReviews = (targetId) => {
+    setLoadingRMReviews(true);
+    fetch(`http://localhost:5000/api/roommates/${targetId}/reviews`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setRmReviews(d.reviews);
+        setLoadingRMReviews(false);
+      })
+      .catch(() => setLoadingRMReviews(false));
+  };
+
+  const openRMReviews = (person) => {
+    setSelectedRM(person);
+    setRmReviews([]);
+    setShowRMReviewModal(true);
+    fetchRMReviews(person.id);
+  };
+
+  const submitRMReview = () => {
+    if (!userId) { showToast("Please login to review!"); return; }
+    if (!newRMComment.trim()) { showToast("Please add a comment!"); return; }
+    
+    setSubmittingRM(true);
+    fetch(`http://localhost:5000/api/roommates/${selectedRM.id}/reviews`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, rating: newRMRating, comment: newRMComment })
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          showToast("Review submitted! ⭐");
+          setNewRMComment("");
+          setNewRMRating(5);
+          fetchRMReviews(selectedRM.id);
+          // Refresh roommate list to update average rating
+          fetch("http://localhost:5000/api/roommates")
+            .then(r => r.json())
+            .then(data => { setRoommates(data); setFiltered(data); });
+        }
+        setSubmittingRM(false);
+      })
+      .catch(() => setSubmittingRM(false));
   };
 
   // Fetch initial data
@@ -293,9 +347,34 @@ export default function FindRoommates() {
                       <div className="rm2-avatar-wrap">
                         <div className="rm2-avatar">{initial}</div>
                       </div>
-                      <span className="rm2-match-label" style={{ color: matchColor, fontWeight: 800, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        {match}% Match
-                      </span>
+                      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2 }}>
+                        <span className="rm2-match-label" style={{ color: matchColor, fontWeight: 800, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {match}% Match
+                        </span>
+                        <div 
+                          className="rm2-rating-badge"
+                          onClick={(e) => { e.stopPropagation(); openRMReviews(person); }}
+                          style={{ 
+                            display:'flex', 
+                            alignItems:'center', 
+                            gap:4, 
+                            background: person.review_count > 0 ? '#fffbeb' : '#f8fafc', 
+                            padding:'2px 8px', 
+                            borderRadius:'50px', 
+                            border: person.review_count > 0 ? '1px solid #fef3c7' : '1px solid #e2e8f0', 
+                            marginTop:4, 
+                            cursor:'pointer' 
+                          }}
+                        >
+                          <Star size={10} fill={person.review_count > 0 ? "#f59e0b" : "none"} color={person.review_count > 0 ? "#f59e0b" : "#94a3b8"} />
+                          <span style={{ fontSize:'11px', fontWeight:800, color: person.review_count > 0 ? '#92400e' : '#64748b' }}>
+                            {person.review_count > 0 ? Number(person.avg_rating).toFixed(1) : "0.0"}
+                          </span>
+                          <span style={{ fontSize:'10px', color: person.review_count > 0 ? '#b45309' : '#94a3b8', fontWeight:600 }}>
+                            ({person.review_count || 0})
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="rm2-card-info-modern">
@@ -330,24 +409,36 @@ export default function FindRoommates() {
                         </span>
                       </div>
 
-                      {person.preferences && person.preferences !== "skipped" && (
-                        <div className="rm2-pref-section">
-                          <span className="rm2-pref-title">Preferences</span>
-                          <div className="rm2-pref-tags">
-                            {person.preferences.split(",").filter(Boolean).slice(0, 5).map((pref, i) => {
+                      <div className="rm2-pref-section">
+                        <span className="rm2-pref-title">Preferences</span>
+                        <div className="rm2-pref-tags">
+                          {person.preferences && person.preferences !== "skipped" && person.preferences.split(",").filter(Boolean).length > 0 ? (
+                            person.preferences.split(",").filter(Boolean).slice(0, 5).map((pref, i) => {
                               const isMatch = myPreferences.some(p => p.toLowerCase() === pref.trim().toLowerCase());
                               return (
                                 <span key={i} className={`rm2-pref-tag ${isMatch ? "rm2-pref-match" : ""}`}>
                                   {pref.trim()}
                                 </span>
                               );
-                            })}
-                          </div>
+                            })
+                          ) : (
+                            <span className="rm2-no-pref">No Preferences</span>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
 
                     <div className="rm2-card-actions">
+                      <button
+                        className="rm2-action-btn"
+                        style={{ background:'#f5f3ff', color:'#7c3aed', border:'1px solid #ddd6fe' }}
+                        onClick={() => openRMReviews(person)}
+                        title="View Reviews"
+                      >
+                        <Star size={14} />
+                        Review
+                      </button>
+
                       <button
                         className={`rm2-action-btn ${accepted ? "rm2-btn-chat" : "rm2-btn-locked"}`}
                         onClick={() => accepted && navigate("/dashboard/chat", { state: { selectedUserId: person.id } })}
@@ -546,6 +637,81 @@ export default function FindRoommates() {
                 <button type="submit" className="fr-modal-submit">Post Listing</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Roommate Review Modal */}
+      {showRMReviewModal && selectedRM && (
+        <div className="fr-modal-overlay" onClick={() => setShowRMReviewModal(false)}>
+          <div className="fr-modal" onClick={e => e.stopPropagation()} style={{ maxWidth:'500px' }}>
+            <div className="fr-modal-header" style={{ borderBottom:'1px solid #f1f5f9' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                <div style={{ width:40, height:40, borderRadius:'50%', background:'linear-gradient(135deg, #6366f1, #8b5cf6)', color:'white', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:18 }}>
+                  {selectedRM.name.charAt(0)}
+                </div>
+                <div>
+                  <h3 style={{ fontSize:16, margin:0 }}>Reviews for {selectedRM.name}</h3>
+                  <p style={{ fontSize:12, color:'#64748b', margin:0 }}>{selectedRM.occupation || "Roommate"}</p>
+                </div>
+              </div>
+              <X size={20} style={{ cursor:'pointer', color:'#94a3b8' }} onClick={() => setShowRMReviewModal(false)} />
+            </div>
+
+            <div className="fr-modal-body" style={{ maxHeight:'70vh', overflowY:'auto', padding:'20px' }}>
+              {/* Write Review Section */}
+              <div style={{ background:'#f8fafc', padding:16, borderRadius:16, marginBottom:24, border:'1px solid #e2e8f0' }}>
+                <h4 style={{ margin:'0 0 12px 0', fontSize:14, fontWeight:700 }}>Write a Review</h4>
+                <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+                  {[1,2,3,4,5].map(v => (
+                    <Star 
+                      key={v} 
+                      size={20} 
+                      style={{ cursor:'pointer' }} 
+                      fill={v <= newRMRating ? "#f59e0b" : "none"} 
+                      color={v <= newRMRating ? "#f59e0b" : "#cbd5e1"} 
+                      onClick={() => setNewRMRating(v)}
+                    />
+                  ))}
+                </div>
+                <textarea 
+                  placeholder="Share your experience with this roommate..." 
+                  value={newRMComment}
+                  onChange={e => setNewRMComment(e.target.value)}
+                  style={{ width:'100%', padding:12, borderRadius:12, border:'1px solid #e2e8f0', minHeight:80, fontSize:13, fontFamily:'inherit', marginBottom:12 }}
+                />
+                <button 
+                  onClick={submitRMReview}
+                  disabled={submittingRM}
+                  style={{ width:'100%', padding:10, borderRadius:10, border:'none', background:'#6366f1', color:'white', fontWeight:700, fontSize:13, cursor: submittingRM ? 'not-allowed' : 'pointer' }}
+                >
+                  {submittingRM ? "Submitting..." : "Post Review"}
+                </button>
+              </div>
+
+              {/* Reviews List */}
+              <h4 style={{ margin:'0 0 16px 0', fontSize:14, fontWeight:700 }}>User Feedback</h4>
+              {loadingRMReviews ? (
+                <div style={{ textAlign:'center', padding:20, color:'#64748b', fontSize:13 }}>Loading reviews...</div>
+              ) : rmReviews.length === 0 ? (
+                <div style={{ textAlign:'center', padding:20, color:'#94a3b8', fontSize:13 }}>No reviews yet. Be the first to review!</div>
+              ) : (
+                <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+                  {rmReviews.map((rev, i) => (
+                    <div key={i} style={{ paddingBottom:16, borderBottom: i === rmReviews.length - 1 ? 'none' : '1px solid #f1f5f9' }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                        <span style={{ fontWeight:700, fontSize:13 }}>{rev.reviewer_name || "Anonymous"}</span>
+                        <div style={{ display:'flex', gap:2 }}>
+                          {[...Array(5)].map((_, si) => <Star key={si} size={10} fill={si < rev.rating ? "#f59e0b" : "none"} color={si < rev.rating ? "#f59e0b" : "#cbd5e1"} />)}
+                        </div>
+                      </div>
+                      <p style={{ fontSize:13, color:'#475569', margin:'0 0 4px 0', lineHeight:1.5 }}>{rev.comment}</p>
+                      <span style={{ fontSize:11, color:'#94a3b8' }}>{new Date(rev.review_date).toLocaleDateString()}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

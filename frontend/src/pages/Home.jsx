@@ -25,6 +25,9 @@ const [showPlans, setShowPlans] = useState(false);
 const [activeTab,setActiveTab] = useState("rent");
 const [propertyFilter, setPropertyFilter] = useState("All");
 const [cities, setCities] = useState([]);
+const [dynamicPopular, setDynamicPopular] = useState([]);
+const [loadingPopular, setLoadingPopular] = useState(true);
+const [dynamicTestimonials, setDynamicTestimonials] = useState([]);
 
 const popularProperties = [
   {
@@ -95,20 +98,47 @@ const popularProperties = [
 
 const [activeProperty, setActiveProperty] = useState(popularProperties[0]);
 
-useEffect(() => {
-  const fetchCities = async () => {
-    try {
-      const { data } = await axios.get("http://localhost:5000/api/cities");
-      if (data.success && data.cities) {
-        setCities(data.cities);
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/cities");
+        if (data.success && data.cities) {
+          setCities(data.cities);
+        }
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+        setCities(['Mumbai', 'Pune', 'Nashik', 'Hyderabad']);
       }
-    } catch (error) {
-      console.error("Error fetching cities:", error);
-      setCities(['Mumbai', 'Pune', 'Nashik', 'Hyderabad']);
-    }
-  };
-  fetchCities();
-}, []);
+    };
+
+    const fetchPopular = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/rooms/popular");
+        if (data.success && data.rooms && data.rooms.length > 0) {
+          setDynamicPopular(data.rooms);
+        }
+      } catch (error) {
+        console.error("Error fetching popular rooms:", error);
+      } finally {
+        setLoadingPopular(false);
+      }
+    };
+
+    const fetchLatestFeedback = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/rooms/latest-feedback");
+        if (data.success && data.reviews && data.reviews.length > 0) {
+          setDynamicTestimonials(data.reviews);
+        }
+      } catch (error) {
+        console.error("Error fetching latest feedback:", error);
+      }
+    };
+
+    fetchCities();
+    fetchPopular();
+    fetchLatestFeedback();
+  }, []);
 
 const rentSteps = [
 "Fill up a form with the basic details about your apartment",
@@ -120,6 +150,30 @@ const findSteps = [
 "Browse rooms or roommates by city",
 "Contact the roommate or landlord",
 "Move into your new shared space"
+];
+
+const testimonials = [
+  {
+    name: "Aman Gupta",
+    role: "Student, IIT Delhi",
+    text: "Found my perfect flatmate in just 2 days! The matching algorithm is scarily accurate.",
+    rating: 5,
+    img: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg"
+  },
+  {
+    name: "Priya Sharma",
+    role: "Software Engineer",
+    text: "Safety was my top concern, and Roomify's verification process made me feel completely secure.",
+    rating: 5,
+    img: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg"
+  },
+  {
+    name: "Vikram Singh",
+    role: "Digital Nomad",
+    text: "The Pro features are worth every penny. Unlimited chats helped me close my deal instantly.",
+    rating: 4,
+    img: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg"
+  }
 ];
 
 return(
@@ -199,23 +253,61 @@ alt="roommate"
   </div>
 
   <div className="sp-grid">
-    {popularProperties.slice(0, 4).map((prop, idx) => (
-      <div key={idx} className="sp-card" onClick={()=>setShowRegister(true)}>
-        <div className="sp-img-wrapper">
-          <img src={prop.image} alt={prop.title} />
-          <div className="sp-price">{prop.rent}<span>{prop.period}</span></div>
-        </div>
-        <div className="sp-info">
-          <h3>{prop.title}</h3>
-          <p>📍 {prop.city} • {prop.type}</p>
-          <div className="sp-amenities">
-            {prop.amenities && prop.amenities.map((amenity, i) => (
-              <span key={i} className="sp-amenity">{amenity}</span>
-            ))}
+    {dynamicPopular.length > 0 ? (
+      dynamicPopular.map((prop, idx) => {
+        let images = [];
+        try { images = JSON.parse(prop.image_url); if(!Array.isArray(images)) images = [prop.image_url]; }
+        catch { images = prop.image_url ? [prop.image_url] : []; }
+        
+        return (
+          <div key={idx} className="sp-card" onClick={()=>navigate(`/dashboard/room-details/${prop.room_id}`)}>
+            <div className="sp-img-wrapper">
+              <img src={`http://localhost:5000${images[0]}`} alt={prop.property_type} />
+              <div className="sp-price">₹{Number(prop.rent).toLocaleString()}<span>/mo</span></div>
+            </div>
+            <div className="sp-info">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <h3 style={{ fontSize:'16px' }}>{prop.property_type} in {prop.location?.split(',')[0]}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fffbeb', padding: '2px 8px', borderRadius: '50px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#92400e' }}>⭐ {Number(prop.avg_rating).toFixed(1)}</span>
+                  <span style={{ fontSize: '10px', color: '#b45309', fontWeight: 600 }}>({prop.review_count})</span>
+                </div>
+              </div>
+              <p>📍 {prop.location} • {prop.furnishing}</p>
+              <div className="sp-amenities">
+                {prop.amenities && prop.amenities.split(',').slice(0, 3).map((amenity, i) => (
+                  <span key={i} className="sp-amenity">{amenity.trim()}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })
+    ) : (
+      popularProperties.slice(0, 4).map((prop, idx) => (
+        <div key={idx} className="sp-card" onClick={()=>setShowRegister(true)}>
+          <div className="sp-img-wrapper">
+            <img src={prop.image} alt={prop.title} />
+            <div className="sp-price">{prop.rent}<span>{prop.period}</span></div>
+          </div>
+          <div className="sp-info">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <h3>{prop.title}</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fffbeb', padding: '2px 8px', borderRadius: '50px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#92400e' }}>⭐ {prop.rating}</span>
+                <span style={{ fontSize: '10px', color: '#b45309', fontWeight: 600 }}>({prop.reviews})</span>
+              </div>
+            </div>
+            <p>📍 {prop.city} • {prop.type}</p>
+            <div className="sp-amenities">
+              {prop.amenities && prop.amenities.map((amenity, i) => (
+                <span key={i} className="sp-amenity">{amenity}</span>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    ))}
+      ))
+    )}
   </div>
   
   <div className="sp-footer">
@@ -327,6 +419,37 @@ alt="illustration"
         <div className="badge msg">💬 Unlimited Chats</div>
       </div>
     </div>
+  </div>
+</section>
+
+{/* TESTIMONIALS */}
+<section className="testimonials">
+  <div className="test-header">
+    <h2>Real Stories from Real Users</h2>
+    <p>Join thousands of happy people who found their home through Roomify.</p>
+  </div>
+  <div className="test-grid">
+    {(dynamicTestimonials.length > 0 ? dynamicTestimonials : testimonials).map((t, i) => (
+      <div key={i} className="test-card">
+        <div className="test-stars">
+          {[...Array(5)].map((_, si) => (
+            <span key={si} className="star-icon">
+              {si < (t.rating || 5) ? "⭐" : "☆"}
+            </span>
+          ))}
+        </div>
+        <p className="test-text">"{t.comment || t.text}"</p>
+        <div className="test-user">
+          <div className="author-avatar" style={{ width:40, height:40, borderRadius:'50%', background:'#6366f1', color:'white', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, marginRight:12 }}>
+            {(t.reviewer_name || t.name).charAt(0)}
+          </div>
+          <div>
+            <h4>{t.reviewer_name || t.name}</h4>
+            <span>{t.review_date ? new Date(t.review_date).toLocaleDateString() : (t.role || "Verified Member")}</span>
+          </div>
+        </div>
+      </div>
+    ))}
   </div>
 </section>
 
