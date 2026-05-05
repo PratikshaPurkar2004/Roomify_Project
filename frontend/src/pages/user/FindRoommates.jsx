@@ -133,7 +133,7 @@ export default function FindRoommates() {
     }));
 
     if (city) result = result.filter(u => String(u.location || "").toLowerCase().includes(city.toLowerCase()));
-    if (budget) result = result.filter(u => u.rent == null || Number(u.rent) <= Number(budget));
+    if (budget) result = result.filter(u => u.rent == null || u.rent === "" || Number(u.rent) <= Number(budget));
     if (gender) result = result.filter(u => String(u.gender || "").toLowerCase() === gender.toLowerCase());
     
     // Sorting by Match Percentage Descending
@@ -143,8 +143,8 @@ export default function FindRoommates() {
   }, [city, budget, gender, roommates, myPreferences, myProfile]);
 
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
-  const isFinder = currentUser.user_type === "Finder";
-  const showGate = !hasInteracted && hostRooms.length === 0 && !isFinder;
+  const isFinder = String(currentUser.user_type || "").toLowerCase() === "finder";
+  const showGate = !!userId && !hasInteracted && hostRooms.length === 0 && !isFinder;
 
   const handleAddRoom = async (e) => {
     e.preventDefault();
@@ -352,7 +352,7 @@ export default function FindRoommates() {
                         <div className="rm2-pref-section">
                           <span className="rm2-pref-title">Preferences</span>
                           <div className="rm2-pref-tags">
-                            {person.preferences.split(",").filter(Boolean).slice(0, 5).map((pref, i) => {
+                            {String(person.preferences).split(",").filter(Boolean).slice(0, 5).map((pref, i) => {
                               const isMatch = myPreferences.some(p => p.toLowerCase() === pref.trim().toLowerCase());
                               return (
                                 <span key={i} className={`rm2-pref-tag ${isMatch ? "rm2-pref-match" : ""}`}>
