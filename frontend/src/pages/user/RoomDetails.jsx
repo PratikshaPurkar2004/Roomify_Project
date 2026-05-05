@@ -1,25 +1,40 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MapPin, Home, ArrowLeft, Users, Shield, CheckCircle2, ChevronLeft, ChevronRight, IndianRupee, BedDouble, Wifi } from "lucide-react";
+import { MapPin, Home, ArrowLeft, Users, Shield, CheckCircle2, ChevronLeft, ChevronRight, IndianRupee, BedDouble, Wifi, Star, X, Pencil } from "lucide-react";
 
 export default function RoomDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [curIdx, setCurIdx] = useState(0);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [editReviewId, setEditReviewId] = useState(null);
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState("");
+  const userId = localStorage.getItem("userId");
   const touchStartX = useRef(null);
   const mouseStartX = useRef(null);
   const isDragging = useRef(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Fetch room details
     fetch(`http://localhost:5000/api/rooms/${id}`)
       .then(r => r.json())
       .then(data => { if (data.success) setRoom(data.room); else setError(data.message || "Not found"); })
-      .catch(() => setError("Failed to load"))
+      .catch(() => setError("Failed to load room"))
       .finally(() => setLoading(false));
+
+    // Fetch reviews
+    fetch(`http://localhost:5000/api/rooms/${id}/reviews`)
+      .then(r => r.json())
+      .then(data => { if (data.success) setReviews(data.reviews); })
+      .catch(err => console.error("Error fetching reviews:", err));
   }, [id]);
 
   if (loading) return (
@@ -64,6 +79,53 @@ export default function RoomDetails() {
     const diff = mouseStartX.current - e.clientX;
     if (Math.abs(diff) > 40) diff > 0 ? goNext() : goPrev();
     isDragging.current = false;
+  };
+
+  const fetchReviews = () => {
+    fetch(`http://localhost:5000/api/rooms/${id}/reviews`)
+      .then(r => r.json())
+      .then(data => { if (data.success) setReviews(data.reviews); })
+      .catch(err => console.error("Error fetching reviews:", err));
+  };
+
+  const submitReview = async () => {
+    if (!userId) { setToast("Please login to review!"); return; }
+    setSubmitting(true);
+    try {
+      const url = editReviewId 
+        ? `http://localhost:5000/api/rooms/reviews/${editReviewId}` 
+        : `http://localhost:5000/api/rooms/${id}/reviews`;
+      
+      const method = editReviewId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, rating: newRating, comment: newComment }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setToast(editReviewId ? "Review updated! ⭐" : "Review submitted! ⭐");
+        setShowReviewModal(false);
+        setEditReviewId(null);
+        setNewComment("");
+        setNewRating(5);
+        fetchReviews();
+      } else {
+        setToast(data.message || "Failed to submit");
+      }
+    } catch {
+      setToast("Error submitting review");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openEditReview = (rev) => {
+    setEditReviewId(rev.review_id);
+    setNewRating(rev.rating);
+    setNewComment(rev.comment);
+    setShowReviewModal(true);
   };
 
   return (
@@ -139,6 +201,30 @@ export default function RoomDetails() {
         .rd-host-name { font-size:17px; font-weight:800; color:#0f172a; margin:0; }
         .rd-host-sub { font-size:12px; color:#94a3b8; font-weight:600; margin-top:3px; }
         .rd-verified { display:flex; align-items:center; gap:6px; color:#10b981; font-size:13px; font-weight:700; margin-bottom:14px; }
+        
+        /* REVIEWS */
+        .rd-review { border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
+        .rd-review:last-child { border-bottom: none; }
+        .rd-rev-user { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .rd-rev-avatar { width: 36px; height: 36px; border-radius: 50%; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #6366f1; }
+        .rd-rev-name { font-size: 14px; font-weight: 700; color: #1e293b; margin: 0; }
+        .rd-rev-date { font-size: 12px; color: #94a3b8; font-weight: 500; }
+        .rd-rev-comment { font-size: 14px; color: #475569; line-height: 1.6; margin: 8px 0 0; }
+        .rd-rating-summary { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; padding: 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; }
+        .rd-rating-big { font-size: 44px; font-weight: 900; color: #0f172a; line-height: 1; }
+        .rd-rating-stars { display: flex; flex-direction: column; gap: 4px; }
+        
+        /* TOAST */
+        .rd-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 24px; border-radius: 50px; font-weight: 700; z-index: 9999; box-shadow: 0 8px 30px rgba(0,0,0,0.2); animation: fadeUp 0.3s ease; }
+
+        /* MODAL */
+        .rd-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: flex; alignItems: center; justifyContent: center; padding: 20px; }
+        .rd-modal { background: white; width: 100%; max-width: 480px; border-radius: 24px; overflow: hidden; animation: fadeUp 0.3s ease; }
+        .rd-modal-head { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .rd-modal-body { padding: 24px; }
+        .rd-modal-foot { padding: 16px 24px; background: #f8fafc; border-top: 1px solid #f1f5f9; display: flex; gap: 12px; }
+        .rd-star-btn { background: none; border: none; cursor: pointer; padding: 4px; transition: transform 0.2s; }
+        .rd-star-btn:hover { transform: scale(1.2); }
 
       `}</style>
 
@@ -240,6 +326,95 @@ export default function RoomDetails() {
               </div>
             </div>
           )}
+
+          {/* Reviews Section */}
+          <div className="rd-card">
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
+              <h2 style={{ margin:0 }}>Reviews & Ratings</h2>
+              <button onClick={() => setShowReviewModal(true)} style={{ background:'#f5f3ff', color:'#6366f1', border:'1px solid #ddd6fe', padding:'7px 16px', borderRadius:'50px', fontSize:'13px', fontWeight:700, cursor:'pointer', transition:'all 0.2s' }}>+ Write a Review</button>
+            </div>
+            
+            {reviews.length > 0 ? (
+              <>
+                <div className="rd-rating-summary" style={{ display:'flex', gap:'40px', alignItems:'center', flexWrap:'wrap' }}>
+                  <div style={{ textAlign:'center' }}>
+                    <div className="rd-rating-big">
+                      {reviews.length > 0 
+                        ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) 
+                        : "0.0"}
+                    </div>
+                    <div style={{ display:'flex', gap:'2px', justifyContent:'center', marginBottom:'4px' }}>
+                      {[...Array(5)].map((_, i) => {
+                        const avg = reviews.length > 0 ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length) : 0;
+                        return <Star key={i} size={16} fill={i < Math.round(avg) ? "#f59e0b" : "none"} color={i < Math.round(avg) ? "#f59e0b" : "#cbd5e1"} />;
+                      })}
+                    </div>
+                    <div style={{ fontSize:'13px', color:'#94a3b8', fontWeight:600 }}>{reviews.length} review(s)</div>
+                  </div>
+
+                  <div style={{ flex:1, minWidth:'200px', display:'flex', flexDirection:'column', gap:'8px' }}>
+                    {[5,4,3,2,1].map(num => {
+                      const count = reviews.filter(r => r.rating === num).length;
+                      const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                      return (
+                        <div key={num} style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                          <span style={{ fontSize:'12px', fontWeight:600, color:'#475569', minWidth:'12px' }}>{num}</span>
+                          <div style={{ flex:1, height:'6px', background:'#f1f5f9', borderRadius:'10px', overflow:'hidden' }}>
+                            <div style={{ width:`${pct}%`, height:'100%', background:'#f59e0b', borderRadius:'10px' }}></div>
+                          </div>
+                          <span style={{ fontSize:'11px', color:'#94a3b8', minWidth:'25px', textAlign:'right' }}>{Math.round(pct)}%</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="rd-reviews-list">
+                  {reviews.map((rev, i) => (
+                    <div key={i} className="rd-review">
+                      <div className="rd-rev-user">
+                        <div style={{ display:'flex', alignItems:'center', gap:'12px', flex:1 }}>
+                          <div className="rd-rev-avatar" style={{ background: i % 2 === 0 ? '#6366f1' : '#8b5cf6' }}>
+                            {rev.reviewer_name?.charAt(0) || "U"}
+                          </div>
+                          <div>
+                            <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                              <p className="rd-rev-name">{rev.reviewer_name || "Anonymous User"}</p>
+                              <div style={{ display:'flex', alignItems:'center', gap:2, background:'#f0fdf4', padding:'2px 6px', borderRadius:'4px', border:'1px solid #dcfce7' }}>
+                                <CheckCircle2 size={10} color="#16a34a" />
+                                <span style={{ fontSize:'10px', color:'#16a34a', fontWeight:700, textTransform:'uppercase' }}>Verified Stay</span>
+                              </div>
+                            </div>
+                            <p className="rd-rev-date">{new Date(rev.review_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
+                          </div>
+                        </div>
+                        {parseInt(userId) === rev.user_id && (
+                          <button onClick={() => openEditReview(rev)} style={{ background:'none', border:'none', color:'#6366f1', cursor:'pointer', padding:'8px', borderRadius:'50%', transition:'background 0.2s' }} title="Edit Review">
+                            <Pencil size={14} />
+                          </button>
+                        )}
+                      </div>
+                      <div style={{ display:'flex', gap:'2px', marginBottom:'8px' }}>
+                        {[...Array(5)].map((_, i) => <Star key={i} size={12} fill={i < rev.rating ? "#f59e0b" : "none"} color={i < rev.rating ? "#f59e0b" : "#cbd5e1"} />)}
+                      </div>
+                      <p className="rd-rev-comment">{rev.comment}</p>
+                    </div>
+                  ))}
+                </div>
+                
+                {reviews.length > 3 && (
+                  <button style={{ width:'100%', background:'none', border:'1px solid #e2e8f0', padding:'12px', borderRadius:'12px', marginTop:'20px', color:'#6366f1', fontWeight:700, cursor:'pointer', transition:'all 0.2s' }}>
+                    View All {reviews.length} Reviews
+                  </button>
+                )}
+              </>
+            ) : (
+              <div style={{ textAlign:'center', padding:'20px', color:'#94a3b8' }}>
+                <Star size={40} style={{ marginBottom:'10px', opacity:0.5 }} />
+                <p>No reviews yet for this room.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* RIGHT — BOOKING */}
@@ -269,6 +444,49 @@ export default function RoomDetails() {
           </div>
         </div>
       </div>
+
+      {/* TOAST */}
+      {toast && <div className="rd-toast">{toast}</div>}
+
+      {/* REVIEW MODAL */}
+      {showReviewModal && (
+        <div className="rd-modal-overlay" onClick={() => setShowReviewModal(false)}>
+          <div className="rd-modal" onClick={e => e.stopPropagation()}>
+            <div className="rd-modal-head">
+              <h3 style={{ margin:0, fontWeight:900 }}>{editReviewId ? "Edit Your Review" : "Write a Review"}</h3>
+              <button onClick={() => { setShowReviewModal(false); setEditReviewId(null); }} style={{ background:'none', border:'none', color:'#94a3b8', cursor:'pointer' }}><X size={24} /></button>
+            </div>
+            <div className="rd-modal-body">
+              <p style={{ fontSize:'14px', color:'#64748b', marginBottom:'16px' }}>{editReviewId ? "Update your rating and comments below." : "How was your experience with this property?"}</p>
+              
+              <div style={{ display:'flex', justifyContent:'center', gap:'8px', marginBottom:'24px' }}>
+                {[1,2,3,4,5].map(val => (
+                  <button key={val} className="rd-star-btn" onClick={() => setNewRating(val)}>
+                    <Star size={36} fill={val <= newRating ? "#f59e0b" : "none"} color={val <= newRating ? "#f59e0b" : "#cbd5e1"} />
+                  </button>
+                ))}
+              </div>
+
+              <textarea 
+                placeholder="Write your feedback here..."
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+                style={{ width:'100%', minHeight:'120px', padding:'16px', borderRadius:'16px', border:'1.5px solid #e2e8f0', fontFamily:'inherit', fontSize:'15px', resize:'none', outline:'none' }}
+              />
+            </div>
+            <div className="rd-modal-foot">
+              <button onClick={() => { setShowReviewModal(false); setEditReviewId(null); }} style={{ flex:1, padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', fontWeight:700, cursor:'pointer' }}>Cancel</button>
+              <button 
+                onClick={submitReview} 
+                disabled={submitting}
+                style={{ flex:2, padding:'12px', borderRadius:'12px', border:'none', background:'linear-gradient(135deg,#6366f1,#8b5cf6)', color:'white', fontWeight:800, cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}
+              >
+                {submitting ? "Updating..." : (editReviewId ? "Update Review" : "Submit Review")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

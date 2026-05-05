@@ -1184,3 +1184,93 @@ body {
     font-size: 28px;
   }
 }
+/* ===== TESTIMONIALS ===== */
+.testimonials {
+  padding: 80px 8%;
+  background: #F8FAFC;
+  text-align: center;
+}
+
+.test-header {
+  margin-bottom: 50px;
+}
+
+.test-header h2 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #0F172A;
+  margin-bottom: 12px;
+}
+
+.test-header p {
+  color: #64748B;
+  font-size: 16px;
+}
+
+.test-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.test-card {
+  background: white;
+  padding: 40px 32px;
+  border-radius: 24px;
+  text-align: left;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.test-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.08);
+  border-color: #C7D2FE;
+}
+
+.test-stars {
+  margin-bottom: 20px;
+}
+
+.star-icon {
+  font-size: 14px;
+  margin-right: 2px;
+}
+
+.test-text {
+  font-size: 17px;
+  line-height: 1.7;
+  color: #334155;
+  font-style: italic;
+  margin-bottom: 30px;
+}
+
+.test-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.test-user img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.test-user h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.test-user span {
+  font-size: 13px;
+  color: #94A3B8;
+  font-weight: 500;
+}
