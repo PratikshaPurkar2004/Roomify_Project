@@ -27,76 +27,8 @@ const [propertyFilter, setPropertyFilter] = useState("All");
 const [cities, setCities] = useState([]);
 const [dynamicPopular, setDynamicPopular] = useState([]);
 const [loadingPopular, setLoadingPopular] = useState(true);
-const [dynamicTestimonials, setDynamicTestimonials] = useState([]);
 
-const popularProperties = [
-  {
-    title: "Spacious 2BHK in Bandra",
-    city: "Mumbai",
-    rent: "₹18,000",
-    period: "/mo",
-    type: "Apartment",
-    image: "https://images.pexels.com/photos/1918291/pexels-photo-1918291.jpeg",
-    amenities: ["WiFi", "AC", "Parking"],
-    rating: 4.8,
-    reviews: 42,
-    isVerified: true,
-    isHot: true,
-    beds: 2,
-    baths: 1,
-    sqft: "950 sq.ft"
-  },
-  {
-    title: "Modern Studio near Hinjewadi",
-    city: "Pune",
-    rent: "₹12,500",
-    period: "/mo",
-    type: "Studio",
-    image: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
-    amenities: ["Furnished", "Gym", "WiFi"],
-    rating: 4.6,
-    reviews: 28,
-    isVerified: true,
-    isHot: false,
-    beds: 1,
-    baths: 1,
-    sqft: "550 sq.ft"
-  },
-  {
-    title: "Cozy Room in Hitech City",
-    city: "Hyderabad",
-    rent: "₹9,000",
-    period: "/mo",
-    type: "Shared Room",
-    image: "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg",
-    amenities: ["Laundry", "Kitchen", "WiFi"],
-    rating: 4.5,
-    reviews: 19,
-    isVerified: false,
-    isHot: false,
-    beds: 1,
-    baths: 1,
-    sqft: "320 sq.ft"
-  },
-  {
-    title: "Premium Flat in Nashik Road",
-    city: "Nashik",
-    rent: "₹8,500",
-    period: "/mo",
-    type: "Apartment",
-    image: "https://images.pexels.com/photos/1648776/pexels-photo-1648776.jpeg",
-    amenities: ["Balcony", "AC", "Parking"],
-    rating: 4.7,
-    reviews: 35,
-    isVerified: true,
-    isHot: true,
-    beds: 2,
-    baths: 1,
-    sqft: "850 sq.ft"
-  }
-];
-
-const [activeProperty, setActiveProperty] = useState(popularProperties[0]);
+const [activeProperty, setActiveProperty] = useState(null);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -124,20 +56,8 @@ const [activeProperty, setActiveProperty] = useState(popularProperties[0]);
       }
     };
 
-    const fetchLatestFeedback = async () => {
-      try {
-        const { data } = await axios.get("http://localhost:5000/api/rooms/latest-feedback");
-        if (data.success && data.reviews && data.reviews.length > 0) {
-          setDynamicTestimonials(data.reviews);
-        }
-      } catch (error) {
-        console.error("Error fetching latest feedback:", error);
-      }
-    };
-
     fetchCities();
     fetchPopular();
-    fetchLatestFeedback();
   }, []);
 
 const rentSteps = [
@@ -152,29 +72,7 @@ const findSteps = [
 "Move into your new shared space"
 ];
 
-const testimonials = [
-  {
-    name: "Aman Gupta",
-    role: "Student, IIT Delhi",
-    text: "Found my perfect flatmate in just 2 days! The matching algorithm is scarily accurate.",
-    rating: 5,
-    img: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg"
-  },
-  {
-    name: "Priya Sharma",
-    role: "Software Engineer",
-    text: "Safety was my top concern, and Roomify's verification process made me feel completely secure.",
-    rating: 5,
-    img: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg"
-  },
-  {
-    name: "Vikram Singh",
-    role: "Digital Nomad",
-    text: "The Pro features are worth every penny. Unlimited chats helped me close my deal instantly.",
-    rating: 4,
-    img: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg"
-  }
-];
+// Hardcoded testimonials removed
 
 return(
 
@@ -268,10 +166,6 @@ alt="roommate"
             <div className="sp-info">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                 <h3 style={{ fontSize:'16px' }}>{prop.property_type} in {prop.location?.split(',')[0]}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fffbeb', padding: '2px 8px', borderRadius: '50px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#92400e' }}>⭐ {Number(prop.avg_rating).toFixed(1)}</span>
-                  <span style={{ fontSize: '10px', color: '#b45309', fontWeight: 600 }}>({prop.review_count})</span>
-                </div>
               </div>
               <p>📍 {prop.location} • {prop.furnishing}</p>
               <div className="sp-amenities">
@@ -284,29 +178,9 @@ alt="roommate"
         );
       })
     ) : (
-      popularProperties.slice(0, 4).map((prop, idx) => (
-        <div key={idx} className="sp-card" onClick={()=>setShowRegister(true)}>
-          <div className="sp-img-wrapper">
-            <img src={prop.image} alt={prop.title} />
-            <div className="sp-price">{prop.rent}<span>{prop.period}</span></div>
-          </div>
-          <div className="sp-info">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <h3>{prop.title}</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fffbeb', padding: '2px 8px', borderRadius: '50px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 800, color: '#92400e' }}>⭐ {prop.rating}</span>
-                <span style={{ fontSize: '10px', color: '#b45309', fontWeight: 600 }}>({prop.reviews})</span>
-              </div>
-            </div>
-            <p>📍 {prop.city} • {prop.type}</p>
-            <div className="sp-amenities">
-              {prop.amenities && prop.amenities.map((amenity, i) => (
-                <span key={i} className="sp-amenity">{amenity}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      ))
+      <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#64748b' }}>
+        <p>No popular properties listed yet.</p>
+      </div>
     )}
   </div>
   
@@ -422,36 +296,7 @@ alt="illustration"
   </div>
 </section>
 
-{/* TESTIMONIALS */}
-<section className="testimonials">
-  <div className="test-header">
-    <h2>Real Stories from Real Users</h2>
-    <p>Join thousands of happy people who found their home through Roomify.</p>
-  </div>
-  <div className="test-grid">
-    {(dynamicTestimonials.length > 0 ? dynamicTestimonials : testimonials).map((t, i) => (
-      <div key={i} className="test-card">
-        <div className="test-stars">
-          {[...Array(5)].map((_, si) => (
-            <span key={si} className="star-icon">
-              {si < (t.rating || 5) ? "⭐" : "☆"}
-            </span>
-          ))}
-        </div>
-        <p className="test-text">"{t.comment || t.text}"</p>
-        <div className="test-user">
-          <div className="author-avatar" style={{ width:40, height:40, borderRadius:'50%', background:'#6366f1', color:'white', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, marginRight:12 }}>
-            {(t.reviewer_name || t.name).charAt(0)}
-          </div>
-          <div>
-            <h4>{t.reviewer_name || t.name}</h4>
-            <span>{t.review_date ? new Date(t.review_date).toLocaleDateString() : (t.role || "Verified Member")}</span>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-</section>
+
 
 
 {/* CTA */}

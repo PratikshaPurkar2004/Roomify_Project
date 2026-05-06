@@ -9,9 +9,7 @@ import {
   FaSearch,
   FaEnvelope,
   FaComments,
-  FaSignOutAlt,
   FaDoorOpen,
-  FaHeart,
 } from "react-icons/fa";
 
 import "../styles/Sidebar.css";
@@ -28,12 +26,7 @@ function Sidebar() {
 
   const handleChatClick = (e) => {
     e.preventDefault();
-    const subscribed = localStorage.getItem("subscribed");
-    if (subscribed === "true") {
-      navigate("/dashboard/chat");
-    } else {
-      navigate("/dashboard/subscription");
-    }
+    navigate("/dashboard/chat");
   };
 
   return (
@@ -81,4 +74,3 @@ function Sidebar() {
 }
 
 export default Sidebar;
-

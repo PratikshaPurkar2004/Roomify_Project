@@ -12,10 +12,13 @@ export default function RoomDetails() {
   const [curIdx, setCurIdx] = useState(0);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [editReviewId, setEditReviewId] = useState(null);
-  const [newRating, setNewRating] = useState(5);
+  const [newRating, setNewRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState("");
+  const [avgRating, setAvgRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
   const userId = localStorage.getItem("userId");
   const touchStartX = useRef(null);
   const mouseStartX = useRef(null);
@@ -33,9 +36,26 @@ export default function RoomDetails() {
     // Fetch reviews
     fetch(`http://localhost:5000/api/rooms/${id}/reviews`)
       .then(r => r.json())
-      .then(data => { if (data.success) setReviews(data.reviews); })
+      .then(data => {
+        if (data.success) {
+          setReviews(data.reviews);
+          if (data.reviews.length > 0) {
+            const avg = data.reviews.reduce((acc, r) => acc + r.rating, 0) / data.reviews.length;
+            setAvgRating(avg);
+            setReviewCount(data.reviews.length);
+          }
+        }
+      })
       .catch(err => console.error("Error fetching reviews:", err));
   }, [id]);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   if (loading) return (
     <div style={{ marginLeft:'280px', display:'flex', alignItems:'center', justifyContent:'center', height:'100vh' }}>
@@ -84,9 +104,23 @@ export default function RoomDetails() {
   const fetchReviews = () => {
     fetch(`http://localhost:5000/api/rooms/${id}/reviews`)
       .then(r => r.json())
-      .then(data => { if (data.success) setReviews(data.reviews); })
+      .then(data => {
+        if (data.success) {
+          setReviews(data.reviews);
+          if (data.reviews.length > 0) {
+            const avg = data.reviews.reduce((acc, r) => acc + r.rating, 0) / data.reviews.length;
+            setAvgRating(avg);
+            setReviewCount(data.reviews.length);
+          } else {
+            setAvgRating(0);
+            setReviewCount(0);
+          }
+        }
+      })
       .catch(err => console.error("Error fetching reviews:", err));
   };
+
+
 
   const submitReview = async () => {
     if (!userId) { setToast("Please login to review!"); return; }
@@ -109,7 +143,8 @@ export default function RoomDetails() {
         setShowReviewModal(false);
         setEditReviewId(null);
         setNewComment("");
-        setNewRating(5);
+        setNewRating(0);
+        setEditReviewId(null);
         fetchReviews();
       } else {
         setToast(data.message || "Failed to submit");
@@ -118,6 +153,24 @@ export default function RoomDetails() {
       setToast("Error submitting review");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const deleteReview = async (reviewId) => {
+    if (!window.confirm("Are you sure you want to delete this review?")) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/rooms/reviews/${reviewId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setToast("Review deleted! 🗑️");
+        fetchReviews();
+      }
+    } catch {
+      setToast("Error deleting review");
     }
   };
 
@@ -218,7 +271,7 @@ export default function RoomDetails() {
         .rd-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 24px; border-radius: 50px; font-weight: 700; z-index: 9999; box-shadow: 0 8px 30px rgba(0,0,0,0.2); animation: fadeUp 0.3s ease; }
 
         /* MODAL */
-        .rd-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: flex; alignItems: center; justifyContent: center; padding: 20px; }
+        .rd-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .rd-modal { background: white; width: 100%; max-width: 480px; border-radius: 24px; overflow: hidden; animation: fadeUp 0.3s ease; }
         .rd-modal-head { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
         .rd-modal-body { padding: 24px; }
@@ -354,7 +407,7 @@ export default function RoomDetails() {
 
                   <div style={{ flex:1, minWidth:'200px', display:'flex', flexDirection:'column', gap:'8px' }}>
                     {[5,4,3,2,1].map(num => {
-                      const count = reviews.filter(r => r.rating === num).length;
+                      const count = reviews.filter(r => Number(r.rating) == num).length;
                       const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                       return (
                         <div key={num} style={{ display:'flex', alignItems:'center', gap:'12px' }}>
@@ -374,24 +427,31 @@ export default function RoomDetails() {
                     <div key={i} className="rd-review">
                       <div className="rd-rev-user">
                         <div style={{ display:'flex', alignItems:'center', gap:'12px', flex:1 }}>
-                          <div className="rd-rev-avatar" style={{ background: i % 2 === 0 ? '#6366f1' : '#8b5cf6' }}>
-                            {rev.reviewer_name?.charAt(0) || "U"}
+                          <div className="rd-rev-avatar" style={{ background: `hsl(${(rev.user_id * 47) % 360}, 60%, 55%)`, color:'white' }}>
+                            {rev.reviewer_name?.charAt(0)?.toUpperCase() || "U"}
                           </div>
                           <div>
                             <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                               <p className="rd-rev-name">{rev.reviewer_name || "Anonymous User"}</p>
-                              <div style={{ display:'flex', alignItems:'center', gap:2, background:'#f0fdf4', padding:'2px 6px', borderRadius:'4px', border:'1px solid #dcfce7' }}>
-                                <CheckCircle2 size={10} color="#16a34a" />
-                                <span style={{ fontSize:'10px', color:'#16a34a', fontWeight:700, textTransform:'uppercase' }}>Verified Stay</span>
-                              </div>
+                              {rev.rating >= 4 && (
+                                <div style={{ display:'flex', alignItems:'center', gap:2, background:'#f0fdf4', padding:'2px 6px', borderRadius:'4px', border:'1px solid #dcfce7' }}>
+                                  <CheckCircle2 size={10} color="#16a34a" />
+                                  <span style={{ fontSize:'10px', color:'#16a34a', fontWeight:700, textTransform:'uppercase' }}>Top Rated</span>
+                                </div>
+                              )}
                             </div>
-                            <p className="rd-rev-date">{new Date(rev.review_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
+                            <p className="rd-rev-date">{new Date(rev.review_date).toLocaleDateString('en-US', { day:'numeric', month: 'short', year: 'numeric' })}</p>
                           </div>
                         </div>
                         {parseInt(userId) === rev.user_id && (
-                          <button onClick={() => openEditReview(rev)} style={{ background:'none', border:'none', color:'#6366f1', cursor:'pointer', padding:'8px', borderRadius:'50%', transition:'background 0.2s' }} title="Edit Review">
-                            <Pencil size={14} />
-                          </button>
+                          <div style={{ display:'flex', gap:4 }}>
+                            <button onClick={() => openEditReview(rev)} style={{ background:'none', border:'none', color:'#6366f1', cursor:'pointer', padding:'8px', borderRadius:'50%', transition:'background 0.2s' }} title="Edit Review">
+                              <Pencil size={14} />
+                            </button>
+                            <button onClick={() => deleteReview(rev.review_id)} style={{ background:'none', border:'none', color:'#ef4444', cursor:'pointer', padding:'8px', borderRadius:'50%', transition:'background 0.2s' }} title="Delete Review">
+                              <X size={14} />
+                            </button>
+                          </div>
                         )}
                       </div>
                       <div style={{ display:'flex', gap:'2px', marginBottom:'8px' }}>
@@ -423,14 +483,26 @@ export default function RoomDetails() {
             <div className="rd-book-head">
               <div className="rd-book-price">₹{Number(room.rent).toLocaleString()} <span>/ pp / mo</span></div>
               {totalRent && <div className="rd-book-pp"><IndianRupee size={12} /> ₹{totalRent.toLocaleString()} total rent</div>}
+              {reviewCount > 0 && (
+                <div style={{ display:'flex', alignItems:'center', gap:'8px', marginTop:'12px', background:'rgba(245,158,11,0.15)', padding:'6px 14px', borderRadius:'50px', border:'1px solid rgba(245,158,11,0.3)' }}>
+                  <Star size={14} fill="#f59e0b" color="#f59e0b" />
+                  <span style={{ fontSize:'14px', fontWeight:800, color:'#fbbf24' }}>{avgRating.toFixed(1)}</span>
+                  <span style={{ fontSize:'12px', color:'rgba(255,255,255,0.7)', fontWeight:600 }}>({reviewCount} review{reviewCount !== 1 ? 's' : ''})</span>
+                </div>
+              )}
             </div>
             <div className="rd-book-body">
               <button className="rd-cta-btn">Request to Connect</button>
               <p className="rd-cta-note">You won't be charged until accepted</p>
               <div className="rd-breakdown">
-                <div className="rd-brow"><span style={{color:'#64748b',fontWeight:600}}>₹{Number(room.rent).toLocaleString()} × 1 month</span><span style={{fontWeight:700,color:'#1e293b'}}>₹{Number(room.rent).toLocaleString()}</span></div>
-                <div className="rd-brow"><span style={{color:'#64748b',fontWeight:600}}>Service fee</span><span style={{fontWeight:700,color:'#10b981'}}>Free</span></div>
-                <div className="rd-brow"><span>Total</span><span style={{color:'#6366f1'}}>₹{Number(room.rent).toLocaleString()}</span></div>
+                <div className="rd-brow">
+                  <span style={{color:'#64748b',fontWeight:600}}>Monthly Rent</span>
+                  <span style={{fontWeight:700,color:'#1e293b'}}>₹{Number(room.rent).toLocaleString()}</span>
+                </div>
+                <div className="rd-brow" style={{ marginTop:'8px', paddingTop:'8px', borderTop:'1px solid #e2e8f0' }}>
+                  <span style={{ fontWeight:800, color:'#0f172a' }}>Total</span>
+                  <span style={{ color:'#6366f1', fontWeight:900 }}>₹{Number(room.rent).toLocaleString()}</span>
+                </div>
               </div>
             </div>
             <div className="rd-host-sec">
@@ -459,10 +531,19 @@ export default function RoomDetails() {
             <div className="rd-modal-body">
               <p style={{ fontSize:'14px', color:'#64748b', marginBottom:'16px' }}>{editReviewId ? "Update your rating and comments below." : "How was your experience with this property?"}</p>
               
-              <div style={{ display:'flex', justifyContent:'center', gap:'8px', marginBottom:'24px' }}>
+              <div style={{ display:'flex', justifyContent:'center', gap:'8px', marginBottom:'24px' }} onMouseLeave={() => setHoverRating(0)}>
                 {[1,2,3,4,5].map(val => (
-                  <button key={val} className="rd-star-btn" onClick={() => setNewRating(val)}>
-                    <Star size={36} fill={val <= newRating ? "#f59e0b" : "none"} color={val <= newRating ? "#f59e0b" : "#cbd5e1"} />
+                  <button 
+                    key={val} 
+                    className="rd-star-btn" 
+                    onClick={() => setNewRating(val)}
+                    onMouseEnter={() => setHoverRating(val)}
+                  >
+                    <Star 
+                      size={36} 
+                      fill={(hoverRating || newRating) >= val ? "#f59e0b" : "none"} 
+                      color={(hoverRating || newRating) >= val ? "#f59e0b" : "#cbd5e1"} 
+                    />
                   </button>
                 ))}
               </div>
@@ -481,7 +562,7 @@ export default function RoomDetails() {
                 disabled={submitting}
                 style={{ flex:2, padding:'12px', borderRadius:'12px', border:'none', background:'linear-gradient(135deg,#6366f1,#8b5cf6)', color:'white', fontWeight:800, cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}
               >
-                {submitting ? "Updating..." : (editReviewId ? "Update Review" : "Submit Review")}
+                {submitting ? (editReviewId ? "Updating..." : "Submitting...") : (editReviewId ? "Update Review" : "Submit Review")}
               </button>
             </div>
           </div>

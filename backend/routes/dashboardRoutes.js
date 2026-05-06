@@ -49,7 +49,7 @@ router.get("/users", async (req, res) => {
   try {
     console.log("Fetching users from database...");
     const [users] = await db.query(
-      "SELECT user_id, name, email, area, user_type, preferences FROM users LIMIT 20"
+      "SELECT user_id, name, email, city, user_type, preferences FROM users LIMIT 20"
     );
     res.json({ users });
   } catch (error) {

@@ -224,11 +224,15 @@ function RoomCard({ room, onOpen }) {
         <div className="fr-card-header-modern">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <h3 style={{ fontSize: '17px', fontWeight: 800 }}>{room.property_type || "Room"} in {room.location?.split(",")[0]}</h3>
-            {room.review_count > 0 && (
+            {room.review_count > 0 ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fffbeb', padding: '2px 6px', borderRadius: '6px', border: '1px solid #fef3c7' }}>
                 <Star size={12} fill="#f59e0b" color="#f59e0b" />
                 <span style={{ fontSize: '11px', fontWeight: 800, color: '#92400e' }}>{Number(room.avg_rating).toFixed(1)}</span>
                 <span style={{ fontSize: '10px', color: '#b45309', fontWeight: 600 }}>({room.review_count})</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#f0fdf4', padding: '2px 8px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+                <span style={{ fontSize: '10px', fontWeight: 800, color: '#15803d', textTransform: 'uppercase' }}>✦ New</span>
               </div>
             )}
           </div>

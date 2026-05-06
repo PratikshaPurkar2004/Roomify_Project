@@ -25,14 +25,17 @@ const upload = multer({ storage: storage });
 router.get("/latest-feedback", async (req, res) => {
   try {
     const [reviews] = await db.query(`
-      SELECT r.*, u.name as reviewer_name 
+      SELECT r.*, u.name as reviewer_name,
+             rm.location as room_location, rm.property_type as room_type
       FROM review r
       LEFT JOIN users u ON r.user_id = u.user_id
+      LEFT JOIN rooms rm ON r.room_id = rm.room_id
       ORDER BY r.review_date DESC, r.review_id DESC
       LIMIT 6
     `);
     res.json({ success: true, reviews });
   } catch (error) {
+    console.error("Latest feedback error:", error);
     res.status(500).json({ success: false, message: "Database error" });
   }
 });
@@ -103,7 +106,13 @@ router.get("/:id", async (req, res) => {
 router.get("/host/:hostId", async (req, res) => {
   const { hostId } = req.params;
   try {
-    const [rooms] = await db.query("SELECT * FROM rooms WHERE host_id = ?", [hostId]);
+    const [rooms] = await db.query(`
+      SELECT r.*,
+             IFNULL((SELECT AVG(rating) FROM review WHERE room_id = r.room_id), 0) as avg_rating,
+             (SELECT COUNT(*) FROM review WHERE room_id = r.room_id) as review_count
+      FROM rooms r
+      WHERE r.host_id = ?
+    `, [hostId]);
     res.json({
       success: true,
       rooms
@@ -281,6 +290,23 @@ router.put("/reviews/:id", async (req, res) => {
     res.json({ success: true, message: "Review updated successfully!" });
   } catch (error) {
     console.error("Update review error:", error);
+    res.status(500).json({ success: false, message: "Database error" });
+  }
+});
+
+// DELETE a review
+router.delete("/reviews/:id", async (req, res) => {
+  const reviewId = req.params.id;
+  const { user_id } = req.body;
+
+  try {
+    const [existing] = await db.query("SELECT user_id FROM review WHERE review_id = ?", [reviewId]);
+    if (existing.length === 0) return res.status(404).json({ success: false, message: "Review not found" });
+    if (existing[0].user_id !== parseInt(user_id)) return res.status(403).json({ success: false, message: "Unauthorized to delete this review" });
+
+    await db.query("DELETE FROM review WHERE review_id = ?", [reviewId]);
+    res.json({ success: true, message: "Review deleted successfully" });
+  } catch (error) {
     res.status(500).json({ success: false, message: "Database error" });
   }
 });

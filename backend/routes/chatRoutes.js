@@ -42,4 +42,19 @@ router.post("/", async (req, res) => {
   }
 });
 
+// GET total message count for a user (free trial limit)
+router.get("/eligibility/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const [rows] = await db.query(
+      "SELECT COUNT(*) as msgCount FROM messages WHERE sender_id = ?",
+      [userId]
+    );
+    res.json({ success: true, msgCount: rows[0].msgCount });
+  } catch (err) {
+    console.error("Error checking eligibility:", err);
+    res.status(500).json({ success: false, msgCount: 0 });
+  }
+});
+
 module.exports = router;
