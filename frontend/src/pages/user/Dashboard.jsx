@@ -172,7 +172,9 @@ function Dashboard() {
     <div className="dashboard">
       <div className="dash-bg-shape dash-shape-1"></div>
       <div className="dash-bg-shape dash-shape-2"></div>
-      <div className="dashboard-container">
+      <div className="page-container">
+        <div className="dashboard-container">
+
         {/* Redesigned Unified Premium Hero Section */}
         <div className="dashboard-hero-premium">
           <div className="hero-main-content">
@@ -326,9 +328,8 @@ function Dashboard() {
 
 
 
+        </div>
       </div>
-
-
     </div>
   );
 }

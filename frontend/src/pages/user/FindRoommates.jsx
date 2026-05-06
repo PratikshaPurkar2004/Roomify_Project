@@ -4,7 +4,7 @@ import "../../styles/FindRoommates.css";
 // Re-using FindRooms styles for the modal
 import "../../styles/FindRooms.css";
 import { calculateMatchPercentage } from "../../utils/matchUtils";
-import { Search, MapPin, Wallet, User, MessageCircle, UserPlus, Star, Filter, Plus, Home, X } from "lucide-react";
+import { Search, MapPin, Wallet, User, MessageCircle, UserPlus, Star, Filter, Plus, Home, X, Mail, Briefcase, Calendar, Heart } from "lucide-react";
 
 export default function FindRoommates() {
   const navigate = useNavigate();
@@ -307,6 +307,8 @@ export default function FindRoommates() {
 
       {toast && <div className="rm2-toast">{toast}</div>}
 
+      <div className="page-container">
+
       {loadingRooms ? (
         <div style={{ textAlign: "center", marginTop: "100px", color: "#64748b" }}>
            Loading your discovery feed...
@@ -341,7 +343,8 @@ export default function FindRoommates() {
                   fontSize: '15px'
                 }}
               >
-                Skip for now
+                Skip & Browse Roommates
+
               </button>
             </div>
             {hostRooms.length > 0 && (
@@ -403,7 +406,7 @@ export default function FindRoommates() {
                 const initial  = person.name?.charAt(0)?.toUpperCase() || "?";
 
                 return (
-                  <div className="rm2-card" key={person.id}>
+                  <div className="rm2-card" key={person.id} onClick={() => navigate(`/dashboard/roommate/${person.id}`)} style={{ cursor: 'pointer' }}>
                     {/* Match badge */}
                     <div className="rm2-match-ring" style={{ "--mc": matchColor }}>
                       <div className="rm2-avatar-wrap">
@@ -490,7 +493,7 @@ export default function FindRoommates() {
                       </div>
                     </div>
 
-                    <div className="rm2-card-actions">
+                    <div className="rm2-card-actions" onClick={e => e.stopPropagation()}>
                       <button
                         className="rm2-action-btn"
                         style={{ background:'#f5f3ff', color:'#7c3aed', border:'1px solid #ddd6fe' }}
@@ -798,6 +801,8 @@ export default function FindRoommates() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
+

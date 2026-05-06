@@ -78,6 +78,18 @@ export default function Chat() {
         if (prev.find(msg => msg.id === message.id)) return prev;
         return [...prev, formatted];
       });
+
+      // If this message is for the currently open chat, mark it as read immediately
+      if (selectedContact && String(message.sender_id) === String(selectedContact.id)) {
+        markAsRead(message.sender_id);
+      } else {
+        // Increment unread count for the contact in the sidebar list
+        setContacts(prev => prev.map(c => 
+          String(c.id) === String(message.sender_id) 
+            ? { ...c, unread_count: (c.unread_count || 0) + 1 } 
+            : c
+        ));
+      }
     });
 
     return () => {
@@ -115,15 +127,26 @@ export default function Chat() {
       console.error("Error fetching messages:", err);
     }
   };
+  const markAsRead = async (contactId) => {
+    try {
+      await fetch(`http://localhost:5000/api/chat/read/${userId}/${contactId}`, { method: "PUT" });
+    } catch (err) {
+      console.error("Error marking as read:", err);
+    }
+  };
 
   const handleSelectContact = async (contact) => {
     setSelectedContact(contact);
     fetchMessages(contact.id);
+    markAsRead(contact.id);
     
     // Join the socket room
     if (socket.current && contact.roomid) {
       socket.current.emit("join_room", { roomid: contact.roomid, userid: userId });
     }
+
+    // Clear unread count locally for this contact
+    setContacts(prev => prev.map(c => c.id === contact.id ? { ...c, unread_count: 0 } : c));
   };
 
   // Auto-scroll to bottom
@@ -360,7 +383,8 @@ export default function Chat() {
       <div className="chat-bg-shape chat-shape-1"></div>
       <div className="chat-bg-shape chat-shape-2"></div>
 
-      <div className="chat-container">
+      <div className="page-container">
+        <div className="chat-container">
         <header className="chat-header">
           <h2 className="chat-title">Messages</h2>
           <p className="chat-subtitle">Connect instantly with your roommate matches</p>
@@ -387,7 +411,10 @@ export default function Chat() {
                     {contact?.name ? contact.name.charAt(0).toUpperCase() : "U"}
                   </div>
                   <div className="contact-info">
-                    <h4>{contact?.name || "Unknown"}</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4>{contact?.name || "Unknown"}</h4>
+                      {contact?.unread_count > 0 && <span className="sidebar-badge" style={{ position: 'static' }}>{contact.unread_count}</span>}
+                    </div>
                     <p><MapPin size={14} /> {contact?.city || "Anywhere"}</p>
                   </div>
                 </div>
@@ -456,7 +483,9 @@ export default function Chat() {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
+
   );
 }

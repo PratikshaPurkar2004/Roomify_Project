@@ -154,7 +154,7 @@ function Preference() {
     <div className="pref-page">
       <HomeNavbar isSimple={true} />
       
-      <div className="pref-container">
+      <div className="pref-container page-container">
         
         <AnimatePresence>
           {toast && (

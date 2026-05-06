@@ -60,7 +60,7 @@ function Subscription() {
 
   if (showPayment) {
     return (
-      <div className="sub-container">
+      <div className="sub-container page-container">
         <div className="sub-bg-shape sub-shape-1"></div>
         <div className="sub-bg-shape sub-shape-2"></div>
 
@@ -185,9 +185,10 @@ function Subscription() {
   }
 
   return (
-    <div className="sub-container">
+    <div className="sub-container page-container">
       <div className="sub-bg-shape sub-shape-1"></div>
       <div className="sub-bg-shape sub-shape-2"></div>
+
 
       {toastMessage && (
         <div className="glass-toast">

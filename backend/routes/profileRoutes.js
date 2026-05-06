@@ -7,6 +7,7 @@ router.get("/:id", async (req, res) => {
   const sql = `
     SELECT 
       name,
+      email,
       age_group,
       DOB,
       occupation,
@@ -14,12 +15,28 @@ router.get("/:id", async (req, res) => {
       gender,
       preferences,
       user_type,
-      city
+      city,
+      bio,
+      phone
     FROM users
     WHERE user_id = ?
   `;
   try {
     console.log("Fetching profile for userId:", userId);
+    
+    // Log profile view if viewerId is provided
+    const viewerId = req.query.viewerId;
+    if (viewerId && String(viewerId) !== String(userId)) {
+      try {
+        await db.query(
+          "INSERT INTO profile_views (viewer_id, viewed_id) VALUES (?, ?)", 
+          [viewerId, userId]
+        );
+      } catch (viewErr) {
+        console.error("Error logging profile view:", viewErr);
+      }
+    }
+
     const [result] = await db.query(sql, [userId]);
     if (result.length === 0) return res.status(404).json({ message: "User not found" });
     res.json(result[0]);

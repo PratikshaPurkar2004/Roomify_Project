@@ -57,4 +57,19 @@ router.get("/eligibility/:userId", async (req, res) => {
   }
 });
 
+// PUT mark messages as read
+router.put("/read/:userId/:contactId", async (req, res) => {
+  const { userId, contactId } = req.params;
+  try {
+    await db.query(
+      "UPDATE messages SET is_read = 1 WHERE receiver_id = ? AND sender_id = ? AND is_read = 0",
+      [userId, contactId]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error marking messages as read:", err);
+    res.status(500).json({ success: false, message: "Error updating messages" });
+  }
+});
+
 module.exports = router;

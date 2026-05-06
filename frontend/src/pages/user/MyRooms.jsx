@@ -106,7 +106,7 @@ export default function MyRooms() {
   return (
     <div className="mr-page">
       <style>{`
-        .mr-page { padding: 40px; background: #f8fafc; min-height: 100vh; font-family: 'Segoe UI', sans-serif; margin-left: 280px; }
+        .mr-page { min-height: 100vh; }
         .mr-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
         .mr-topbar h1 { font-size: 32px; font-weight: 800; color: #0f172a; margin: 0; }
         .mr-topbar p { color: #64748b; margin: 4px 0 0; font-size: 15px; }
@@ -154,8 +154,12 @@ export default function MyRooms() {
       `}</style>
 
       {toast && <div className="mr-toast">{toast}</div>}
+      
+      <div className="page-container">
 
-      <div className="mr-topbar" style={{ justifyContent: 'flex-end', marginBottom: '20px' }}>
+      <div className="mr-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1 className="mr-title" style={{ fontSize: '32px', fontWeight: 800, color: '#0f172a', margin: 0 }}>My Rooms</h1>
+
         <button className="mr-add-btn" onClick={() => setShowAddModal(true)}>
           <Plus size={20} /> Add New Room
         </button>
@@ -558,7 +562,9 @@ export default function MyRooms() {
           </div>
         </div>
       )}
+      </div>
     </div>
+
   );
 }
 

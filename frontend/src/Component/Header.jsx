@@ -1,15 +1,20 @@
 import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
+import { UserCheck, UserPlus, Eye, Send } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/authSlice";
 import "../styles/Header.css";
+
+import axios from "axios";
 
 function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   // Determine page title based on path
   const getPageTitle = () => {
@@ -23,6 +28,7 @@ function Header() {
     if (path === "/dashboard/subscription") return "";
     if (path === "/dashboard/my-rooms") return "My Rooms";
     if (path.startsWith("/dashboard/room-details/")) return "Room Details";
+    if (path.startsWith("/dashboard/roommate/")) return "Roommate Profile";
     return "Roomify";
   };
 
@@ -50,10 +56,32 @@ function Header() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  const activeUser = user || userState;
+  const activeUserId = activeUser?.user_id || localStorage.getItem('userId');
+
+  React.useEffect(() => {
+    if (!activeUserId) return;
+
+    const fetchNotifications = () => {
+      axios.get(`http://localhost:5000/api/notifications/${activeUserId}`)
+        .then(res => {
+          if (res.data.success) {
+            setNotifications(res.data.notifications);
+          }
+        })
+        .catch(err => console.error("Error fetching notifications", err));
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [activeUserId]);
+
+  const unreadCount = notifications.length;
+
   let userName = "User";
   let profileImage = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; // default
-  
-  const activeUser = user || userState;
 
   if (activeUser) {
     userName = activeUser.name || activeUser.fullname || activeUser.username || "User";
@@ -90,9 +118,41 @@ function Header() {
       {/* RIGHT */}
       <div className="header-right">
 
-        <div className="notification">
-          <FaBell />
-          <span className="notification-dot"></span>
+        <div className="notification-wrapper" style={{ position: 'relative' }}>
+          <div className="notification" onClick={() => setShowNotifications(!showNotifications)}>
+            <FaBell />
+            {unreadCount > 0 && <span className="notification-count">{unreadCount}</span>}
+          </div>
+
+          {showNotifications && (
+            <div className="notif-dropdown">
+              <div className="notif-header">
+                Notifications
+                <span className="badge">{unreadCount} New</span>
+              </div>
+              <div className="notif-list">
+                {notifications.length === 0 ? (
+                  <div style={{ padding: '24px 16px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+                    No notifications yet 🔔
+                  </div>
+                ) : notifications.map(n => (
+                  <div key={n.id} className={`notif-item ${n.unread ? 'unread' : ''}`}>
+                    <div className={`notif-icon ${n.type}`}>
+                      {n.type === 'request' && <UserPlus size={18} />}
+                      {n.type === 'sent' && <Send size={18} />}
+                      {n.type === 'accept' && <UserCheck size={18} />}
+                      {n.type === 'view' && <Eye size={18} />}
+                    </div>
+                    <div className="notif-content">
+                      <div className="notif-title">{n.title}</div>
+                      <div className="notif-message">{n.message}</div>
+                      <div className="notif-time">{n.time}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="profile-section" onClick={() => setOpen(!open)}>

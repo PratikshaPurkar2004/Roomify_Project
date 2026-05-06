@@ -114,6 +114,8 @@ export default function FindRooms() {
 
       {toast && <div className="fr-toast">{toast}</div>}
 
+      <div className="page-container">
+
 
 
       {/* Filter + Add Bar */}
@@ -177,7 +179,9 @@ export default function FindRooms() {
         )}
       </div>
 
+      </div>
     </div>
+
   );
 }
 

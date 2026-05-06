@@ -6,8 +6,8 @@ const { Server } = require("socket.io");
 const db = require("./config/db");
 const socketHandler = require("./socketHandler");
 
-// Load .env from backend directory
-require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+// Load .env from project root directory
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const authRoutes = require("./routes/authRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
@@ -20,6 +20,7 @@ const chatRoutes = require("./routes/chatRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const cityRoutes = require("./routes/cityRoutes");
 const matchRoutes = require("./routes/matchRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -55,6 +56,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/cities", cityRoutes);
 app.use("/api/matches", matchRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend Running 🚀");

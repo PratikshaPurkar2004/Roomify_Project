@@ -101,7 +101,8 @@ export default function Requests() {
         </div>
       )}
 
-      <div className="requests-container">
+      <div className="page-container">
+        <div className="requests-container">
         <header className="requests-header" style={{ marginBottom: '20px' }}>
           <h1 className="requests-title">Roommate Requests</h1>
           <p className="requests-subtitle">Manage your incoming requests and track the ones you've sent.</p>
@@ -261,7 +262,9 @@ export default function Requests() {
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
 }
+

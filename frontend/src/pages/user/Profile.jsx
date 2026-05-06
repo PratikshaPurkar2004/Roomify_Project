@@ -197,7 +197,9 @@ export default function Profile() {
       animate={{ opacity: 1 }}
       className="profile-page"
     >
-      <div className="profile-wrapper">
+      <div className="page-container">
+        <div className="profile-wrapper">
+
         
         <AnimatePresence>
           {toast && (
@@ -230,13 +232,13 @@ export default function Profile() {
         >
           <div className="preview-header">
              <div className={`avatar-circle ${isSubscribed ? 'pro-border' : ''}`}>
-                {form.name.charAt(0).toUpperCase()}
+                {form.name ? form.name.charAt(0).toUpperCase() : "U"}
              </div>
              <h2>
                 {form.name || "Your Name"}
                 {isSubscribed && <span className="premium-sparkle" title="Pro Member">✨</span>}
              </h2>
-             <span className="occupation-badge">{form.occupation || "Occupation"}</span>
+             <span className="occupation-badge">{form.occupation || "Profile"}</span>
              
              <div className="billing-card-real">
                 <div className="billing-header">
@@ -258,13 +260,29 @@ export default function Profile() {
                    {isSubscribed ? 'Manage Billing' : 'Upgrade to Pro'}
                 </button>
              </div>
+
           </div>
 
-
+          <div className="subscription-card">
+            <div className="sub-header">
+              <span>SUBSCRIPTION STATUS</span>
+              <div className="sub-dot active"></div>
+            </div>
+            <div className="sub-body">
+              <h4>{localStorage.getItem("subscribed") === "true" ? "Pro Tier" : "Basic Tier"}</h4>
+              <p>{localStorage.getItem("subscribed") === "true" ? "Unlimited access unlocked" : "Free limited access"}</p>
+              <button 
+                className="btn-upgrade" 
+                onClick={() => navigate("/dashboard/subscription")}
+              >
+                {localStorage.getItem("subscribed") === "true" ? "Manage Plan" : "Upgrade to Pro"}
+              </button>
+            </div>
+          </div>
 
           <div className="preview-actions">
              <button className="btn-main-save" onClick={saveProfile}>Save Changes</button>
-             <button className="btn-light-delete" onClick={() => setShowDeleteModal(true)}>Delete Account</button>
+             <button className="btn-link-delete" onClick={() => setShowDeleteModal(true)}>Delete Account</button>
           </div>
         </motion.div>
 
@@ -358,7 +376,9 @@ export default function Profile() {
         </motion.div>
 
 
+        </div>
       </div>
+
 
       <AnimatePresence>
         {showDeleteModal && (

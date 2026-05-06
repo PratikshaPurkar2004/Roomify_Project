@@ -25,6 +25,7 @@ import Subscription from "../pages/Subscription";
 import Chat from "../pages/user/Chat";
 import MyRooms from "../pages/user/MyRooms";
 import RoomDetails from "../pages/user/RoomDetails";
+import RoommateProfile from "../pages/user/RoommateProfile";
 
 
 /* Auth & Preference Guard */
@@ -55,18 +56,19 @@ function AuthGuard() {
 /* Dashboard Layout */
 function DashboardLayout() {
   return (
-    <>
-      <Header />
-      <div className="layout">
-        <Sidebar />
-        <div className="content">
+    <div className="layout">
+      <Sidebar />
+      <div className="content">
+        <Header />
+        <main className="main-viewport">
           <AuthGuard />
-        </div>
+        </main>
+        <Footer />
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }
+
 
 function Routing() {
   return (
@@ -91,6 +93,7 @@ function Routing() {
         <Route path="chat" element={<Chat />} />
         <Route path="my-rooms" element={<MyRooms />} />
         <Route path="room-details/:id" element={<RoomDetails />} />
+        <Route path="roommate/:id" element={<RoommateProfile />} />
 
 
       </Route>
