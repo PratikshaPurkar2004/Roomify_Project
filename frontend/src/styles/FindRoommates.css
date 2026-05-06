@@ -656,3 +656,16 @@
 
 
 
+
+/* Star Ratings */
+.rm-star-hover {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s, fill 0.2s;
+}
+
+.rm-star-hover:hover {
+  transform: scale(1.3) rotate(5deg);
+}
+
+.rm-star-hover:active {
+  transform: scale(0.9);
+}

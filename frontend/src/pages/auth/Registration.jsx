@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser, clearMessage } from "../../redux/authSlice";
+import { registerUser, sendRegisterOtp, clearMessage } from "../../redux/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import "../../styles/Registration.css";
 
 const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { loading, error, success } = useSelector((state) => state.auth);
+  const { loading, error, success, otpSent } = useSelector((state) => state.auth);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -19,7 +19,8 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
     occupation: "",
     password: "",
     confirmPassword: "",
-    gender: ""
+    gender: "",
+    otp: ""
   });
 
   const [currentImage, setCurrentImage] = useState(0);
@@ -53,7 +54,8 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
       occupation: "",
       password: "",
       confirmPassword: "",
-      gender: ""
+      gender: "",
+      otp: ""
     });
     setErrors({});
 
@@ -130,6 +132,13 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
     if (!data.gender && data.gender !== undefined)
       newErrors.gender = "Select gender";
 
+    // Validate OTP if it's currently requested
+    if (otpSent && !data.otp) {
+      newErrors.otp = "OTP is required";
+    } else if (otpSent && data.otp.length !== 6) {
+      newErrors.otp = "OTP must be 6 digits";
+    }
+
     return newErrors;
   };
 
@@ -174,7 +183,11 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
       return;
     }
 
-    dispatch(registerUser(formData));
+    if (!otpSent) {
+      dispatch(sendRegisterOtp(formData));
+    } else {
+      dispatch(registerUser(formData));
+    }
   };
 
   useEffect(() => {
@@ -347,12 +360,32 @@ const Registration = ({ onClose, onSwitch }) => {  const dispatch = useDispatch(
                 </div>
               </div>
 
+              {otpSent && (
+                <div className="input-row">
+                  <div className="input-group">
+                    <label>Verification OTP</label>
+                    <input
+                      type="text"
+                      name="otp"
+                      placeholder="Enter the 6-digit OTP sent to your email"
+                      value={formData.otp}
+                      onChange={handleChange}
+                      maxLength="6"
+                    />
+                    {errors.otp && <p className="field-error">{errors.otp}</p>}
+                    <p style={{ fontSize: '12px', color: '#10b981', marginTop: '5px' }}>
+                      ✓ OTP sent to {formData.email}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <button 
                 type="submit" 
                 className="register-btn"
                 disabled={loading}
               >
-                {loading ? "Registering..." : "Create Account"}
+                {loading ? "Please wait..." : (otpSent ? "Verify & Register" : "Continue")}
               </button>
 
               <p className="login-link">

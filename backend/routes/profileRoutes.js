@@ -8,10 +8,8 @@ router.get("/:id", async (req, res) => {
     SELECT 
       name,
       age_group,
-      area,
       DOB,
       occupation,
-      area,
       budget,
       gender,
       preferences,

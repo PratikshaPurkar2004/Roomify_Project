@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, MapPin, Home, X, Edit, Trash2, Eye, Users, BedDouble } from "lucide-react";
+import { Plus, MapPin, Home, X, Edit, Trash2, Eye, Users, BedDouble, Star } from "lucide-react";
 
 export default function MyRooms() {
   const navigate = useNavigate();
@@ -272,7 +272,7 @@ export default function MyRooms() {
                         if (isSelected) arr = arr.filter(a => a !== am); else arr.push(am);
                         setNewRoom({...newRoom, amenities: arr.join(', ')});
                       }}
-                      style={{ padding: '7px 15px', border: '1px solid #e2e8f0', borderRadius: '50px', fontSize: '13px', fontWeight: 500, color: isSelected ? '#7c3aed' : '#64748b', background: isSelected ? '#f5f3ff' : 'white', border: isSelected ? '1px solid #7c3aed' : '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
+                      style={{ padding: '7px 15px', borderRadius: '50px', fontSize: '13px', fontWeight: 500, color: isSelected ? '#7c3aed' : '#64748b', background: isSelected ? '#f5f3ff' : 'white', border: isSelected ? '1px solid #7c3aed' : '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
                         {am}
                       </span>
                     )
@@ -289,7 +289,7 @@ export default function MyRooms() {
                         if (isSelected) arr = arr.filter(a => a !== am); else arr.push(am);
                         setNewRoom({...newRoom, amenities: arr.join(', ')});
                       }}
-                      style={{ padding: '7px 15px', border: '1px solid #e2e8f0', borderRadius: '50px', fontSize: '13px', fontWeight: 500, color: isSelected ? '#ef4444' : '#64748b', background: isSelected ? '#fef2f2' : 'white', border: isSelected ? '1px solid #ef4444' : '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
+                      style={{ padding: '7px 15px', borderRadius: '50px', fontSize: '13px', fontWeight: 500, color: isSelected ? '#ef4444' : '#64748b', background: isSelected ? '#fef2f2' : 'white', border: isSelected ? '1px solid #ef4444' : '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none' }}>
                         {am}
                       </span>
                     )
@@ -610,7 +610,20 @@ function RoomCard({ room, onOpen, onEdit, onDelete }) {
 
       <div className="fr-card-body-modern">
         <div className="fr-card-header-modern">
-          <h3 style={{ fontSize: '18px', fontWeight: 800 }}>{room.property_type || "Room"} in {room.location?.split(",")[0]}</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 800 }}>{room.property_type || "Room"} in {room.location?.split(",")[0]}</h3>
+            {room.review_count > 0 ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fffbeb', padding: '2px 6px', borderRadius: '6px', border: '1px solid #fef3c7', flexShrink: 0 }}>
+                <Star size={12} fill="#f59e0b" color="#f59e0b" />
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#92400e' }}>{Number(room.avg_rating).toFixed(1)}</span>
+                <span style={{ fontSize: '10px', color: '#b45309', fontWeight: 600 }}>({room.review_count})</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#f0fdf4', padding: '2px 8px', borderRadius: '6px', border: '1px solid #bbf7d0', flexShrink: 0 }}>
+                <span style={{ fontSize: '10px', fontWeight: 800, color: '#15803d', textTransform: 'uppercase' }}>✦ New</span>
+              </div>
+            )}
+          </div>
           <p className="fr-card-addr"><MapPin size={13} /> {room.address ? `${room.address}, ` : ""}{room.location}</p>
         </div>
         <div className="fr-card-details-grid" style={{ background:'#f8fafc', padding:'12px', borderRadius:'12px', marginTop:'12px' }}>

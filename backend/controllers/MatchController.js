@@ -7,7 +7,7 @@ const findOptimalMatch = async (req, res) => {
 
     // 1. Fetch all users and their preferences
     const [rows] = await db.query(
-      "SELECT user_id, name, user_type, preferences, area as city FROM users"
+      "SELECT user_id, name, user_type, preferences, city FROM users"
     );
 
     const currentUser = rows.find(u => u.user_id == userId);

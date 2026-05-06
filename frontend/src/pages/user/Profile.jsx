@@ -42,6 +42,7 @@ export default function Profile() {
   const [originalPrefs, setOriginalPrefs] = useState([]);
   const [prefSaving, setPrefSaving] = useState(false);
   const [prefMsg, setPrefMsg] = useState({ text: "", type: "" });
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -88,6 +89,12 @@ export default function Profile() {
       .catch((err) => {
         console.error("Error fetching preferences:", err);
       });
+
+    // Fetch Subscription Status
+    fetch(`http://localhost:5000/api/subscriptions/status/${userId}`)
+      .then(res => res.json())
+      .then(data => setIsSubscribed(data.subscribed))
+      .catch(err => console.error("Sub check error:", err));
 
   }, [userId]);
 
@@ -222,11 +229,35 @@ export default function Profile() {
           className="profile-preview-card"
         >
           <div className="preview-header">
-             <div className="avatar-circle">
+             <div className={`avatar-circle ${isSubscribed ? 'pro-border' : ''}`}>
                 {form.name.charAt(0).toUpperCase()}
              </div>
-             <h2>{form.name || "Your Name"}</h2>
+             <h2>
+                {form.name || "Your Name"}
+                {isSubscribed && <span className="premium-sparkle" title="Pro Member">✨</span>}
+             </h2>
              <span className="occupation-badge">{form.occupation || "Occupation"}</span>
+             
+             <div className="billing-card-real">
+                <div className="billing-header">
+                   <span className="billing-label">Subscription Status</span>
+                   <span className={`status-dot ${isSubscribed ? 'active' : 'inactive'}`}></span>
+                </div>
+                
+                <div className="billing-main">
+                   <div className="plan-name-wrap">
+                      <span className="plan-name-text">{isSubscribed ? 'Roomify Pro' : 'Basic Tier'}</span>
+                      {isSubscribed && <span className="verified-check-mini">✓</span>}
+                   </div>
+                   <p className="billing-date">
+                      {isSubscribed ? 'Renewals on June 06, 2026' : 'Free limited access'}
+                   </p>
+                </div>
+
+                <button className={`btn-billing-action ${isSubscribed ? 'manage' : 'upgrade'}`} onClick={() => navigate("/dashboard/subscription")}>
+                   {isSubscribed ? 'Manage Billing' : 'Upgrade to Pro'}
+                </button>
+             </div>
           </div>
 
 

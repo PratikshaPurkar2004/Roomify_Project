@@ -4,6 +4,24 @@ import axios from "axios";
 
 // LOGIN THUNK
 
+// SEND REGISTER OTP THUNK
+export const sendRegisterOtp = createAsyncThunk(
+  "auth/sendRegisterOtp",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/send-register-otp",
+        formData
+      );
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to send Registration OTP"
+      );
+    }
+  }
+);
+
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (formData, { rejectWithValue }) => {
@@ -106,6 +124,7 @@ const authSlice = createSlice({
     loading: false,
     error: null,
     success: false,
+    otpSent: false,
     message: null
   },
 
@@ -113,6 +132,7 @@ const authSlice = createSlice({
     clearMessage: (state) => {
       state.error = null;
       state.success = false;
+      state.otpSent = false;
       state.message = null;
     },
     logout: (state) => {
@@ -146,6 +166,20 @@ const authSlice = createSlice({
 
       .addCase(loginUser.rejected, (state, action) => {
         console.log("LOGIN ERROR:", action.payload);
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // SEND REGISTER OTP
+      .addCase(sendRegisterOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(sendRegisterOtp.fulfilled, (state) => {
+        state.loading = false;
+        state.otpSent = true;
+      })
+      .addCase(sendRegisterOtp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

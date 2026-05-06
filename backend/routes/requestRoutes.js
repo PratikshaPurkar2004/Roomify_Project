@@ -44,12 +44,11 @@ router.get("/:userId", async (req, res) => {
       u.city,
       u.gender,
       u.budget as base_budget,
-      IFNULL(rooms.rent, u.budget) AS rent,
+      (SELECT rent FROM rooms WHERE host_id = u.user_id LIMIT 1) AS rent,
       r.status,
       r.created_at
     FROM requests r
     JOIN users u ON r.sender_id = u.user_id
-    LEFT JOIN rooms ON u.user_id = rooms.host_id
     WHERE r.receiver_id = ?
     ORDER BY r.created_at DESC
   `;
@@ -97,12 +96,11 @@ router.get("/sent-details/:userId", async (req, res) => {
       u.name,
       u.city,
       u.gender,
-      IFNULL(rooms.rent, u.budget) AS budget,
+      (SELECT rent FROM rooms WHERE host_id = u.user_id LIMIT 1) AS budget,
       r.status,
       r.created_at
     FROM requests r
     JOIN users u ON r.receiver_id = u.user_id
-    LEFT JOIN rooms ON u.user_id = rooms.host_id
     WHERE r.sender_id = ?
     ORDER BY r.created_at DESC
   `;
