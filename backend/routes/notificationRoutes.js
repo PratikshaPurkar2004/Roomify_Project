@@ -38,6 +38,7 @@ router.get("/:userId", async (req, res) => {
         title: "New Request",
         message: `${req.name} wants to connect with you.`,
         time: getTimeAgo(req.created_at),
+        created_at: req.created_at,
         unread: true
       });
     });
@@ -59,6 +60,7 @@ router.get("/:userId", async (req, res) => {
         title: "Request Accepted",
         message: `${req.name} accepted your roommate request!`,
         time: getTimeAgo(req.created_at),
+        created_at: req.created_at,
         unread: true
       });
     });
@@ -81,6 +83,7 @@ router.get("/:userId", async (req, res) => {
         title: "Request Sent",
         message: `Your request was sent to ${req.name}.`,
         time: getTimeAgo(req.created_at),
+        created_at: req.created_at,
         unread: false
       });
     });

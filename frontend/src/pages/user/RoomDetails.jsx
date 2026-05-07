@@ -58,7 +58,7 @@ export default function RoomDetails() {
   }, [toast]);
 
   if (loading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh' }}>
+    <div style={{ marginLeft:'280px', display:'flex', alignItems:'center', justifyContent:'center', height:'100vh' }}>
       <div style={{ textAlign:'center' }}>
         <div style={{ width:'40px', height:'40px', border:'4px solid #e2e8f0', borderTop:'4px solid #6366f1', borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }}></div>
         <p style={{ color:'#64748b', fontWeight:600 }}>Loading room...</p>
@@ -67,7 +67,7 @@ export default function RoomDetails() {
   );
 
   if (error || !room) return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100vh', gap:'14px' }}>
+    <div style={{ marginLeft:'280px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100vh', gap:'14px' }}>
       <Home size={64} color="#cbd5e1" />
       <h2 style={{ color:'#1e293b' }}>{error || "Room not found"}</h2>
       <button onClick={() => navigate(-1)} style={{ background:'#6366f1', color:'white', border:'none', padding:'11px 24px', borderRadius:'12px', fontWeight:700, cursor:'pointer' }}>← Go Back</button>
@@ -182,9 +182,7 @@ export default function RoomDetails() {
   };
 
   return (
-    <div style={{ minHeight:'100vh', background:'#f5f7fa', fontFamily:"'Segoe UI', sans-serif" }}>
-      <div className="page-container">
-
+    <div style={{ marginLeft:'280px', minHeight:'100vh', background:'#f5f7fa', fontFamily:"'Segoe UI', sans-serif" }}>
       <style>{`
         @keyframes spin { to { transform:rotate(360deg); } }
         @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
@@ -570,8 +568,6 @@ export default function RoomDetails() {
           </div>
         </div>
       )}
-      </div>
     </div>
-
   );
 }

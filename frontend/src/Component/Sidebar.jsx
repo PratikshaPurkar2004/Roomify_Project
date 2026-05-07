@@ -29,6 +29,16 @@ function Sidebar() {
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
   const [counts, setCounts] = useState({ requestsCount: 0, chatCount: 0 });
+  const [clearedCounts, setClearedCounts] = useState(() => {
+    try {
+      const userId = user?.user_id || localStorage.getItem("userId");
+      const stored = localStorage.getItem(`sidebar_cleared_${userId}`);
+      return stored ? JSON.parse(stored) : { requestsCount: 0, chatCount: 0 };
+    } catch {
+      return { requestsCount: 0, chatCount: 0 };
+    }
+  });
+
   useEffect(() => {
     // Force sidebar width for layout stability
     document.documentElement.style.setProperty('--sidebar-width', '280px');
@@ -47,6 +57,16 @@ function Sidebar() {
               requestsCount: res.data.requestsCount,
               chatCount: res.data.chatCount
             });
+
+            // If the server count drops (e.g. user accepted a request), lower our baseline so future new requests trigger the badge again
+            setClearedCounts(prev => {
+              let updated = { ...prev };
+              let changed = false;
+              if (res.data.requestsCount < prev.requestsCount) { updated.requestsCount = res.data.requestsCount; changed = true; }
+              if (res.data.chatCount < prev.chatCount) { updated.chatCount = res.data.chatCount; changed = true; }
+              if (changed) localStorage.setItem(`sidebar_cleared_${userId}`, JSON.stringify(updated));
+              return changed ? updated : prev;
+            });
           }
         })
         .catch(err => console.error("Sidebar count fetch error:", err));
@@ -64,10 +84,27 @@ function Sidebar() {
     navigate("/");
   };
 
+  const syncClearedCount = (key, value) => {
+    const userId = user?.user_id || localStorage.getItem("userId");
+    setClearedCounts(prev => {
+      const updated = { ...prev, [key]: value };
+      if (userId) localStorage.setItem(`sidebar_cleared_${userId}`, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleRequestsClick = () => {
+    syncClearedCount('requestsCount', counts.requestsCount);
+  };
+
   const handleChatClick = (e) => {
     e.preventDefault();
+    syncClearedCount('chatCount', counts.chatCount);
     navigate("/dashboard/chat");
   };
+
+  const displayRequestsCount = counts.requestsCount > clearedCounts.requestsCount ? counts.requestsCount - clearedCounts.requestsCount : 0;
+  const displayChatCount = counts.chatCount > clearedCounts.chatCount ? counts.chatCount - clearedCounts.chatCount : 0;
 
   return (
     <div className="sidebar">
@@ -100,14 +137,14 @@ function Sidebar() {
           <FaUsers /> <span>Find Roommates</span>
         </NavLink>
 
-        <NavLink to="/dashboard/requests" className="menu-item">
+        <NavLink to="/dashboard/requests" className="menu-item" onClick={handleRequestsClick}>
           <FaEnvelope /> <span>Requests</span>
-          {counts.requestsCount > 0 && <span className="sidebar-badge">{counts.requestsCount}</span>}
+          {displayRequestsCount > 0 && <span className="sidebar-badge">{displayRequestsCount}</span>}
         </NavLink>
 
         <a href="#" className="menu-item" onClick={handleChatClick}>
           <FaRegCommentDots /> <span>Chat</span>
-          {counts.chatCount > 0 && <span className="sidebar-badge">{counts.chatCount}</span>}
+          {displayChatCount > 0 && <span className="sidebar-badge">{displayChatCount}</span>}
         </a>
 
       </div>

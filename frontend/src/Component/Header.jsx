@@ -15,6 +15,7 @@ function Header() {
   const [open, setOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [lastSeenTime, setLastSeenTime] = useState(0);
 
   // Determine page title based on path
   const getPageTitle = () => {
@@ -75,10 +76,33 @@ function Header() {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 10000); // Poll every 10 seconds
 
+    // Load last seen time
+    const storedSeen = localStorage.getItem(`last_seen_notif_${activeUserId}`);
+    if (storedSeen) setLastSeenTime(parseInt(storedSeen));
+
     return () => clearInterval(interval);
   }, [activeUserId]);
 
-  const unreadCount = notifications.length;
+  const handleToggleNotifications = () => {
+    const willShow = !showNotifications;
+    setShowNotifications(willShow);
+    if (willShow) {
+      const now = Date.now();
+      setLastSeenTime(now);
+      localStorage.setItem(`last_seen_notif_${activeUserId}`, now.toString());
+    }
+  };
+
+  const processedNotifications = notifications.map(n => {
+    if (!n.created_at) return n;
+    const notifTime = new Date(n.created_at).getTime();
+    if (notifTime <= lastSeenTime) {
+      return { ...n, unread: false };
+    }
+    return n;
+  });
+
+  const unreadCount = processedNotifications.filter(n => n.unread).length;
 
   let userName = "User";
   let profileImage = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; // default
@@ -119,7 +143,7 @@ function Header() {
       <div className="header-right">
 
         <div className="notification-wrapper" style={{ position: 'relative' }}>
-          <div className="notification" onClick={() => setShowNotifications(!showNotifications)}>
+          <div className="notification" onClick={handleToggleNotifications}>
             <FaBell />
             {unreadCount > 0 && <span className="notification-count">{unreadCount}</span>}
           </div>
@@ -128,14 +152,14 @@ function Header() {
             <div className="notif-dropdown">
               <div className="notif-header">
                 Notifications
-                <span className="badge">{unreadCount} New</span>
+                <span className="badge">{unreadCount > 0 ? `${unreadCount} New` : 'All caught up!'}</span>
               </div>
               <div className="notif-list">
-                {notifications.length === 0 ? (
+                {processedNotifications.length === 0 ? (
                   <div style={{ padding: '24px 16px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
                     No notifications yet 🔔
                   </div>
-                ) : notifications.map(n => (
+                ) : processedNotifications.map(n => (
                   <div key={n.id} className={`notif-item ${n.unread ? 'unread' : ''}`}>
                     <div className={`notif-icon ${n.type}`}>
                       {n.type === 'request' && <UserPlus size={18} />}
