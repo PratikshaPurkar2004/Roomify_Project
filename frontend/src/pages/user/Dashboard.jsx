@@ -143,7 +143,7 @@ function Dashboard() {
 
   const fetchData = useCallback(() => {
     const userId = localStorage.getItem("userId");
-    const userIdParams = userId ? `?userId=/${userId}` : "";
+    const userIdParams = userId ? `?userId=${userId}` : "";
 
     fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/stats${userIdParams}`)
       .then((res) => res.json())

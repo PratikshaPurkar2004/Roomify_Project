@@ -30,7 +30,9 @@ export default function Profile() {
     occupation: "",
     city: "",
     budget: "",
-    gender: ""
+    gender: "",
+    phone: "",
+    bio: ""
   });
 
   const [toast, setToast] = useState(null);
@@ -65,7 +67,9 @@ export default function Profile() {
             occupation: res.data.occupation || "",
             city: res.data.city || "",
             budget: res.data.budget || "",
-            gender: res.data.gender || ""
+            gender: res.data.gender || "",
+            phone: res.data.phone || "",
+            bio: res.data.bio || ""
           });
         }
       })
@@ -329,6 +333,36 @@ export default function Profile() {
                    <label>Max Budget (₹)</label>
                    <input name="budget" type="number" value={form.budget} onChange={handleChange} placeholder="Monthly budget" />
                 </div>
+             </div>
+          </div>
+
+          <div className="form-section">
+             <h3>Contact & About Me</h3>
+             <div className="input-group-grid">
+                <div className="input-box">
+                   <label>Phone Number</label>
+                   <input name="phone" value={form.phone} onChange={handleChange} placeholder="e.g. +91 98765 43210" />
+                </div>
+             </div>
+             <div className="input-box" style={{ marginTop: '18px' }}>
+                <label>Bio / About Me</label>
+                <textarea 
+                  name="bio" 
+                  value={form.bio} 
+                  onChange={handleChange} 
+                  placeholder="Tell potential roommates about yourself..."
+                  style={{ 
+                    padding: '13px 16px', 
+                    background: '#F8FAFC', 
+                    border: '1.5px solid #E2E8F0', 
+                    borderRadius: '12px', 
+                    fontSize: '14px', 
+                    minHeight: '100px', 
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                    outline: 'none'
+                  }}
+                />
              </div>
           </div>
 

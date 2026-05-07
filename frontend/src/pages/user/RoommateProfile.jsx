@@ -32,7 +32,7 @@ export default function RoommateProfile() {
         setLoading(true);
         
         // Fetch target profile
-        const profRes = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/${id}?viewerId=/${userId}`);
+        const profRes = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/${id}?viewerId=${userId}`);
         const profData = await profRes.json();
         
         if (profData.error) throw new Error(profData.error);
