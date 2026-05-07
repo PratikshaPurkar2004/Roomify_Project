@@ -265,3 +265,24 @@
 .dropdown-item.logout:hover {
   background: #FEF2F2;
 }
+
+.notif-footer {
+  padding: 14px;
+  text-align: center;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  color: #6366f1;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.notif-footer:hover {
+  background: #f1f5f9;
+  color: #4f46e5;
+}

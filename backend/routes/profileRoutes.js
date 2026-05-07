@@ -29,7 +29,7 @@ router.get("/:id", async (req, res) => {
     if (viewerId && String(viewerId) !== String(userId)) {
       try {
         await db.query(
-          "INSERT INTO profile_views (viewer_id, viewed_id) VALUES (?, ?)", 
+          "INSERT INTO views_log (viewer_id, user_id) VALUES (?, ?)", 
           [viewerId, userId]
         );
       } catch (viewErr) {

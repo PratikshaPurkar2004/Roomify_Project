@@ -142,10 +142,6 @@ function Sidebar() {
           {displayRequestsCount > 0 && <span className="sidebar-badge">{displayRequestsCount}</span>}
         </NavLink>
 
-        <NavLink to="/dashboard/notifications" className="menu-item">
-          <FaRegCommentDots style={{ transform: 'rotate(0deg)' }} /> <span>Notifications</span>
-        </NavLink>
-
         <NavLink to="/dashboard/chat" className="menu-item" onClick={handleChatClick}>
           <FaComments /> <span>Chat</span>
           {displayChatCount > 0 && <span className="sidebar-badge">{displayChatCount}</span>}

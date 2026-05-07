@@ -11,6 +11,7 @@ export default function Chat() {
   const [selectedContact, setSelectedContact] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const messagesBodyRef = useRef(null);
   const socket = useRef(null);
   const userId = localStorage.getItem("userId");
@@ -22,10 +23,9 @@ export default function Chat() {
       return;
     }
 
-        // Fetch accepted contacts
-        return fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/contacts/${userId}`);
-      })
-      .then(res => res && res.json())
+    // Fetch accepted contacts
+    fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/contacts/${userId}`)
+      .then(res => res.json())
       .then(data => {
         if (data && data.success) {
           setContacts(Array.isArray(data.contacts) ? data.contacts : []);
@@ -170,18 +170,25 @@ export default function Chat() {
     if (e.key === "Enter") handleSend();
   };
 
+  if (isLoading) {
+    return (
+      <div className="chat-page">
+        <div className="chat-loading">
+          <div className="chat-spinner"></div>
+          <p>Loading your inbox...</p>
+        </div>
+      </div>
+    );
+  }
 
-
+  return (
+    <div className="chat-page">
       {/* Dynamic Backgrounds */}
       <div className="chat-bg-shape chat-shape-1"></div>
       <div className="chat-bg-shape chat-shape-2"></div>
 
       <div className="page-container">
         <div className="chat-container">
-        <header className="chat-header">
-          <h2 className="chat-title">Messages</h2>
-          <p className="chat-subtitle">Connect instantly with your roommate matches</p>
-        </header>
 
         {!Array.isArray(contacts) || contacts.length === 0 ? (
           <div className="no-contacts-card">

@@ -203,7 +203,7 @@ function Dashboard() {
                   <span className="stat-desc">#Views</span>
                 </div>
                 <div className="stat-divider"></div>
-                <div className="stat-item">
+                <div className="stat-item clickable" onClick={() => navigate("/dashboard/find-roommates")}>
                   <span className="stat-num">{stats.matches || 0}</span>
                   <span className="stat-desc">#Matches</span>
                 </div>
@@ -291,8 +291,8 @@ function Dashboard() {
               </div>
             </div>
 
-            <div className="chart-wrapper-premium" style={{ height: '400px', width: '100%', background: '#fff', borderRadius: '24px', padding: '20px', border: '1px solid #edf2f7' }}>
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="chart-wrapper-premium" style={{ height: '400px', width: '100%', background: '#fff', borderRadius: '24px', padding: '20px', border: '1px solid #edf2f7', position: 'relative' }}>
+              <ResponsiveContainer width="99%" height={400}>
                 <AreaChart
                   data={graphData}
                   margin={{ top: 20, right: 30, left: 0, bottom: 0 }}

@@ -224,7 +224,6 @@ export default function FindRoommates() {
 
   // Filter & Sort
   useEffect(() => {
-    console.log("Matching Debug - Current User:", myProfile);
     let result = roommates.map(u => ({
       ...u,
       matchPercentage: calculateMatchPercentage(myProfile || { preferences: myPreferences }, u)

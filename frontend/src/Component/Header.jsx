@@ -175,9 +175,6 @@ function Header() {
                   </div>
                 ))}
               </div>
-              <div className="notif-footer" onClick={() => { navigate("/dashboard/notifications"); setShowNotifications(false); }} style={{ padding: '12px', textAlign: 'center', borderTop: '1px solid #f1f5f9', color: '#6366f1', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                See all notifications <ArrowRight size={14} />
-              </div>
             </div>
           )}
         </div>

@@ -67,6 +67,14 @@ export default function RoomDetails() {
           }
         }).catch(() => {});
     }
+    // Log view
+    if (userId) {
+      fetch(`${import.meta.env.VITE_API_URL}/api/rooms/${id}/view`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ viewerId: userId }),
+      }).catch(err => console.error("Error logging view:", err));
+    }
   }, [id]);
 
   // Update request status when room data loads
