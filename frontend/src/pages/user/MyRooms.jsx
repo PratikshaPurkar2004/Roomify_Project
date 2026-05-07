@@ -73,7 +73,7 @@ export default function MyRooms() {
       else fd.append(k, v);
     });
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/rooms/edit/${editRoom.room_id}`, { method: `PUT", body: fd });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/rooms/edit/${editRoom.room_id}`, { method: "PUT", body: fd });
       const data = await res.json();
       if (data.success) { showToast("Updated! ✏️"); setShowEditModal(false); fetchMyRooms(); }
       else showToast(data.message || "Failed");
@@ -87,7 +87,7 @@ export default function MyRooms() {
 
   const confirmDelete = () => {
     if (!roomToDelete) return;
-    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/delete/${roomToDelete}`, { method: `DELETE" })
+    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/delete/${roomToDelete}`, { method: "DELETE" })
       .then(r => r.json()).then(data => { 
         if (data.success) { 
           showToast("Deleted 🗑️"); 
@@ -580,7 +580,7 @@ function RoomCard({ room, onOpen, onEdit, onDelete }) {
       <div className="fr-card-img-wrap-modern" onClick={onOpen} style={{ cursor: 'pointer', position: 'relative' }}>
         {images.length > 0 ? (
           <>
-            <img src={`${import.meta.env.VITE_API_URL}${images[idx]}`} alt=`Room" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={`${import.meta.env.VITE_API_URL}${images[idx]}`} alt="Room" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             {images.length > 1 && (
               <>
                 <button onClick={prev} className="fr-card-arrow-mini l" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.85)', border: 'none', borderRadius: '50%', width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}><ChevronLeft size={16} color="#0f172a" /></button>
