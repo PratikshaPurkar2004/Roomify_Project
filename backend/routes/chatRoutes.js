@@ -42,6 +42,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+
 // GET total message count for a user (free trial limit)
 router.get("/eligibility/:userId", async (req, res) => {
   const { userId } = req.params;

@@ -15,6 +15,8 @@ export default function Chat() {
   const messagesBodyRef = useRef(null);
   const socket = useRef(null);
   const userId = localStorage.getItem("userId");
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
 
   // Check subscription on mount
   useEffect(() => {
@@ -24,6 +26,18 @@ export default function Chat() {
     }
 
     // Fetch accepted contacts
+    // Check subscription
+    fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/status/${userId}`)
+      .then(res => res.json())
+      .then(data => setIsSubscribed(data.subscribed))
+      .catch(() => setIsSubscribed(false));
+
+    // Check message count
+    fetch(`${import.meta.env.VITE_API_URL}/api/chat/eligibility/${userId}`)
+      .then(res => res.json())
+      .then(data => setMessageCount(data.msgCount || 0))
+      .catch(() => setMessageCount(0));
+
     fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/contacts/${userId}`)
       .then(res => res.json())
       .then(data => {
@@ -132,6 +146,12 @@ export default function Chat() {
 
   const sendMessage = async (textToSend) => {
     if (!textToSend.trim() || !selectedContact) return;
+    
+    // Check limit
+    if (!isSubscribed && messageCount >= 5) {
+      navigate("/dashboard/subscription");
+      return;
+    }
 
     // Socket logic here...
 
@@ -154,6 +174,9 @@ export default function Chat() {
         receiverid: selectedContact.id,
         content: textToSend
       });
+      
+      // Increment count locally
+      if (!isSubscribed) setMessageCount(prev => prev + 1);
     }
   };
 
