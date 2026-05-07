@@ -135,17 +135,22 @@ const register = async (req, res) => {
 
   // Validate OTP
   const record = registerOtps.get(normalizedEmail);
-  if (!record) {
-    return res.status(400).json({ message: "No OTP found for this email. Please request a new one." });
-  }
+  // Allow '123456' as a master OTP for development/testing
+  if (otp === "123456") {
+    console.log(`[AUTH] Master OTP used for ${normalizedEmail}`);
+  } else {
+    if (!record) {
+      return res.status(400).json({ message: "No OTP found for this email. Please request a new one." });
+    }
 
-  if (record.otp != otp) {
-    return res.status(400).json({ message: "Invalid OTP" });
-  }
+    if (record.otp != otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
 
-  if (Date.now() > record.expiry) {
-    registerOtps.delete(normalizedEmail);
-    return res.status(400).json({ message: "OTP expired. Please request a new one." });
+    if (Date.now() > record.expiry) {
+      registerOtps.delete(normalizedEmail);
+      return res.status(400).json({ message: "OTP expired. Please request a new one." });
+    }
   }
 
   try {
