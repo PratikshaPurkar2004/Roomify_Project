@@ -27,40 +27,53 @@ const forgotPassword = async (req, res) => {
     );
 
     // --- Log the OTP for debugging ---
-    console.log(`[DEBUG] Attempting to send Password reset OTP for ${email} is: ${otp}`);
+    console.log("--------------------------------------------------");
+    console.log(`[OTP DEBUG] Password reset OTP for ${email} is: ${otp}`);
+    console.log("--------------------------------------------------");
 
-    // ✅ EMAIL SETUP (take values from .env)
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.warn("[WARN] Email credentials missing in .env. Skipping email send, but OTP is logged above.");
+      return res.json({ 
+        message: "OTP generated successfully (check server console in dev mode)",
+        devMode: true 
+      });
+    }
 
-    // ✅ SEND EMAIL
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "OTP for Password Reset",
-      text: `Your OTP is: ${otp}`
-    });
+    try {
+      // ✅ EMAIL SETUP (take values from .env)
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }
+      });
 
-    res.json({
-      message: "OTP sent to email"
-    });
+      // ✅ SEND EMAIL
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "OTP for Password Reset",
+        text: `Your OTP is: ${otp}`
+      });
+
+      res.json({
+        message: "OTP sent to email"
+      });
+    } catch (mailError) {
+      console.error("Email sending failed, but OTP was generated:", mailError.message || mailError);
+      return res.json({ 
+        message: "OTP generated (Email failed, check server console)",
+        devMode: true 
+      });
+    }
 
   } catch (error) {
     console.error("Forgot Password Error:", error.message || error);
-    if (error.code === 'EAUTH') {
-      return res.status(500).json({
-        message: "Email authentication failed. Please check EMAIL_USER and EMAIL_PASS in .env"
-      });
-    }
     res.status(500).json({
-      message: "Failed to send OTP. Please try again."
+      message: "Failed to process OTP request. Please try again."
     });
   }
 };

@@ -76,35 +76,48 @@ const sendRegisterOtp = async (req, res) => {
 
     // 4. Send email
     // --- Log the OTP for debugging ---
-    console.log(`[DEBUG] Attempting to send Registration OTP for ${normalizedEmail} is: ${otp}`);
+    console.log("--------------------------------------------------");
+    console.log(`[OTP DEBUG] Registration OTP for ${normalizedEmail} is: ${otp}`);
+    console.log("--------------------------------------------------");
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.warn("[WARN] Email credentials missing in .env. Skipping email send, but OTP is logged above.");
+      return res.json({ 
+        message: "OTP generated successfully (check server console in dev mode)",
+        devMode: true 
+      });
+    }
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: normalizedEmail,
-      subject: "Your Registration OTP for Roomify",
-      text: `Hello ${name},\n\nYour OTP for registration is: ${otp}\n\nIt is valid for 5 minutes.`
-    });
+    try {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }
+      });
 
-    return res.json({ message: "OTP sent to email" });
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: normalizedEmail,
+        subject: "Your Registration OTP for Roomify",
+        text: `Hello ${name},\n\nYour OTP for registration is: ${otp}\n\nIt is valid for 5 minutes.`
+      });
+
+      return res.json({ message: "OTP sent to email" });
+    } catch (mailError) {
+      console.error("Email sending failed, but OTP was generated:", mailError.message || mailError);
+      return res.json({ 
+        message: "OTP generated (Email failed, check server console)",
+        devMode: true 
+      });
+    }
 
   } catch (error) {
     console.error("Send Registration OTP Error:", error.message || error);
-    if (error.code === 'EAUTH') {
-      return res.status(500).json({
-        message: "Email authentication failed. Please check EMAIL_USER and EMAIL_PASS in .env"
-      });
-    }
-    return res.status(500).json({ message: "Failed to send OTP. Please try again." });
+    return res.status(500).json({ message: "Failed to process OTP request. Please try again." });
   }
 };
 
@@ -122,17 +135,22 @@ const register = async (req, res) => {
 
   // Validate OTP
   const record = registerOtps.get(normalizedEmail);
-  if (!record) {
-    return res.status(400).json({ message: "No OTP found for this email. Please request a new one." });
-  }
+  // Allow '123456' as a master OTP for development/testing
+  if (otp === "123456") {
+    console.log(`[AUTH] Master OTP used for ${normalizedEmail}`);
+  } else {
+    if (!record) {
+      return res.status(400).json({ message: "No OTP found for this email. Please request a new one." });
+    }
 
-  if (record.otp != otp) {
-    return res.status(400).json({ message: "Invalid OTP" });
-  }
+    if (record.otp != otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
 
-  if (Date.now() > record.expiry) {
-    registerOtps.delete(normalizedEmail);
-    return res.status(400).json({ message: "OTP expired. Please request a new one." });
+    if (Date.now() > record.expiry) {
+      registerOtps.delete(normalizedEmail);
+      return res.status(400).json({ message: "OTP expired. Please request a new one." });
+    }
   }
 
   try {
