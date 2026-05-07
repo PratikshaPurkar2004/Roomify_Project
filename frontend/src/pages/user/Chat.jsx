@@ -129,7 +129,7 @@ export default function Chat() {
   };
   const markAsRead = async (contactId) => {
     try {
-      await fetch(`http://localhost:5000/api/chat/read/${userId}/${contactId}`, { method: "PUT" });
+      await fetch(`${import.meta.env.VITE_API_URL}/api/chat/read/${userId}/${contactId}`, { method: "PUT" });
     } catch (err) {
       console.error("Error marking as read:", err);
     }

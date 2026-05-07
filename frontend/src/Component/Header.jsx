@@ -64,7 +64,7 @@ function Header() {
     if (!activeUserId) return;
 
     const fetchNotifications = () => {
-      axios.get(`http://localhost:5000/api/notifications/${activeUserId}`)
+      axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/${activeUserId}`)
         .then(res => {
           if (res.data.success) {
             setNotifications(res.data.notifications);

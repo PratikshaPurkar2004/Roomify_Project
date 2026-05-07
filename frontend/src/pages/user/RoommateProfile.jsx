@@ -32,21 +32,21 @@ export default function RoommateProfile() {
         setLoading(true);
         
         // Fetch target profile
-        const profRes = await fetch(`http://localhost:5000/api/profile/${id}?viewerId=${userId}`);
+        const profRes = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/${id}?viewerId=/${userId}`);
         const profData = await profRes.json();
         
         if (profData.error) throw new Error(profData.error);
         
         // Fetch current user profile for matching
-        const myProfRes = await fetch(`http://localhost:5000/api/profile/${userId}`);
+        const myProfRes = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/${userId}`);
         const myProfData = await myProfRes.json();
         
         // Fetch sent requests
-        const sentRes = await fetch(`http://localhost:5000/api/requests/sent/${userId}`);
+        const sentRes = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/sent/${userId}`);
         const sentData = await sentRes.json();
         
         // Fetch accepted connections
-        const acceptedRes = await fetch(`http://localhost:5000/api/requests/accepted-ids/${userId}`);
+        const acceptedRes = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/accepted-ids/${userId}`);
         const acceptedData = await acceptedRes.json();
         
         setProfile(profData);
@@ -67,7 +67,7 @@ export default function RoommateProfile() {
   const handleRequest = async () => {
     if (!userId) { showToast("Please login first!"); return; }
     try {
-      const res = await fetch("http://localhost:5000/api/requests", {
+      const res = await fetch("${import.meta.env.VITE_API_URL}/api/requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sender_id: userId, receiver_id: id }),

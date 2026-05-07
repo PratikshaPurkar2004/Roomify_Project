@@ -32,7 +32,7 @@ function Sidebar() {
   const [clearedCounts, setClearedCounts] = useState(() => {
     try {
       const userId = user?.user_id || localStorage.getItem("userId");
-      const stored = localStorage.getItem(`sidebar_cleared_${userId}`);
+      const stored = localStorage.getItem(`sidebar_cleared_/${userId}`);
       return stored ? JSON.parse(stored) : { requestsCount: 0, chatCount: 0 };
     } catch {
       return { requestsCount: 0, chatCount: 0 };
@@ -50,7 +50,7 @@ function Sidebar() {
     if (!userId) return;
 
     const fetchCounts = () => {
-      axios.get(`http://localhost:5000/api/notifications/sidebar-counts/${userId}`)
+      axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/sidebar-counts/${userId}`)
         .then(res => {
           if (res.data.success) {
             setCounts({
@@ -64,7 +64,7 @@ function Sidebar() {
               let changed = false;
               if (res.data.requestsCount < prev.requestsCount) { updated.requestsCount = res.data.requestsCount; changed = true; }
               if (res.data.chatCount < prev.chatCount) { updated.chatCount = res.data.chatCount; changed = true; }
-              if (changed) localStorage.setItem(`sidebar_cleared_${userId}`, JSON.stringify(updated));
+              if (changed) localStorage.setItem(`sidebar_cleared_/${userId}`, JSON.stringify(updated));
               return changed ? updated : prev;
             });
           }
@@ -88,7 +88,7 @@ function Sidebar() {
     const userId = user?.user_id || localStorage.getItem("userId");
     setClearedCounts(prev => {
       const updated = { ...prev, [key]: value };
-      if (userId) localStorage.setItem(`sidebar_cleared_${userId}`, JSON.stringify(updated));
+      if (userId) localStorage.setItem(`sidebar_cleared_/${userId}`, JSON.stringify(updated));
       return updated;
     });
   };
