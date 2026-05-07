@@ -110,7 +110,7 @@ function Header() {
   if (activeUser) {
     userName = activeUser.name || activeUser.fullname || activeUser.username || "User";
     if (activeUser.profile_image) {
-      profileImage = `http://localhost:5000${activeUser.profile_image}`;
+      profileImage = `${import.meta.env.VITE_API_URL}${activeUser.profile_image}`;
     } else if (activeUser.gender) {
       const gender = activeUser.gender.toLowerCase();
       if (gender === "male" || gender === "m") {

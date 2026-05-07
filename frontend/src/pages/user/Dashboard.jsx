@@ -145,12 +145,12 @@ function Dashboard() {
     const userId = localStorage.getItem("userId");
     const userIdParams = userId ? `?userId=${userId}` : "";
 
-    fetch(`http://localhost:5000/api/dashboard/stats${userIdParams}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/stats${userIdParams}`)
       .then((res) => res.json())
       .then((data) => setStats(data))
       .catch((err) => console.error(err));
 
-    fetch("http://localhost:5000/api/dashboard/users")
+    fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/users`)
       .then((res) => res.json())
       .then((data) => setUsers(data.users || []))
       .catch((err) => console.error(err));

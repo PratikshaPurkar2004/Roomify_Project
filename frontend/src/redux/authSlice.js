@@ -10,7 +10,7 @@ export const sendRegisterOtp = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/send-register-otp",
+        `${import.meta.env.VITE_API_URL}/api/auth/send-register-otp`,
         formData
       );
       return res.data;
@@ -27,7 +27,7 @@ export const loginUser = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
         formData
       );
 
@@ -54,7 +54,7 @@ export const registerUser = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `${import.meta.env.VITE_API_URL}/api/auth/register`,
         formData
       );
       // If backend returned the new user id, store it so preferences page can use it
@@ -82,7 +82,7 @@ export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email, { rejectWithValue }) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/forgot-password`, { email });
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Failed to send OTP");
@@ -94,7 +94,7 @@ export const verifyOtp = createAsyncThunk(
   "auth/verifyOtp",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/verify-otp", data);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/verify-otp`, data);
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "OTP verification failed");
@@ -106,7 +106,7 @@ export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/reset-password", data);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/reset-password`, data);
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Password reset failed");

@@ -7,7 +7,7 @@ export const fetchDashboardStats = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/dashboard/stats"
+        `${import.meta.env.VITE_API_URL}/api/dashboard/stats`
       );
       return res.data;
     } catch (error) {

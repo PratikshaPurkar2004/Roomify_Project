@@ -34,12 +34,12 @@ export default function Chat() {
     }
 
     // Check subscription status
-    fetch(`http://localhost:5000/api/subscriptions/status/${userId}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/status/${userId}`)
       .then(res => res.json())
       .then(data => {
         setIsSubscribed(data.subscribed);
         // Fetch message count eligibility
-        fetch(`http://localhost:5000/api/chat/eligibility/${userId}`)
+        fetch(`${import.meta.env.VITE_API_URL}/api/chat/eligibility/${userId}`)
           .then(res => res.json())
           .then(eligData => {
             console.log("Chat Eligibility Data:", eligData);
@@ -49,7 +49,7 @@ export default function Chat() {
           });
 
         // Fetch accepted contacts regardless of subscription for free limit capability
-        return fetch(`http://localhost:5000/api/subscriptions/contacts/${userId}`);
+        return fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/contacts/${userId}`);
       })
       .then(res => res && res.json())
       .then(data => {
@@ -61,7 +61,7 @@ export default function Chat() {
       .finally(() => setIsLoading(false));
 
     // Initialize Socket Connection
-    socket.current = io("http://localhost:5000");
+    socket.current = io(`${import.meta.env.VITE_API_URL}`);
 
     socket.current.on("receive_message", (message) => {
       // Check if message belongs to current chat
@@ -109,7 +109,7 @@ export default function Chat() {
 
   const fetchMessages = async (contactId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/chat/${userId}/${contactId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/${userId}/${contactId}`);
       const data = await res.json();
       if (data.success) {
         const formatted = data.messages.map(m => {
@@ -210,7 +210,7 @@ export default function Chat() {
     setIsProcessing(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/subscriptions/subscribe", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -228,7 +228,7 @@ export default function Chat() {
         setShowLimitModal(false);
         setShowPaymentOptions(false);
         // Refresh contacts to ensure UI updates
-        fetch(`http://localhost:5000/api/subscriptions/contacts/${userId}`)
+        fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/contacts/${userId}`)
           .then(r => r.json())
           .then(d => { if (d.success) setContacts(d.contacts); });
       }

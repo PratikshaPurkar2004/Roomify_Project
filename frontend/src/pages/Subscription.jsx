@@ -28,7 +28,7 @@ function Subscription() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/subscriptions/subscribe", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

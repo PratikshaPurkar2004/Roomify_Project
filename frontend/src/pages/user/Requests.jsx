@@ -20,7 +20,7 @@ export default function Requests() {
 
     setIsLoading(true);
     // Fetch incoming
-    fetch(`http://localhost:5000/api/requests/${userId}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/requests/${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -31,7 +31,7 @@ export default function Requests() {
       .catch(err => console.error("Error fetching incoming:", err));
 
     // Fetch sent
-    fetch(`http://localhost:5000/api/requests/sent-details/${userId}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/requests/sent-details/${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -44,7 +44,7 @@ export default function Requests() {
 
   const updateStatus = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${id}/status`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status })
@@ -71,7 +71,7 @@ export default function Requests() {
 
   const unsendRequest = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/${id}`, {
         method: "DELETE"
       });
       const data = await res.json();

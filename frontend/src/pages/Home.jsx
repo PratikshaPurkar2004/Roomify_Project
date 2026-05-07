@@ -33,7 +33,7 @@ const [activeProperty, setActiveProperty] = useState(null);
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/cities");
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/cities`);
         if (data.success && data.cities) {
           setCities(data.cities);
         }
@@ -45,7 +45,7 @@ const [activeProperty, setActiveProperty] = useState(null);
 
     const fetchPopular = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/rooms/popular");
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/rooms/popular`);
         if (data.success && data.rooms && data.rooms.length > 0) {
           setDynamicPopular(data.rooms);
         }
@@ -160,7 +160,7 @@ alt="roommate"
         return (
           <div key={idx} className="sp-card" onClick={()=>navigate(`/dashboard/room-details/${prop.room_id}`)}>
             <div className="sp-img-wrapper">
-              <img src={`http://localhost:5000${images[0]}`} alt={prop.property_type} />
+              <img src={`${import.meta.env.VITE_API_URL}${images[0]}`} alt={prop.property_type} />
               <div className="sp-price">₹{Number(prop.rent).toLocaleString()}<span>/mo</span></div>
             </div>
             <div className="sp-info">

@@ -28,7 +28,7 @@ export default function MyRooms() {
 
   const fetchMyRooms = () => {
     if (!userId) return;
-    fetch(`http://localhost:5000/api/rooms/host/${userId}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/host/${userId}`)
       .then(r => r.json())
       .then(data => { if (data.success) setRooms(data.rooms || []); })
       .catch(() => setRooms([]));
@@ -36,9 +36,9 @@ export default function MyRooms() {
 
   useEffect(() => {
     fetchMyRooms();
-    fetch("http://localhost:5000/api/cities?all=true").then(r => r.json()).then(d => { if (d.success) setDbCities(d.cities); }).catch(() => {});
-    fetch("http://localhost:5000/api/cities/states").then(r => r.json()).then(d => { if (d.success) setDbStates(d.states); }).catch(() => {});
-    fetch("http://localhost:5000/api/cities/countries").then(r => r.json()).then(d => { if (d.success) setDbCountries(d.countries); }).catch(() => {});
+    fetch(`${import.meta.env.VITE_API_URL}/api/cities?all=true`).then(r => r.json()).then(d => { if (d.success) setDbCities(d.cities); }).catch(() => {});
+    fetch(`${import.meta.env.VITE_API_URL}/api/cities/states`).then(r => r.json()).then(d => { if (d.success) setDbStates(d.states); }).catch(() => {});
+    fetch(`${import.meta.env.VITE_API_URL}/api/cities/countries`).then(r => r.json()).then(d => { if (d.success) setDbCountries(d.countries); }).catch(() => {});
   }, [userId]);
 
   const handleAddRoom = async (e) => {
@@ -50,7 +50,7 @@ export default function MyRooms() {
       else if (v !== null && v !== "") fd.append(k, v);
     });
     try {
-      const res = await fetch("http://localhost:5000/api/rooms/add", { method: "POST", body: fd });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/rooms/add`, { method: "POST", body: fd });
       const data = await res.json();
       if (data.success) {
         showToast("Room added! 🎉"); setShowAddModal(false);
@@ -73,7 +73,7 @@ export default function MyRooms() {
       else fd.append(k, v);
     });
     try {
-      const res = await fetch(`http://localhost:5000/api/rooms/edit/${editRoom.room_id}`, { method: "PUT", body: fd });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/rooms/edit/${editRoom.room_id}`, { method: `PUT", body: fd });
       const data = await res.json();
       if (data.success) { showToast("Updated! ✏️"); setShowEditModal(false); fetchMyRooms(); }
       else showToast(data.message || "Failed");
@@ -87,7 +87,7 @@ export default function MyRooms() {
 
   const confirmDelete = () => {
     if (!roomToDelete) return;
-    fetch(`http://localhost:5000/api/rooms/delete/${roomToDelete}`, { method: "DELETE" })
+    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/delete/${roomToDelete}`, { method: `DELETE" })
       .then(r => r.json()).then(data => { 
         if (data.success) { 
           showToast("Deleted 🗑️"); 
@@ -99,8 +99,8 @@ export default function MyRooms() {
   };
 
   const getImg = (room) => {
-    try { const a = JSON.parse(room.image_url); return Array.isArray(a) && a.length ? `http://localhost:5000${a[0]}` : null; }
-    catch { return room.image_url ? `http://localhost:5000${room.image_url}` : null; }
+    try { const a = JSON.parse(room.image_url); return Array.isArray(a) && a.length ? `${import.meta.env.VITE_API_URL}${a[0]}` : null; }
+    catch { return room.image_url ? `${import.meta.env.VITE_API_URL}${room.image_url}` : null; }
   };
 
   return (
@@ -580,7 +580,7 @@ function RoomCard({ room, onOpen, onEdit, onDelete }) {
       <div className="fr-card-img-wrap-modern" onClick={onOpen} style={{ cursor: 'pointer', position: 'relative' }}>
         {images.length > 0 ? (
           <>
-            <img src={`http://localhost:5000${images[idx]}`} alt="Room" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={`${import.meta.env.VITE_API_URL}${images[idx]}`} alt=`Room" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             {images.length > 1 && (
               <>
                 <button onClick={prev} className="fr-card-arrow-mini l" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.85)', border: 'none', borderRadius: '50%', width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}><ChevronLeft size={16} color="#0f172a" /></button>

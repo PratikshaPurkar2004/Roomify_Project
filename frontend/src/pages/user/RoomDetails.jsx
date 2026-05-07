@@ -27,14 +27,14 @@ export default function RoomDetails() {
   useEffect(() => {
     window.scrollTo(0, 0);
     // Fetch room details
-    fetch(`http://localhost:5000/api/rooms/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/${id}`)
       .then(r => r.json())
       .then(data => { if (data.success) setRoom(data.room); else setError(data.message || "Not found"); })
       .catch(() => setError("Failed to load room"))
       .finally(() => setLoading(false));
 
     // Fetch reviews
-    fetch(`http://localhost:5000/api/rooms/${id}/reviews`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/${id}/reviews`)
       .then(r => r.json())
       .then(data => {
         if (data.success) {
@@ -102,7 +102,7 @@ export default function RoomDetails() {
   };
 
   const fetchReviews = () => {
-    fetch(`http://localhost:5000/api/rooms/${id}/reviews`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/${id}/reviews`)
       .then(r => r.json())
       .then(data => {
         if (data.success) {
@@ -127,8 +127,8 @@ export default function RoomDetails() {
     setSubmitting(true);
     try {
       const url = editReviewId 
-        ? `http://localhost:5000/api/rooms/reviews/${editReviewId}` 
-        : `http://localhost:5000/api/rooms/${id}/reviews`;
+        ? `${import.meta.env.VITE_API_URL}/api/rooms/reviews/${editReviewId}` 
+        : `${import.meta.env.VITE_API_URL}/api/rooms/${id}/reviews`;
       
       const method = editReviewId ? "PUT" : "POST";
 
@@ -159,7 +159,7 @@ export default function RoomDetails() {
   const deleteReview = async (reviewId) => {
     if (!window.confirm("Are you sure you want to delete this review?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/rooms/reviews/${reviewId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/rooms/reviews/${reviewId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: userId }),
@@ -307,7 +307,7 @@ export default function RoomDetails() {
             <div className="rd-slider-track" style={{ transform: `translateX(-${curIdx * 100}%)` }}>
               {images.map((img, i) => (
                 <div key={i} className="rd-slide">
-                  <img src={`http://localhost:5000${img}`} alt={`Room ${i+1}`} />
+                  <img src={`${import.meta.env.VITE_API_URL}${img}`} alt={`Room ${i+1}`} />
                   <div className="rd-slide-overlay"></div>
                 </div>
               ))}

@@ -30,7 +30,7 @@ export default function FindRooms() {
   };
 
   const fetchRooms = () => {
-    fetch("http://localhost:5000/api/rooms")
+    fetch(`${import.meta.env.VITE_API_URL}/api/rooms`)
       .then(r => r.json())
       .then(data => {
         const list = Array.isArray(data) ? data : (data.rooms || []);
@@ -42,7 +42,7 @@ export default function FindRooms() {
 
   useEffect(() => {
     fetchRooms();
-    fetch("http://localhost:5000/api/cities/all")
+    fetch(`${import.meta.env.VITE_API_URL}/api/cities/all`)
       .then(r => r.json())
       .then(d => { if (d.success) setAllCities(d.cities); });
   }, []);
@@ -70,7 +70,7 @@ export default function FindRooms() {
     });
 
     try {
-      const res = await fetch("http://localhost:5000/api/rooms/add", { method: "POST", body: formData });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/rooms/add`, { method: "POST", body: formData });
       const data = await res.json();
       if (data.success) {
         showToast("Room added successfully! 🎉");
@@ -90,17 +90,17 @@ export default function FindRooms() {
   };
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/cities?all=true")
+    fetch(`${import.meta.env.VITE_API_URL}/api/cities?all=true`)
       .then(r => r.json())
       .then(d => { if (d.success) setDbCities(d.cities); })
       .catch(() => {});
 
-    fetch("http://localhost:5000/api/cities/states")
+    fetch(`${import.meta.env.VITE_API_URL}/api/cities/states`)
       .then(r => r.json())
       .then(d => { if (d.success) setDbStates(d.states); })
       .catch(() => {});
 
-    fetch("http://localhost:5000/api/cities/countries")
+    fetch(`${import.meta.env.VITE_API_URL}/api/cities/countries`)
       .then(r => r.json())
       .then(d => { if (d.success) setDbCountries(d.countries); })
       .catch(() => {});
@@ -203,7 +203,7 @@ function RoomCard({ room, onOpen }) {
       <div className="fr-card-img-wrap-modern" onClick={onOpen} style={{ cursor: 'pointer', position: 'relative' }}>
         {images.length > 0 ? (
           <>
-            <img src={`http://localhost:5000${images[idx]}`} alt="Room" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={`${import.meta.env.VITE_API_URL}${images[idx]}`} alt=`Room" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             {images.length > 1 && (
               <>
                 <button onClick={prev} className="fr-card-arrow-mini l" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.85)', border: 'none', borderRadius: '50%', width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}><ChevronLeft size={16} color="#0f172a" /></button>

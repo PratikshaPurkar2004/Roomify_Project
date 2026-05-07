@@ -2,7 +2,7 @@ import React from "react";
 import "../styles/RoomCard.css";
 
 function RoomCard({ room }) {
-  const imageUrl = room.image_url ? `http://localhost:5000${room.image_url}` : room.image;
+  const imageUrl = room.image_url ? `${import.meta.env.VITE_API_URL}${room.image_url}` : room.image;
   
   return (
     <div className="horizontal-card">

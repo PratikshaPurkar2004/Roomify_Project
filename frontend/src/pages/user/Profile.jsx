@@ -56,7 +56,7 @@ export default function Profile() {
 
     // Fetch Profile
     axios
-    .get(`http://localhost:5000/api/profile/${userId}`)
+    .get(`${import.meta.env.VITE_API_URL}/api/profile/${userId}`)
       .then((res) => {
         if (res.data) {
           setForm({
@@ -74,7 +74,7 @@ export default function Profile() {
       });
 
     // Fetch Preferences
-    fetch(`http://localhost:5000/api/preferences/${userId}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/preferences/${userId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data && data.preferences) {
@@ -91,7 +91,7 @@ export default function Profile() {
       });
 
     // Fetch Subscription Status
-    fetch(`http://localhost:5000/api/subscriptions/status/${userId}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/status/${userId}`)
       .then(res => res.json())
       .then(data => setIsSubscribed(data.subscribed))
       .catch(err => console.error("Sub check error:", err));
@@ -119,7 +119,7 @@ export default function Profile() {
     const payload = { ...form };
     
     axios
-      .put(`http://localhost:5000/api/profile/${userId}`, payload)
+      .put(`${import.meta.env.VITE_API_URL}/api/profile/${userId}`, payload)
       .then(() => {
         showToast("Profile Updated Successfully ✅", "success");
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -137,7 +137,7 @@ export default function Profile() {
 
   const deleteProfile = () => {
     axios
-      .delete(`http://localhost:5000/api/profile/${userId}`)
+      .delete(`${import.meta.env.VITE_API_URL}/api/profile/${userId}`)
       .then(() => {
         localStorage.clear();
         window.location.href = "/";
@@ -172,7 +172,7 @@ export default function Profile() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/preferences/save-preferences",
+        `${import.meta.env.VITE_API_URL}/api/preferences/save-preferences`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
