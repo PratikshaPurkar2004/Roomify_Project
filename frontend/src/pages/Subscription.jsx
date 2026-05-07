@@ -1,15 +1,25 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Subscription.css";
 
 function Subscription() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [paymentStep, setPaymentStep] = useState('method');
   const [paymentMethod, setPaymentMethod] = useState('');
+
+  // Auto-open payment if redirected from chat limit
+  useEffect(() => {
+    if (location.state?.autoOpen) {
+      setSelectedPlan({ name: location.state.planName, amount: location.state.amount });
+      setShowPayment(true);
+      setPaymentStep('method');
+    }
+  }, [location.state]);
 
   const startPayment = (planName, amount) => {
     setSelectedPlan({ name: planName, amount });

@@ -149,7 +149,7 @@ export default function Chat() {
     
     // Check limit
     if (!isSubscribed && messageCount >= 5) {
-      navigate("/dashboard/subscription");
+      navigate("/dashboard/subscription", { state: { autoOpen: true, planName: "Roomify Pro", amount: 499 } });
       return;
     }
 
