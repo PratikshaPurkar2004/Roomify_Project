@@ -26,6 +26,7 @@ import Chat from "../pages/user/Chat";
 import MyRooms from "../pages/user/MyRooms";
 import RoomDetails from "../pages/user/RoomDetails";
 import RoommateProfile from "../pages/user/RoommateProfile";
+import Notifications from "../pages/user/Notifications";
 
 
 /* Auth & Preference Guard */
@@ -94,6 +95,7 @@ function Routing() {
         <Route path="my-rooms" element={<MyRooms />} />
         <Route path="room-details/:id" element={<RoomDetails />} />
         <Route path="roommate/:id" element={<RoommateProfile />} />
+        <Route path="notifications" element={<Notifications />} />
 
 
       </Route>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
-import { UserCheck, UserPlus, Eye, Send } from "lucide-react";
+import { UserCheck, UserPlus, Eye, Send, ArrowRight } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/authSlice";
@@ -174,6 +174,9 @@ function Header() {
                     </div>
                   </div>
                 ))}
+              </div>
+              <div className="notif-footer" onClick={() => { navigate("/dashboard/notifications"); setShowNotifications(false); }} style={{ padding: '12px', textAlign: 'center', borderTop: '1px solid #f1f5f9', color: '#6366f1', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                See all notifications <ArrowRight size={14} />
               </div>
             </div>
           )}
