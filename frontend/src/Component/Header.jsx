@@ -145,7 +145,7 @@ function Header() {
         <div className="notification-wrapper" style={{ position: 'relative' }}>
           <div className="notification" onClick={handleToggleNotifications}>
             <FaBell />
-            {unreadCount > 0 && <span className="notification-count">{unreadCount}</span>}
+            {unreadCount > 0 && <span className="notification-dot"></span>}
           </div>
 
           {showNotifications && (

@@ -19,6 +19,7 @@ export default function RoomDetails() {
   const [toast, setToast] = useState("");
   const [avgRating, setAvgRating] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
+  const [requestStatus, setRequestStatus] = useState(null); // null, 'sending', 'sent', 'accepted'
   const userId = localStorage.getItem("userId");
   const touchStartX = useRef(null);
   const mouseStartX = useRef(null);
@@ -47,7 +48,40 @@ export default function RoomDetails() {
         }
       })
       .catch(err => console.error("Error fetching reviews:", err));
+
+    // Check if already sent a request to this host
+    if (userId) {
+      fetch(`${import.meta.env.VITE_API_URL}/api/requests/sent/${userId}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.success && d.sentRequests) {
+            // We'll check after room loads if host_id is in sentRequests
+            window.__sentRequests = d.sentRequests;
+          }
+        }).catch(() => {});
+      fetch(`${import.meta.env.VITE_API_URL}/api/requests/accepted-ids/${userId}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.success && d.acceptedIds) {
+            window.__acceptedIds = d.acceptedIds;
+          }
+        }).catch(() => {});
+    }
   }, [id]);
+
+  // Update request status when room data loads
+  useEffect(() => {
+    if (room && userId) {
+      const hostId = room.host_id;
+      if (String(hostId) === String(userId)) {
+        setRequestStatus('own');
+      } else if (window.__acceptedIds?.includes(hostId)) {
+        setRequestStatus('accepted');
+      } else if (window.__sentRequests?.includes(hostId)) {
+        setRequestStatus('sent');
+      }
+    }
+  }, [room, userId]);
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -120,6 +154,30 @@ export default function RoomDetails() {
       .catch(err => console.error("Error fetching reviews:", err));
   };
 
+  const handleRequestToConnect = async () => {
+    if (!userId) { setToast("Please login first!"); return; }
+    if (!room?.host_id) return;
+    if (String(room.host_id) === String(userId)) { setToast("This is your own listing!"); return; }
+    setRequestStatus('sending');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requests`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sender_id: userId, receiver_id: room.host_id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRequestStatus('sent');
+        setToast("Request sent to host! ✅");
+      } else {
+        setRequestStatus(null);
+        setToast(data.message || "Failed to send request");
+      }
+    } catch {
+      setRequestStatus(null);
+      setToast("Error sending request");
+    }
+  };
 
 
   const submitReview = async () => {
@@ -492,8 +550,37 @@ export default function RoomDetails() {
               )}
             </div>
             <div className="rd-book-body">
-              <button className="rd-cta-btn">Request to Connect</button>
-              <p className="rd-cta-note">You won't be charged until accepted</p>
+              {requestStatus === 'own' ? (
+                <button
+                  className="rd-cta-btn"
+                  onClick={() => navigate('/dashboard/my-rooms')}
+                  style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', cursor: 'pointer' }}
+                >
+                  Manage My Room →
+                </button>
+              ) : (
+                <>
+                  <button 
+                    className="rd-cta-btn" 
+                    onClick={handleRequestToConnect}
+                    disabled={requestStatus === 'sent' || requestStatus === 'sending' || requestStatus === 'accepted'}
+                    style={{
+                      background: requestStatus === 'sent' ? '#10b981' 
+                        : requestStatus === 'accepted' ? '#10b981' 
+                        : 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                      opacity: requestStatus === 'sending' ? 0.7 : 1,
+                      cursor: (requestStatus === 'sent' || requestStatus === 'accepted') ? 'default' : 'pointer'
+                    }}
+                  >
+                    {requestStatus === 'sending' ? 'Sending...' 
+                      : requestStatus === 'sent' ? '✓ Request Sent' 
+                      : requestStatus === 'accepted' ? '✓ Connected' 
+                      : 'Request to Connect'}
+                  </button>
+                  <p className="rd-cta-note">{requestStatus === 'sent' ? 'Waiting for host to accept' : requestStatus === 'accepted' ? 'You can now chat with the host' : "You won't be charged until accepted"}</p>
+                </>
+              )}
+
               <div className="rd-breakdown">
                 <div className="rd-brow">
                   <span style={{color:'#64748b',fontWeight:600}}>Monthly Rent</span>
