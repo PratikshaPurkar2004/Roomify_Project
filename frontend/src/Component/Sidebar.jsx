@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { logout } from "../redux/authSlice";
+import { io } from "socket.io-client"; // Added for real-time badges
 import {
   FaHome,
   FaUser,
@@ -26,9 +27,11 @@ import "../styles/Sidebar.css";
 
 function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
   const [counts, setCounts] = useState({ requestsCount: 0, chatCount: 0 });
+  const isOnChatPage = location.pathname === '/dashboard/chat';
   useEffect(() => {
     // Force sidebar width for layout stability
     document.documentElement.style.setProperty('--sidebar-width', '280px');
@@ -54,10 +57,28 @@ function Sidebar() {
     };
 
     fetchCounts();
-    const interval = setInterval(fetchCounts, 10000); // Poll every 10 seconds
+    // If user is on chat page, mark all messages as read and reset count
+    if (location.pathname === '/dashboard/chat') {
+      setCounts(prev => ({ ...prev, chatCount: 0 }));
+    }
+    const interval = setInterval(fetchCounts, 30000); // Poll less frequently as backup
 
-    return () => clearInterval(interval);
-  }, [user]);
+    // REAL-TIME SOCKET UPDATES FOR BADGES
+    const socket = io(import.meta.env.VITE_API_URL);
+    socket.emit("join_room", { userid: userId }); // Join personal global room
+
+    socket.on("receive_message", (message) => {
+      // If message is for us, increment the chat count instantly
+      if (String(message.receiver_id) === String(userId)) {
+        setCounts(prev => ({ ...prev, chatCount: prev.chatCount + 1 }));
+      }
+    });
+
+    return () => {
+      clearInterval(interval);
+      socket.disconnect();
+    };
+  }, [user, location.pathname]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -103,7 +124,7 @@ function Sidebar() {
 
         <NavLink to="/dashboard/chat" className="menu-item">
           <FaComments /> <span>Chat</span>
-          {counts.chatCount > 0 && <span className="sidebar-badge">{counts.chatCount}</span>}
+          {!isOnChatPage && counts.chatCount > 0 && <span className="sidebar-badge chat-badge-wp">{counts.chatCount}</span>}
         </NavLink>
 
       </div>

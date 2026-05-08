@@ -81,9 +81,17 @@
 }
 
 @keyframes pulseDot {
-  0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
-  70%  { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+  }
+
+  70% {
+    box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
 }
 
 /* Notification Dropdown */
@@ -157,10 +165,25 @@
   flex-shrink: 0;
 }
 
-.notif-icon.request { background: #E0E7FF; color: #4F46E5; }
-.notif-icon.accept { background: #DCFCE7; color: #16A34A; }
-.notif-icon.sent { background: #FEF3C7; color: #D97706; }
-.notif-icon.view { background: #F3E8FF; color: #9333EA; }
+.notif-icon.request {
+  background: #E0E7FF;
+  color: #4F46E5;
+}
+
+.notif-icon.accept {
+  background: #DCFCE7;
+  color: #16A34A;
+}
+
+.notif-icon.sent {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.notif-icon.view {
+  background: #F3E8FF;
+  color: #9333EA;
+}
 
 .notif-content {
   flex: 1;
@@ -237,6 +260,7 @@
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

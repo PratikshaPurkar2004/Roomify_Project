@@ -49,11 +49,19 @@ router.get("/status/:userId", async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      "SELECT * FROM subscriptions WHERE user_id = ? AND status = 'active' AND end_date > NOW()",
+      "SELECT plan_name, end_date FROM subscriptions WHERE user_id = ? AND status = 'active' AND end_date > NOW()",
       [userId]
     );
 
-    res.json({ subscribed: rows.length > 0 });
+    if (rows.length > 0) {
+      res.json({ 
+        subscribed: true, 
+        plan_name: rows[0].plan_name,
+        end_date: rows[0].end_date
+      });
+    } else {
+      res.json({ subscribed: false });
+    }
   } catch (err) {
     console.error("Check subscription error:", err);
     res.status(500).json({ subscribed: false });
@@ -72,17 +80,36 @@ router.get("/contacts/:userId", async (req, res) => {
         u.city,
         u.gender,
         u.email,
-        r.id as roomid
+        r.id as roomid,
+        lm.content as last_message,
+        lm.created_at as last_message_time,
+        (SELECT COUNT(*) FROM messages m2 WHERE m2.receiver_id = ? AND m2.sender_id = u.user_id AND m2.is_read = 0) as unread_count
       FROM requests r
       JOIN users u ON (
         (r.sender_id = ? AND u.user_id = r.receiver_id) OR
         (r.receiver_id = ? AND u.user_id = r.sender_id)
       )
+      LEFT JOIN (
+        SELECT m1.sender_id, m1.receiver_id, m1.content, m1.created_at
+        FROM messages m1
+        INNER JOIN (
+          SELECT 
+            LEAST(sender_id, receiver_id) as u1,
+            GREATEST(sender_id, receiver_id) as u2,
+            MAX(id) as max_id
+          FROM messages
+          GROUP BY u1, u2
+        ) latest ON m1.id = latest.max_id
+      ) lm ON (
+        (lm.sender_id = ? AND lm.receiver_id = u.user_id) OR
+        (lm.sender_id = u.user_id AND lm.receiver_id = ?)
+      )
       WHERE r.status = 'accepted'
       AND (r.sender_id = ? OR r.receiver_id = ?)
+      ORDER BY lm.created_at DESC
     `;
 
-    const [rows] = await db.query(sql, [userId, userId, userId, userId]);
+    const [rows] = await db.query(sql, [userId, userId, userId, userId, userId, userId, userId]);
     res.json({ success: true, contacts: rows });
   } catch (err) {
     console.error("Get contacts error:", err);

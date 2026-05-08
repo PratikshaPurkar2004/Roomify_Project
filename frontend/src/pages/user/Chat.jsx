@@ -1,314 +1,294 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/Chat.css";
-import { MessageCircle, Send, MapPin, Users } from "lucide-react";
+import { MessageCircle, Send, Search, User, CheckCheck, Trash2, AlertTriangle } from "lucide-react";
 import { io } from "socket.io-client";
+import axios from "axios";
 
 export default function Chat() {
   const navigate = useNavigate();
   const location = useLocation();
   const [contacts, setContacts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedContact, setSelectedContact] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
+  
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
+
   const messagesBodyRef = useRef(null);
   const socket = useRef(null);
   const userId = localStorage.getItem("userId");
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [messageCount, setMessageCount] = useState(0);
 
-  // Check subscription on mount
   useEffect(() => {
-    if (!userId) {
-      navigate("/login");
-      return;
-    }
+    setTimeout(() => {
+      if (messagesBodyRef.current) {
+        messagesBodyRef.current.scrollTop = messagesBodyRef.current.scrollHeight;
+      }
+    }, 50);
+  }, [messages]);
 
-    // Fetch accepted contacts
-    // Check subscription
-    fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/status/${userId}`)
-      .then(res => res.json())
-      .then(data => setIsSubscribed(data.subscribed))
-      .catch(() => setIsSubscribed(false));
-
-    // Check message count
-    fetch(`${import.meta.env.VITE_API_URL}/api/chat/eligibility/${userId}`)
-      .then(res => res.json())
-      .then(data => setMessageCount(data.msgCount || 0))
-      .catch(() => setMessageCount(0));
-
-    fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/contacts/${userId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success) {
-          setContacts(Array.isArray(data.contacts) ? data.contacts : []);
+  useEffect(() => {
+    if (!userId) { navigate("/login"); return; }
+    const fetchData = async () => {
+      try {
+        const [eligRes, contactsRes, subRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/api/chat/eligibility/${userId}`),
+          fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/contacts/${userId}`),
+          fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/status/${userId}`)
+        ]);
+        const eligData = await eligRes.json();
+        setMessageCount(eligData.msgCount || 0);
+        const subData = await subRes.json();
+        setIsSubscribed(subData.subscribed || false);
+        const contactsData = await contactsRes.json();
+        if (contactsData?.success) {
+          const formatted = contactsData.contacts.map(c => ({
+             ...c, 
+             roomid: c.roomid || [parseInt(userId), parseInt(c.id)].sort((a,b)=>a-b).join('_'),
+             last_message: c.last_message || "Start chatting...",
+             last_message_time: c.last_message_time || null
+          }));
+          setContacts(formatted);
         }
-      })
-      .catch(err => console.error("Error:", err))
-      .finally(() => setIsLoading(false));
-
-    // Initialize Socket Connection
+      } catch (err) { console.error(err); } finally { setIsLoading(false); }
+    };
+    fetchData();
     socket.current = io(`${import.meta.env.VITE_API_URL}`);
-
+    socket.current.emit("join_room", { userid: userId }); // Join personal global room
+    
     socket.current.on("receive_message", (message) => {
-      // Check if message belongs to current chat
       const time = new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const formatted = {
-        id: message.id,
-        text: message.content,
-        sender: String(message.sender_id) === String(userId) ? "me" : "them",
-        time
-      };
+      const formatted = { id: message.id, text: message.content, sender: String(message.sender_id) === String(userId) ? "me" : "them", time };
       
-      setMessages(prev => {
-        // Prevent duplicates if sender is 'me' (since it might be added locally already)
-        if (prev.find(msg => msg.id === message.id)) return prev;
-        return [...prev, formatted];
+      if (selectedContact && (String(message.sender_id) === String(selectedContact.id) || String(message.sender_id) === String(userId))) {
+        setMessages(prev => prev.find(m => m.id === message.id) ? prev : [...prev, formatted]);
+      }
+
+      setContacts(prev => {
+        const newContacts = prev.map(c => {
+          const isSender = Number(c.id) === Number(message.sender_id);
+          const isReceiver = Number(c.id) === Number(message.receiver_id);
+          
+          if (isSender) {
+            const isCurrentlySelected = selectedContact && Number(selectedContact.id) === Number(c.id);
+            return { 
+              ...c, 
+              last_message: message.content, 
+              last_message_time: message.created_at,
+              unread_count: isCurrentlySelected ? 0 : (Number(c.unread_count) || 0) + 1 
+            };
+          }
+          if (isReceiver) {
+             return { ...c, last_message: message.content, last_message_time: message.created_at };
+          }
+          return c;
+        });
+        return [...newContacts].sort((a, b) => new Date(b.last_message_time || 0) - new Date(a.last_message_time || 0));
       });
 
-      // If this message is for the currently open chat, mark it as read immediately
-      if (selectedContact && String(message.sender_id) === String(selectedContact.id)) {
-        markAsRead(message.sender_id);
-      } else {
-        // Increment unread count for the contact in the sidebar list
-        setContacts(prev => prev.map(c => 
-          String(c.id) === String(message.sender_id) 
-            ? { ...c, unread_count: (c.unread_count || 0) + 1 } 
-            : c
-        ));
-      }
+      if (selectedContact && Number(message.sender_id) === Number(selectedContact.id)) { markAsRead(message.sender_id); }
     });
+    return () => { if (socket.current) socket.current.disconnect(); };
+  }, [userId, navigate, selectedContact]);
 
-    return () => {
-      if (socket.current) socket.current.disconnect();
-    };
-  }, [userId, navigate]);
-
-  // Auto-select contact if navigated from FindRoommates
   useEffect(() => {
     if (contacts.length > 0 && location.state?.selectedUserId && !selectedContact) {
-      const contactToSelect = contacts.find(c => c.id === location.state.selectedUserId);
-      if (contactToSelect) {
-        handleSelectContact(contactToSelect);
-      }
+      const c = contacts.find(c => c.id === location.state.selectedUserId);
+      if (c) handleSelectContact(c);
     }
   }, [contacts, location.state, selectedContact]);
 
-  const fetchMessages = async (contactId) => {
+  const fetchMessages = async (cid) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/${userId}/${contactId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/${userId}/${cid}`);
       const data = await res.json();
       if (data.success) {
-        const formatted = data.messages.map(m => {
-          const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          return {
-            id: m.id,
-            text: m.content,
-            sender: String(m.sender_id) === String(userId) ? "me" : "them",
-            time
-          };
-        });
-        setMessages(formatted);
+        setMessages(data.messages.map(m => ({
+          id: m.id, text: m.content, sender: String(m.sender_id) === String(userId) ? "me" : "them",
+          time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        })));
       }
-    } catch (err) {
-      console.error("Error fetching messages:", err);
-    }
-  };
-  const markAsRead = async (contactId) => {
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/chat/read/${userId}/${contactId}`, { method: "PUT" });
-    } catch (err) {
-      console.error("Error marking as read:", err);
-    }
+    } catch (err) { console.error(err); }
   };
 
-  const handleSelectContact = async (contact) => {
-    setSelectedContact(contact);
-    fetchMessages(contact.id);
-    markAsRead(contact.id);
-    
-    // Join the socket room
-    if (socket.current && contact.roomid) {
-      socket.current.emit("join_room", { roomid: contact.roomid, userid: userId });
-    }
-
-    // Clear unread count locally for this contact
-    setContacts(prev => prev.map(c => c.id === contact.id ? { ...c, unread_count: 0 } : c));
+  const markAsRead = async (cid) => {
+    try { await fetch(`${import.meta.env.VITE_API_URL}/api/chat/read/${userId}/${cid}`, { method: "PUT" }); } catch (err) { console.error(err); }
   };
 
-  // Auto-scroll to bottom
-  useEffect(() => {
-    if (messagesBodyRef.current) {
-      messagesBodyRef.current.scrollTop = messagesBodyRef.current.scrollHeight;
-    }
-  }, [messages]);
+  const handleSelectContact = (c) => {
+    setSelectedContact(c);
+    fetchMessages(c.id);
+    markAsRead(c.id);
+    if (socket.current && c.roomid) socket.current.emit("join_room", { roomid: c.roomid, userid: userId });
+    setContacts(prev => prev.map(i => i.id === c.id ? { ...i, unread_count: 0 } : i));
+  };
 
-  const sendMessage = async (textToSend) => {
-    if (!textToSend.trim() || !selectedContact) return;
-    
-    // Check limit
-    if (!isSubscribed && messageCount >= 5) {
-      navigate("/dashboard/subscription", { state: { autoOpen: true, planName: "Roomify Pro", amount: 499 } });
-      return;
-    }
-
-    // Socket logic here...
-
-    // Emit via Socket
+  const sendMessage = async (txt) => {
+    if (!txt.trim() || !selectedContact) return;
+    if (!isSubscribed && messageCount >= 5) { setShowPaymentModal(true); return; }
     if (socket.current && selectedContact.roomid) {
       const tempId = Date.now();
-      const formatted = {
-        id: tempId,
-        text: textToSend,
-        sender: "me",
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      
-      setMessages(prev => [...prev, formatted]);
-      setNewMessage(""); // Clear input immediately
-
-      socket.current.emit("send_message", {
-        roomid: selectedContact.roomid,
-        senderid: userId,
-        receiverid: selectedContact.id,
-        content: textToSend
-      });
-      
-      // Increment count locally
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setMessages(prev => [...prev, { id: tempId, text: txt, sender: "me", time }]);
+      setNewMessage("");
+      socket.current.emit("send_message", { roomid: selectedContact.roomid, sender_id: userId, receiver_id: selectedContact.id, content: txt });
       if (!isSubscribed) setMessageCount(prev => prev + 1);
     }
   };
 
-  const handleSend = () => {
-    sendMessage(newMessage);
-    setNewMessage(""); 
+  const handleConfirmPayment = async () => {
+    setPaymentLoading(true);
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/subscriptions/subscribe`, { user_id: userId, plan_name: 'Roomify Pro', amount: 499, payment_method: 'UPI' });
+      if (res.data.success) { setIsSubscribed(true); setShowPaymentModal(false); }
+    } catch (err) { console.error(err); }
+    setPaymentLoading(false);
   };
 
-  const handleSendIcebreaker = (text) => {
-    sendMessage(text);
+  const handleClearChat = () => {
+    if (!selectedContact) return;
+    setShowClearModal(true);
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") handleSend();
+  const confirmClearChat = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/clear/${userId}/${selectedContact.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setMessages([]);
+        setContacts(prev => prev.map(c => c.id === selectedContact.id ? { ...c, last_message: "Start chatting...", last_message_time: null } : c));
+      }
+    } catch (err) { console.error("Clear chat error:", err); }
+    setShowClearModal(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="chat-page">
-        <div className="chat-loading">
-          <div className="chat-spinner"></div>
-          <p>Loading your inbox...</p>
-        </div>
-      </div>
-    );
-  }
+  const filteredContacts = contacts.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  if (isLoading) return <div className="chat-page-loader">Loading...</div>;
 
   return (
-    <div className="chat-page">
-      {/* Dynamic Backgrounds */}
-      <div className="chat-bg-shape chat-shape-1"></div>
-      <div className="chat-bg-shape chat-shape-2"></div>
-
-      <div className="page-container">
-        <div className="chat-container">
-
-        {!Array.isArray(contacts) || contacts.length === 0 ? (
-          <div className="no-contacts-card">
-            <Users size={72} className="no-chat-icon" />
-            <h2>No Connections Yet</h2>
-            <p>Once you accept someone's roommate request (or they accept yours), you can start an instant chat right here.</p>
+    <div className="chat-page-content">
+      <div className="chat-layout">
+        <div className="chat-contacts-card">
+          <div className="chat-sidebar-header">
+             <h2 className="sidebar-main-title">Chats</h2>
+             <div className="chat-search-bar-modern">
+               <Search size={18} className="search-icon-dim" />
+               <input type="text" placeholder="Search conversations..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+             </div>
           </div>
-        ) : (
-          <div className="chat-layout">
-            {/* Contacts Sidebar */}
-            <div className="chat-contacts">
-              <h3 className="contacts-title">Your Connections</h3>
-              {Array.isArray(contacts) && contacts.map(contact => (
-                <div
-                  key={contact?.id || Math.random()}
-                  className={`contact-item ${selectedContact?.id === contact?.id ? 'active' : ''}`}
-                  onClick={() => handleSelectContact(contact)}
-                >
-                  <div className="contact-avatar">
-                    {contact?.name ? contact.name.charAt(0).toUpperCase() : "U"}
+          <div className="contacts-list-scrollable">
+            {filteredContacts.map(c => (
+              <div key={c.id} className={`contact-card-item ${selectedContact?.id === c.id ? 'active' : ''}`} onClick={() => handleSelectContact(c)}>
+                <div className="contact-avatar-square">{c.name.charAt(0).toUpperCase()}</div>
+                <div className="contact-details-box">
+                  <div className="contact-name-row">
+                    <h4>{c.name}</h4>
+                    {c.last_message_time && (
+                      <span className={`timestamp-small ${c.unread_count > 0 ? 'unread-time-wp' : ''}`}>
+                        {new Date(c.last_message_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
                   </div>
-                  <div className="contact-info">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h4>{contact?.name || "Unknown"}</h4>
-                      {contact?.unread_count > 0 && <span className="sidebar-badge" style={{ position: 'static' }}>{contact.unread_count}</span>}
-                    </div>
-                    <p><MapPin size={14} /> {contact?.city || "Anywhere"}</p>
+                  <div className="contact-status-row">
+                    <p className={`preview-text-faint ${Number(c.unread_count) > 0 ? 'unread-bold' : ''}`}>{c.last_message}</p>
+                    {Number(c.unread_count) > 0 && <span className="unread-dot-badge-wp">{c.unread_count}</span>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {selectedContact ? (
+          <div className="chat-messages-card">
+            <div className="messages-header-modern">
+              <div className="header-user-info">
+                 <div className="contact-avatar-square small">{selectedContact.name.charAt(0).toUpperCase()}</div>
+                 <div className="name-status-box">
+                   <h3>{selectedContact.name}</h3>
+                   <div className="active-now-status">
+                      <div className="green-dot"></div>
+                      <span>Active now</span>
+                   </div>
+                 </div>
+              </div>
+              <div className="header-actions-group">
+                <button className="clear-chat-trash-btn" title="Clear Chat" onClick={handleClearChat}>
+                  <Trash2 size={20} />
+                </button>
+                <button className="view-profile-pill-btn" onClick={() => navigate(`/dashboard/roommate/${selectedContact.id}`)}>View Profile</button>
+              </div>
+            </div>
+            <div className="messages-body-viewport" ref={messagesBodyRef}>
+              {messages.map(m => (
+                <div key={m.id} className={`message-bubble-modern ${m.sender === "me" ? "sent" : "received"}`}>
+                  <span className="msg-content-text">{m.text}</span>
+                  <div className="msg-metadata">
+                    <span className="msg-time-small">{m.time}</span>
+                    {m.sender === "me" && <CheckCheck size={14} className="check-icon-blue" />}
                   </div>
                 </div>
               ))}
             </div>
-
-            {/* Messages Content */}
-            {selectedContact ? (
-              <div className="chat-messages">
-                <div className="chat-messages-header">
-                  <div className="contact-avatar">
-                    {selectedContact?.name ? selectedContact.name.charAt(0).toUpperCase() : "U"}
-                  </div>
-                  <div>
-                    <h3>{selectedContact?.name || "Unknown"}</h3>
-                    <p>Online</p>
-                  </div>
-                </div>
-
-                <div className="messages-body" ref={messagesBodyRef}>
-                  {Array.isArray(messages) && messages.length === 0 ? (
-                    <div className="icebreakers-container">
-                      <p className="icebreakers-title">Start the conversation 👋</p>
-                      <div className="icebreaker-pills">
-                        <button className="icebreaker-pill" onClick={() => handleSendIcebreaker("Hey! Are you still looking for a roommate?")}>
-                          Hey! Are you still looking for a roommate?
-                        </button>
-                        <button className="icebreaker-pill" onClick={() => handleSendIcebreaker("Hi! When are you planning to move?")}>
-                          Hi! When are you planning to move?
-                        </button>
-                        <button className="icebreaker-pill" onClick={() => handleSendIcebreaker("Hey! Just accepted your match!")}>
-                          Hey! Just accepted your match!
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    Array.isArray(messages) && messages.map(msg => (
-                      <div key={msg?.id || Math.random()} className={`message-bubble ${msg?.sender === "me" ? "sent" : "received"}`}>
-                        {msg?.text}
-                        <span className="message-time">{msg?.time}</span>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                <div className="chat-input-area">
-                  <input
-                    type="text"
-                    placeholder="Type something amazing..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                  />
-                  <button className="chat-send-btn" onClick={handleSend}>
-                    <Send size={18} />
-                    Send
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="select-contact">
-                <MessageCircle size={80} className="no-chat-icon" />
-                <h3>Your Messages Await</h3>
-                <p>Select a contact from the sidebar to start your conversation and get to know your future roommate.</p>
-              </div>
-            )}
+            <div className="chat-input-footer-area">
+              <input type="text" placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyPress={(e) => e.key === "Enter" && sendMessage(newMessage)} />
+              <button className="send-circle-btn" onClick={() => sendMessage(newMessage)}><Send size={20} /></button>
+            </div>
+          </div>
+        ) : (
+          <div className="chat-messages-card empty-state">
+             <MessageCircle size={100} color="#6366f1" style={{opacity: 0.1, marginBottom: 20}} />
+             <h3>Your Messages</h3>
+             <p>Select a conversation from the sidebar to start chatting.</p>
           </div>
         )}
-        </div>
       </div>
-    </div>
 
+      {showPaymentModal && (
+        <div className="payment-modal-overlay">
+          <div className="payment-modal-card">
+            <button className="modal-close-unique" onClick={() => setShowPaymentModal(false)}>×</button>
+            <div className="modal-step-content">
+              <div style={{fontSize: 50, marginBottom: 25}}>💎</div>
+              <h2 style={{fontSize: 32, fontWeight: 800, marginBottom: 15}}>Upgrade Your Chat</h2>
+              <p style={{color: '#64748b', fontSize: 16, marginBottom: 35}}>You've reached the free message limit (5 messages). Unlock unlimited conversations with Roomify Pro.</p>
+              <button className="modal-action-btn" disabled={paymentLoading} onClick={handleConfirmPayment}>
+                {paymentLoading ? "Processing..." : "Upgrade to Pro @ ₹499"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showClearModal && (
+        <div className="payment-modal-overlay">
+          <div className="payment-modal-card" style={{maxWidth: 420}}>
+            <button className="modal-close-unique" onClick={() => setShowClearModal(false)}>×</button>
+            <div className="modal-step-content">
+              <div style={{width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px'}}>
+                <Trash2 size={30} color="#EF4444" />
+              </div>
+              <h2 style={{fontSize: 24, fontWeight: 800, marginBottom: 10, color: '#0f172a'}}>Clear Chat</h2>
+              <p style={{color: '#64748b', fontSize: 15, marginBottom: 30, lineHeight: 1.6}}>Are you sure you want to clear your chat with <strong>{selectedContact?.name}</strong>? This action cannot be undone.</p>
+              <div style={{display: 'flex', gap: 12}}>
+                <button onClick={() => setShowClearModal(false)} style={{flex: 1, padding: '14px 20px', borderRadius: 16, border: '1px solid #e2e8f0', background: 'white', color: '#1e293b', fontWeight: 700, fontSize: 15, cursor: 'pointer', transition: 'all 0.2s'}}>
+                  Cancel
+                </button>
+                <button onClick={confirmClearChat} style={{flex: 1, padding: '14px 20px', borderRadius: 16, border: 'none', background: '#EF4444', color: 'white', fontWeight: 700, fontSize: 15, cursor: 'pointer', boxShadow: '0 8px 20px rgba(239,68,68,0.3)', transition: 'all 0.2s'}}>
+                  Clear Chat
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

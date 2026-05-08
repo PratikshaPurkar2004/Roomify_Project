@@ -42,7 +42,11 @@ export default function Profile() {
   const [originalPrefs, setOriginalPrefs] = useState([]);
   const [prefSaving, setPrefSaving] = useState(false);
   const [prefMsg, setPrefMsg] = useState({ text: "", type: "" });
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscription, setSubscription] = useState({
+    isSubscribed: false,
+    planName: "Basic Tier",
+    endDate: null
+  });
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -93,7 +97,13 @@ export default function Profile() {
     // Fetch Subscription Status
     fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/status/${userId}`)
       .then(res => res.json())
-      .then(data => setIsSubscribed(data.subscribed))
+      .then(data => {
+        setSubscription({
+          isSubscribed: data.subscribed,
+          planName: data.plan_name || "Basic Tier",
+          endDate: data.end_date
+        });
+      })
       .catch(err => console.error("Sub check error:", err));
 
   }, [userId]);
@@ -231,12 +241,11 @@ export default function Profile() {
           className="profile-preview-card"
         >
           <div className="preview-header">
-             <div className={`avatar-circle ${isSubscribed ? 'pro-border' : ''}`}>
+             <div className="avatar-circle">
                 {form.name ? form.name.charAt(0).toUpperCase() : "U"}
              </div>
              <h2>
                 {form.name || "Your Name"}
-                {isSubscribed && <span className="premium-sparkle" title="Pro Member">✨</span>}
              </h2>
              <span className="occupation-badge">
                 {form.occupation || "Profile"} 
@@ -250,45 +259,31 @@ export default function Profile() {
                 })()}`}
              </span>
              
-             <div className="billing-card-real">
-                <div className="billing-header">
-                   <span className="billing-label">Subscription Status</span>
-                   <span className={`status-dot ${isSubscribed ? 'active' : 'inactive'}`}></span>
-                </div>
-                
-                <div className="billing-main">
-                   <div className="plan-name-wrap">
-                      <span className="plan-name-text">{isSubscribed ? 'Roomify Pro' : 'Basic Tier'}</span>
-                      {isSubscribed && <span className="verified-check-mini">✓</span>}
-                   </div>
-                   <p className="billing-date">
-                      {isSubscribed ? 'Renewals on June 06, 2026' : 'Free limited access'}
-                   </p>
-                </div>
+             {subscription.isSubscribed && (
+              <div className={`billing-card-real ${subscription.planName === "Roomify Elite" ? "elite" : ""}`}>
+                 <div className="billing-header">
+                    <span className="billing-label">Current Plan</span>
+                    <span className="status-dot active"></span>
+                 </div>
+                 
+                 <div className="billing-main">
+                    <div className="plan-name-wrap">
+                       <span className="plan-name-text">{subscription.planName}</span>
+                    </div>
+                    <p className="billing-date">
+                       Valid until {new Date(subscription.endDate).toLocaleDateString()}
+                    </p>
+                 </div>
 
-                <button className={`btn-billing-action ${isSubscribed ? 'manage' : 'upgrade'}`} onClick={() => navigate("/dashboard/subscription")}>
-                   {isSubscribed ? 'Manage Billing' : 'Upgrade to Pro'}
-                </button>
-             </div>
+                 <button className="btn-billing-action upgrade" onClick={() => navigate("/dashboard/subscription")}>
+                    Manage / Upgrade Plan
+                 </button>
+              </div>
+             )}
 
           </div>
 
-          <div className="subscription-card">
-            <div className="sub-header">
-              <span>SUBSCRIPTION STATUS</span>
-              <div className="sub-dot active"></div>
-            </div>
-            <div className="sub-body">
-              <h4>{localStorage.getItem("subscribed") === "true" ? "Pro Tier" : "Basic Tier"}</h4>
-              <p>{localStorage.getItem("subscribed") === "true" ? "Unlimited access unlocked" : "Free limited access"}</p>
-              <button 
-                className="btn-upgrade" 
-                onClick={() => navigate("/dashboard/subscription")}
-              >
-                {localStorage.getItem("subscribed") === "true" ? "Manage Plan" : "Upgrade to Pro"}
-              </button>
-            </div>
-          </div>
+          {/* Removed duplicate subscription card */}
 
           <div className="preview-actions">
              <button className="btn-main-save" onClick={saveProfile}>Save Changes</button>
