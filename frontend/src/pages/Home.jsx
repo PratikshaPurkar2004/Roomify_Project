@@ -1,146 +1,427 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import "../styles/Home.css";
+// import React, { useState, useEffect } from "react";
+// import axios from "axios";
+// import { useNavigate } from "react-router-dom";
+// import { useSelector } from "react-redux";
+// import "../styles/Home.css";
 
-import Login from "./auth/Login";
-import Registration from "./auth/Registration";
-import HomeNavbar from "../Component/HomeNavbar";
+// import Login from "./auth/Login";
+// import Registration from "./auth/Registration";
+// import HomeNavbar from "../Component/HomeNavbar";
 
-export default function Home() {
+// export default function Home() {
 
-const navigate = useNavigate();
-const { user } = useSelector((state) => state.auth);
+// const navigate = useNavigate();
+// const { user } = useSelector((state) => state.auth);
 
-useEffect(() => {
-  if (user) {
-    navigate("/dashboard");
-  }
-}, [user, navigate]);
+// useEffect(() => {
+//   if (user) {
+//     navigate("/dashboard");
+//   }
+// }, [user, navigate]);
 
-const [showLogin, setShowLogin] = useState(false);
-const [showRegister, setShowRegister] = useState(false);
-const [showPlans, setShowPlans] = useState(false);
-const [activeTab,setActiveTab] = useState("rent");
-const [propertyFilter, setPropertyFilter] = useState("All");
-const [cities, setCities] = useState([]);
-const [dynamicPopular, setDynamicPopular] = useState([]);
-const [loadingPopular, setLoadingPopular] = useState(true);
+// const [showLogin, setShowLogin] = useState(false);
+// const [showRegister, setShowRegister] = useState(false);
+// const [showPlans, setShowPlans] = useState(false);
+// const [activeTab,setActiveTab] = useState("rent");
+// const [propertyFilter, setPropertyFilter] = useState("All");
+// const [cities, setCities] = useState([]);
+// const [dynamicPopular, setDynamicPopular] = useState([]);
+// const [loadingPopular, setLoadingPopular] = useState(true);
 
-const [activeProperty, setActiveProperty] = useState(null);
+// const [activeProperty, setActiveProperty] = useState(null);
 
-  useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/cities`);
-        if (data.success && data.cities) {
-          setCities(data.cities);
-        }
-      } catch (error) {
-        console.error("Error fetching cities:", error);
-        setCities(['Mumbai', 'Pune', 'Nashik', 'Hyderabad']);
-      }
-    };
+//   useEffect(() => {
+//     const fetchCities = async () => {
+//       try {
+//         const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/cities`);
+//         if (data.success && data.cities) {
+//           setCities(data.cities);
+//         }
+//       } catch (error) {
+//         console.error("Error fetching cities:", error);
+//         setCities(['Mumbai', 'Pune', 'Nashik', 'Hyderabad']);
+//       }
+//     };
 
-    const fetchPopular = async () => {
-      try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/rooms/popular`);
-        if (data.success && data.rooms && data.rooms.length > 0) {
-          setDynamicPopular(data.rooms);
-        }
-      } catch (error) {
-        console.error("Error fetching popular rooms:", error);
-      } finally {
-        setLoadingPopular(false);
-      }
-    };
+//     const fetchPopular = async () => {
+//       try {
+//         const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/rooms/popular`);
+//         if (data.success && data.rooms && data.rooms.length > 0) {
+//           setDynamicPopular(data.rooms);
+//         }
+//       } catch (error) {
+//         console.error("Error fetching popular rooms:", error);
+//       } finally {
+//         setLoadingPopular(false);
+//       }
+//     };
 
-    fetchCities();
-    fetchPopular();
-  }, []);
+//     fetchCities();
+//     fetchPopular();
+//   }, []);
 
-const rentSteps = [
-"Fill up a form with the basic details about your apartment",
-"Sign up and complete your profile",
-"Post your properties and connect with roommates"
-];
+// const rentSteps = [
+// "Fill up a form with the basic details about your apartment",
+// "Sign up and complete your profile",
+// "Post your properties and connect with roommates"
+// ];
 
-const findSteps = [
-"Browse rooms or roommates by city",
-"Contact the roommate or landlord",
-"Move into your new shared space"
-];
+// const findSteps = [
+// "Browse rooms or roommates by city",
+// "Contact the roommate or landlord",
+// "Move into your new shared space"
+// ];
 
-// Hardcoded testimonials removed
+// // Hardcoded testimonials removed
 
-return(
+// return(
 
-<div className="home">
+// <div className="home">
 
-{/* NAVBAR */}
+// {/* NAVBAR */}
 
-<HomeNavbar onLoginClick={() => setShowLogin(true)} onRegisterClick={() => setShowRegister(true)} />
-
-
-{/* HERO */}
-
-<section className="hero">
-
-<div className="hero-text">
-
-<h1>Find Your Perfect Rooms/Roommate.</h1>
-
-<p>
-Roomify connects students and professionals to
-find safe, verified, and affordable shared living spaces — effortlessly.
-</p>
-
-<button
-className="hero-btn"
-onClick={()=>setShowRegister(true)}
->
-Start Your Journey →
-</button>
-
-</div>
-
-<div className="hero-img">
-
-<img
-src="https://cdn-icons-png.flaticon.com/512/706/706830.png"
-alt="roommate"
-/>
-
-</div>
-
-</section>
+// <HomeNavbar onLoginClick={() => setShowLogin(true)} onRegisterClick={() => setShowRegister(true)} />
 
 
-{/* CITIES */}
+// {/* HERO */}
 
-<section className="cities">
+// <section className="hero">
 
-<h2>Popular Cities</h2>
+// <div className="hero-text">
 
-<div onClick={()=>setShowRegister(true)} className="city-grid">
+// <h1>Find Your Perfect Rooms/Roommate.</h1>
 
-{cities.map((city, index) => {
-  const imgIds = ["2409953", "439391", "1051075", "210243", "460672", "374870"];
-  const imgId = imgIds[index % imgIds.length];
+// <p>
+// Roomify connects students and professionals to
+// find safe, verified, and affordable shared living spaces — effortlessly.
+// </p>
+
+// <button
+// className="hero-btn"
+// onClick={()=>setShowRegister(true)}
+// >
+// Start Your Journey →
+// </button>
+
+// </div>
+
+// <div className="hero-img">
+
+// <img
+// src="https://cdn-icons-png.flaticon.com/512/706/706830.png"
+// alt="roommate"
+// />
+
+// </div>
+
+// </section>
+
+
+// {/* CITIES */}
+
+// <section className="cities">
+
+// <h2>Popular Cities</h2>
+
+// <div onClick={()=>setShowRegister(true)} className="city-grid">
+
+// {cities.map((city, index) => {
+//   const imgIds = ["2409953", "439391", "1051075", "210243", "460672", "374870"];
+//   const imgId = imgIds[index % imgIds.length];
   
-  return (
-    <div key={index} className="city-card">
-      <img src={`https://images.pexels.com/photos/${imgId}/pexels-photo-${imgId}.jpeg`} alt={city} />
-      <h3>{city}</h3>
-    </div>
-  );
-})}
+//   return (
+//     <div key={index} className="city-card">
+//       <img src={`https://images.pexels.com/photos/${imgId}/pexels-photo-${imgId}.jpeg`} alt={city} />
+//       <h3>{city}</h3>
+//     </div>
+//   );
+// })}
 
-</div>
+// </div>
 
-</section>
+// </section>
 
+
+// {/* SIMPLE & SWEET PROPERTIES */}
+
+// <section className="simple-properties">
+//   <div className="sp-header">
+//     <h2>Popular Properties</h2>
+//     <p>Discover the most loved spaces.</p>
+//   </div>
+
+//   <div className="sp-grid">
+//     {dynamicPopular.length > 0 ? (
+//       dynamicPopular.map((prop, idx) => {
+//         let images = [];
+//         try { images = JSON.parse(prop.image_url); if(!Array.isArray(images)) images = [prop.image_url]; }
+//         catch { images = prop.image_url ? [prop.image_url] : []; }
+        
+//         return (
+//           <div key={idx} className="sp-card" onClick={()=>navigate(`/dashboard/room-details/${prop.room_id}`)}>
+//             <div className="sp-img-wrapper">
+//               <img src={`${import.meta.env.VITE_API_URL}${images[0]}`} alt={prop.property_type} />
+//               <div className="sp-price">₹{Number(prop.rent).toLocaleString()}<span>/mo</span></div>
+//             </div>
+//             <div className="sp-info">
+//               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+//                 <h3 style={{ fontSize:'16px' }}>{prop.property_type} in {prop.location?.split(',')[0]}</h3>
+//               </div>
+//               <p>📍 {prop.location} • {prop.furnishing}</p>
+//               <div className="sp-amenities">
+//                 {prop.amenities && prop.amenities.split(',').slice(0, 3).map((amenity, i) => (
+//                   <span key={i} className="sp-amenity">{amenity.trim()}</span>
+//                 ))}
+//               </div>
+//             </div>
+//           </div>
+//         );
+//       })
+//     ) : (
+//       <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#64748b' }}>
+//         <p>No popular properties listed yet.</p>
+//       </div>
+//     )}
+//   </div>
+  
+//   <div className="sp-footer">
+//     <button className="sp-view-all" onClick={()=>setShowRegister(true)}>Explore All Properties</button>
+//   </div>
+// </section>
+
+// <section className="why">
+
+// <h2>Why Choose Roomify</h2>
+
+// <div className="why-grid">
+
+// <div className="why-card">
+//   <div className="why-icon-circle">🛡️</div>
+//   <h3>Verified Users</h3>
+//   <p>Every profile undergoes a strict verification process to ensure your safety and trust.</p>
+// </div>
+
+// <div className="why-card">
+//   <div className="why-icon-circle">🎯</div>
+//   <h3>Smart Matching</h3>
+//   <p>Our AI-driven algorithm connects you with roommates based on lifestyle, habits, and shared interests.</p>
+// </div>
+
+// <div className="why-card">
+//   <div className="why-icon-circle">💬</div>
+//   <h3>Secure Chat</h3>
+//   <p>Communicate directly and safely through our built-in real-time messaging system.</p>
+// </div>
+
+// </div>
+
+// </section>
+
+
+// {/* HOW IT WORKS */}
+
+// <section className="how">
+
+// <h2 className="how-title">How It Works</h2>
+
+// <div className="tabs">
+
+// <button
+// className={activeTab==="rent" ? "tab active" : "tab"}
+// onClick={()=>setActiveTab("rent")}
+// >
+// Rent a Room
+// </button>
+
+// <button
+// className={activeTab==="find" ? "tab active" : "tab"}
+// onClick={()=>setActiveTab("find")}
+// >
+// Find a Room
+// </button>
+
+// </div>
+
+// <div className="how-container">
+
+// <div className="how-steps">
+
+// {(activeTab==="rent"?rentSteps:findSteps).map((step,i)=>(
+// <div key={i} className="step-card">
+
+// <div className="step-number">{i+1}</div>
+
+// <p>{step}</p>
+
+// </div>
+// ))}
+
+// <button
+// className="start"
+// onClick={()=>setShowRegister(true)}
+// >
+// Get Started →
+// </button>
+
+// </div>
+
+// <div className="how-image">
+
+// <img
+// src="https://cdn-icons-png.flaticon.com/512/4140/4140037.png"
+// alt="illustration"
+// />
+
+// </div>
+
+// </div>
+
+// </section>
+
+// {/* SUBSCRIPTION INFO */}
+
+// <section className="subscription">
+//   <div className="subscription-banner">
+//     <div className="banner-content">
+//       <h2>Unlock Roomify <span>Pro</span></h2>
+//       <p>Take your roommate search to the next level. Get unlimited messaging, verified badges, and priority placement.</p>
+//       <button className="pro-btn" onClick={() => setShowPlans(true)}>View Plans <span className="arrow">→</span></button>
+//     </div>
+//     <div className="banner-illustration">
+//       <div className="glass-card">
+//         <div className="badge">✓ Verified</div>
+//         <div className="badge msg">💬 Unlimited Chats</div>
+//       </div>
+//     </div>
+//   </div>
+// </section>
+
+
+
+
+// {/* CTA */}
+
+// <section className="cta">
+
+// <h2>Ready to find your perfect roommate?</h2>
+
+// <button
+// onClick={()=>setShowRegister(true)}
+// >
+// Create Free Account
+// </button>
+
+// </section>
+
+
+// {/* HOME FOOTER */}
+
+// <footer className="home-footer">
+
+// <div className="home-footer-grid">
+
+// <div>
+// <div className="footer-brand">Roomify</div>
+// <p>
+// Find trusted roommates and shared rooms based on
+// your lifestyle and preferences. Safe, smart, and simple.
+// </p>
+// </div>
+
+// <div>
+// <h3>Platform</h3>
+// <ul className="platform-col">
+// <li onClick={() => setShowRegister(true)}>Dashboard</li>
+// <li onClick={() => setShowRegister(true)}>Find Roommate</li>
+// <li onClick={() => setShowRegister(true)}>Profile</li>
+// <li onClick={() => setShowRegister(true)}>Requests</li>
+// </ul>
+// </div>
+
+// <div>
+// <h3>Features</h3>
+// <ul className="features-col">
+// <li>Room Matching</li>
+// <li>Preference Filter</li>
+// <li>Chat System</li>
+// <li>Secure Requests</li>
+// </ul>
+// </div>
+
+// <div>
+// <h3>Contact Us</h3>
+// <p>Pune, Maharashtra</p>
+// <p>+91 9876543210</p>
+// <p>support@roomify.com</p>
+// </div>
+
+// </div>
+
+// <div className="home-footer-bottom">
+// <p>© 2026 Roomify. All rights reserved.</p>
+// </div>
+
+// </footer>
+
+
+// {showLogin && (
+//   <Login 
+//     onClose={() => setShowLogin(false)} 
+//     onSwitch={() => { setShowLogin(false); setShowRegister(true); }} 
+//   />
+// )}
+
+// {showRegister && (
+//   <Registration 
+//     onClose={() => setShowRegister(false)} 
+//     onSwitch={() => { setShowRegister(false); setShowLogin(true); }} 
+//   />
+// )}
+
+// {showPlans && (
+//   <div className="plans-modal-overlay" onClick={() => setShowPlans(false)}>
+//     <div className="plans-modal" onClick={e => e.stopPropagation()}>
+//       <button className="close-plan-btn" onClick={() => setShowPlans(false)}>✕</button>
+//       <div className="plans-modal-header">
+//         <h2>Choose Your Plan</h2>
+//         <p>Upgrade to Pro for more features and verified roommates.</p>
+//       </div>
+//       <div className="plans-cards-container">
+        
+//         <div className="plan-card basic">
+//           <h3>Basic</h3>
+//           <div className="plan-price">Free</div>
+//           <ul className="plan-features">
+//             <li>Browse Rooms</li>
+//             <li>Limited Contact</li>
+//             <li>Standard Support</li>
+//           </ul>
+//           <button className="plan-select-btn" onClick={() => {setShowPlans(false); setShowRegister(true)}}>Select Basic</button>
+//         </div>
+
+//         <div className="plan-card pro">
+//           <div className="plan-badge">Most Popular</div>
+//           <h3>Roomify Pro</h3>
+//           <div className="plan-price">₹499<span>/mo</span></div>
+//           <ul className="plan-features">
+//             <li>Unlimited Chats</li>
+//             <li>Verified Badge ✓</li>
+//             <li>Priority Listing</li>
+//             <li>AI Smart Matches</li>
+//           </ul>
+//           <button className="plan-select-btn pro-select" onClick={() => {setShowPlans(false); setShowRegister(true)}}>Get Pro</button>
+//         </div>
+
+//       </div>
+//     </div>
+//   </div>
+// )}
+
+// </div>
+
+// );
+
+// }
 
 {/* SIMPLE & SWEET PROPERTIES */}
 
@@ -153,272 +434,103 @@ alt="roommate"
   <div className="sp-grid">
     {dynamicPopular.length > 0 ? (
       dynamicPopular.map((prop, idx) => {
+
         let images = [];
-        try { images = JSON.parse(prop.image_url); if(!Array.isArray(images)) images = [prop.image_url]; }
-        catch { images = prop.image_url ? [prop.image_url] : []; }
-        
+
+        try {
+          if (
+            typeof prop.image_url === "string" &&
+            prop.image_url.startsWith("[")
+          ) {
+            images = JSON.parse(prop.image_url);
+          } else if (prop.image_url) {
+            images = [prop.image_url];
+          }
+        } catch {
+          images = [];
+        }
+
         return (
-          <div key={idx} className="sp-card" onClick={()=>navigate(`/dashboard/room-details/${prop.room_id}`)}>
+          <div
+            key={idx}
+            className="sp-card"
+            onClick={() =>
+              navigate(`/dashboard/room-details/${prop.room_id}`)
+            }
+          >
             <div className="sp-img-wrapper">
-              <img src={`${import.meta.env.VITE_API_URL}${images[0]}`} alt={prop.property_type} />
-              <div className="sp-price">₹{Number(prop.rent).toLocaleString()}<span>/mo</span></div>
+
+              <img
+                src={
+                  images[0]
+                    ? `${import.meta.env.VITE_API_URL}${images[0].replace(/"/g, "")}`
+                    : "https://via.placeholder.com/300"
+                }
+                alt={prop.property_type}
+              />
+
+              <div className="sp-price">
+                ₹{Number(prop.rent).toLocaleString()}
+                <span>/mo</span>
+              </div>
             </div>
+
             <div className="sp-info">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <h3 style={{ fontSize:'16px' }}>{prop.property_type} in {prop.location?.split(',')[0]}</h3>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "4px",
+                }}
+              >
+                <h3 style={{ fontSize: "16px" }}>
+                  {prop.property_type} in{" "}
+                  {prop.location?.split(",")[0]}
+                </h3>
               </div>
-              <p>📍 {prop.location} • {prop.furnishing}</p>
+
+              <p>
+                📍 {prop.location} • {prop.furnishing}
+              </p>
+
               <div className="sp-amenities">
-                {prop.amenities && prop.amenities.split(',').slice(0, 3).map((amenity, i) => (
-                  <span key={i} className="sp-amenity">{amenity.trim()}</span>
-                ))}
+                {prop.amenities &&
+                  prop.amenities
+                    .split(",")
+                    .slice(0, 3)
+                    .map((amenity, i) => (
+                      <span key={i} className="sp-amenity">
+                        {amenity.trim()}
+                      </span>
+                    ))}
               </div>
+
             </div>
           </div>
         );
       })
     ) : (
-      <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#64748b' }}>
+      <div
+        style={{
+          gridColumn: "1/-1",
+          textAlign: "center",
+          padding: "40px",
+          color: "#64748b",
+        }}
+      >
         <p>No popular properties listed yet.</p>
       </div>
     )}
   </div>
-  
+
   <div className="sp-footer">
-    <button className="sp-view-all" onClick={()=>setShowRegister(true)}>Explore All Properties</button>
+    <button
+      className="sp-view-all"
+      onClick={() => setShowRegister(true)}
+    >
+      Explore All Properties
+    </button>
   </div>
 </section>
-
-<section className="why">
-
-<h2>Why Choose Roomify</h2>
-
-<div className="why-grid">
-
-<div className="why-card">
-  <div className="why-icon-circle">🛡️</div>
-  <h3>Verified Users</h3>
-  <p>Every profile undergoes a strict verification process to ensure your safety and trust.</p>
-</div>
-
-<div className="why-card">
-  <div className="why-icon-circle">🎯</div>
-  <h3>Smart Matching</h3>
-  <p>Our AI-driven algorithm connects you with roommates based on lifestyle, habits, and shared interests.</p>
-</div>
-
-<div className="why-card">
-  <div className="why-icon-circle">💬</div>
-  <h3>Secure Chat</h3>
-  <p>Communicate directly and safely through our built-in real-time messaging system.</p>
-</div>
-
-</div>
-
-</section>
-
-
-{/* HOW IT WORKS */}
-
-<section className="how">
-
-<h2 className="how-title">How It Works</h2>
-
-<div className="tabs">
-
-<button
-className={activeTab==="rent" ? "tab active" : "tab"}
-onClick={()=>setActiveTab("rent")}
->
-Rent a Room
-</button>
-
-<button
-className={activeTab==="find" ? "tab active" : "tab"}
-onClick={()=>setActiveTab("find")}
->
-Find a Room
-</button>
-
-</div>
-
-<div className="how-container">
-
-<div className="how-steps">
-
-{(activeTab==="rent"?rentSteps:findSteps).map((step,i)=>(
-<div key={i} className="step-card">
-
-<div className="step-number">{i+1}</div>
-
-<p>{step}</p>
-
-</div>
-))}
-
-<button
-className="start"
-onClick={()=>setShowRegister(true)}
->
-Get Started →
-</button>
-
-</div>
-
-<div className="how-image">
-
-<img
-src="https://cdn-icons-png.flaticon.com/512/4140/4140037.png"
-alt="illustration"
-/>
-
-</div>
-
-</div>
-
-</section>
-
-{/* SUBSCRIPTION INFO */}
-
-<section className="subscription">
-  <div className="subscription-banner">
-    <div className="banner-content">
-      <h2>Unlock Roomify <span>Pro</span></h2>
-      <p>Take your roommate search to the next level. Get unlimited messaging, verified badges, and priority placement.</p>
-      <button className="pro-btn" onClick={() => setShowPlans(true)}>View Plans <span className="arrow">→</span></button>
-    </div>
-    <div className="banner-illustration">
-      <div className="glass-card">
-        <div className="badge">✓ Verified</div>
-        <div className="badge msg">💬 Unlimited Chats</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-
-
-{/* CTA */}
-
-<section className="cta">
-
-<h2>Ready to find your perfect roommate?</h2>
-
-<button
-onClick={()=>setShowRegister(true)}
->
-Create Free Account
-</button>
-
-</section>
-
-
-{/* HOME FOOTER */}
-
-<footer className="home-footer">
-
-<div className="home-footer-grid">
-
-<div>
-<div className="footer-brand">Roomify</div>
-<p>
-Find trusted roommates and shared rooms based on
-your lifestyle and preferences. Safe, smart, and simple.
-</p>
-</div>
-
-<div>
-<h3>Platform</h3>
-<ul className="platform-col">
-<li onClick={() => setShowRegister(true)}>Dashboard</li>
-<li onClick={() => setShowRegister(true)}>Find Roommate</li>
-<li onClick={() => setShowRegister(true)}>Profile</li>
-<li onClick={() => setShowRegister(true)}>Requests</li>
-</ul>
-</div>
-
-<div>
-<h3>Features</h3>
-<ul className="features-col">
-<li>Room Matching</li>
-<li>Preference Filter</li>
-<li>Chat System</li>
-<li>Secure Requests</li>
-</ul>
-</div>
-
-<div>
-<h3>Contact Us</h3>
-<p>Pune, Maharashtra</p>
-<p>+91 9876543210</p>
-<p>support@roomify.com</p>
-</div>
-
-</div>
-
-<div className="home-footer-bottom">
-<p>© 2026 Roomify. All rights reserved.</p>
-</div>
-
-</footer>
-
-
-{showLogin && (
-  <Login 
-    onClose={() => setShowLogin(false)} 
-    onSwitch={() => { setShowLogin(false); setShowRegister(true); }} 
-  />
-)}
-
-{showRegister && (
-  <Registration 
-    onClose={() => setShowRegister(false)} 
-    onSwitch={() => { setShowRegister(false); setShowLogin(true); }} 
-  />
-)}
-
-{showPlans && (
-  <div className="plans-modal-overlay" onClick={() => setShowPlans(false)}>
-    <div className="plans-modal" onClick={e => e.stopPropagation()}>
-      <button className="close-plan-btn" onClick={() => setShowPlans(false)}>✕</button>
-      <div className="plans-modal-header">
-        <h2>Choose Your Plan</h2>
-        <p>Upgrade to Pro for more features and verified roommates.</p>
-      </div>
-      <div className="plans-cards-container">
-        
-        <div className="plan-card basic">
-          <h3>Basic</h3>
-          <div className="plan-price">Free</div>
-          <ul className="plan-features">
-            <li>Browse Rooms</li>
-            <li>Limited Contact</li>
-            <li>Standard Support</li>
-          </ul>
-          <button className="plan-select-btn" onClick={() => {setShowPlans(false); setShowRegister(true)}}>Select Basic</button>
-        </div>
-
-        <div className="plan-card pro">
-          <div className="plan-badge">Most Popular</div>
-          <h3>Roomify Pro</h3>
-          <div className="plan-price">₹499<span>/mo</span></div>
-          <ul className="plan-features">
-            <li>Unlimited Chats</li>
-            <li>Verified Badge ✓</li>
-            <li>Priority Listing</li>
-            <li>AI Smart Matches</li>
-          </ul>
-          <button className="plan-select-btn pro-select" onClick={() => {setShowPlans(false); setShowRegister(true)}}>Get Pro</button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-)}
-
-</div>
-
-);
-
-}
