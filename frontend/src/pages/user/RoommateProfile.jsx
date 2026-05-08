@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
-  User, MapPin, Wallet, Briefcase, Mail, Phone, Calendar, Heart, 
-  MessageCircle, UserPlus, Star, ChevronLeft, Shield, CheckCircle 
+  User, MapPin, Wallet, Briefcase, Mail, Phone, Calendar, 
+  MessageCircle, UserPlus, Star, ChevronLeft, CheckCircle 
 } from "lucide-react";
 import "../../styles/RoommateProfile.css";
 import { calculateMatchPercentage } from "../../utils/matchUtils";
@@ -175,16 +175,7 @@ export default function RoommateProfile() {
             </div>
           </div>
 
-          <div className="rp-card rp-trust-card">
-            <h3><Shield size={18} /> Trust Score</h3>
-            <div className="rp-trust-gauge">
-              <div className="rp-progress-bg">
-                <div className="rp-progress-fill" style={{ width: '85%' }}></div>
-              </div>
-              <span className="rp-trust-val">8.5 / 10</span>
-            </div>
-            <p>Verification complete. This user has a high activity record.</p>
-          </div>
+
         </aside>
 
         {/* Right Column: Detailed Info */}
@@ -201,7 +192,7 @@ export default function RoommateProfile() {
                 <Calendar className="rp-detail-icon" />
                 <div className="rp-detail-text">
                   <label>Age</label>
-                  <span>{profile.age || "20-25"} years</span>
+                  <span>{profile.age != null ? `${profile.age} years` : "None"}</span>
                 </div>
               </div>
               <div className="rp-detail-item">
@@ -232,7 +223,7 @@ export default function RoommateProfile() {
           <section className="rp-card rp-info-section">
             <div className="rp-section-header">
               <h2 className="rp-section-title">Lifestyles & Preferences</h2>
-              <Heart size={20} color="#ec4899" />
+
             </div>
             <div className="rp-tags-container">
               {profile.preferences && profile.preferences !== "skipped" ? (

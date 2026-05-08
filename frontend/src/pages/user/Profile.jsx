@@ -238,7 +238,17 @@ export default function Profile() {
                 {form.name || "Your Name"}
                 {isSubscribed && <span className="premium-sparkle" title="Pro Member">✨</span>}
              </h2>
-             <span className="occupation-badge">{form.occupation || "Profile"}</span>
+             <span className="occupation-badge">
+                {form.occupation || "Profile"} 
+                {form.dob && ` • ${(() => {
+                   const birthDate = new Date(form.dob);
+                   const today = new Date();
+                   let age = today.getFullYear() - birthDate.getFullYear();
+                   const m = today.getMonth() - birthDate.getMonth();
+                   if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+                   return age >= 0 ? `${age} years` : "";
+                })()}`}
+             </span>
              
              <div className="billing-card-real">
                 <div className="billing-header">
@@ -300,7 +310,14 @@ export default function Profile() {
                    <input name="name" value={form.name} onChange={handleChange} placeholder="Enter your full name" />
                 </div>
                 <div className="input-box">
-                   <label>Birth Date</label>
+                   <label>Birth Date {form.dob && `(Age: ${(() => {
+                      const birthDate = new Date(form.dob);
+                      const today = new Date();
+                      let age = today.getFullYear() - birthDate.getFullYear();
+                      const m = today.getMonth() - birthDate.getMonth();
+                      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+                      return age >= 0 ? age : "None";
+                   })()})`}</label>
                    <input type="date" name="dob" value={form.dob} onChange={handleChange} />
                 </div>
                 <div className="input-box">

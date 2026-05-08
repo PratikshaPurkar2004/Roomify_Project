@@ -6,10 +6,15 @@ router.get("/:id", async (req, res) => {
   const userId = req.params.id;
   const sql = `
     SELECT 
+      user_id AS id,
       name,
       email,
       age_group,
       DOB,
+      CASE 
+        WHEN DOB IS NULL OR DOB > CURDATE() THEN NULL 
+        ELSE TIMESTAMPDIFF(YEAR, DOB, CURDATE()) 
+      END AS age,
       occupation,
       budget,
       gender,

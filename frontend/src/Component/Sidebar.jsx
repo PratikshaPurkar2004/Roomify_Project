@@ -29,21 +29,10 @@ function Sidebar() {
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
   const [counts, setCounts] = useState({ requestsCount: 0, chatCount: 0 });
-  const [clearedCounts, setClearedCounts] = useState(() => {
-    try {
-      const userId = user?.user_id || localStorage.getItem("userId");
-      const stored = localStorage.getItem(`sidebar_cleared_${userId}`);
-      return stored ? JSON.parse(stored) : { requestsCount: 0, chatCount: 0 };
-    } catch {
-      return { requestsCount: 0, chatCount: 0 };
-    }
-  });
-
   useEffect(() => {
     // Force sidebar width for layout stability
     document.documentElement.style.setProperty('--sidebar-width', '280px');
   }, []);
-
 
   useEffect(() => {
     const userId = user?.user_id || localStorage.getItem("userId");
@@ -55,17 +44,9 @@ function Sidebar() {
           if (res.data.success) {
             setCounts({
               requestsCount: res.data.requestsCount,
-              chatCount: res.data.chatCount
-            });
-
-            // If the server count drops (e.g. user accepted a request), lower our baseline so future new requests trigger the badge again
-            setClearedCounts(prev => {
-              let updated = { ...prev };
-              let changed = false;
-              if (res.data.requestsCount < prev.requestsCount) { updated.requestsCount = res.data.requestsCount; changed = true; }
-              if (res.data.chatCount < prev.chatCount) { updated.chatCount = res.data.chatCount; changed = true; }
-              if (changed) localStorage.setItem(`sidebar_cleared_${userId}`, JSON.stringify(updated));
-              return changed ? updated : prev;
+              chatCount: res.data.chatCount,
+              sentMessagesCount: res.data.sentMessagesCount,
+              sentRequestsCount: res.data.sentRequestsCount
             });
           }
         })
@@ -83,28 +64,6 @@ function Sidebar() {
     dispatch(logout());
     navigate("/");
   };
-
-  const syncClearedCount = (key, value) => {
-    const userId = user?.user_id || localStorage.getItem("userId");
-    setClearedCounts(prev => {
-      const updated = { ...prev, [key]: value };
-      if (userId) localStorage.setItem(`sidebar_cleared_${userId}`, JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const handleRequestsClick = () => {
-    syncClearedCount('requestsCount', counts.requestsCount);
-  };
-
-  const handleChatClick = (e) => {
-    e.preventDefault();
-    syncClearedCount('chatCount', counts.chatCount);
-    navigate("/dashboard/chat");
-  };
-
-  const displayRequestsCount = counts.requestsCount > clearedCounts.requestsCount ? counts.requestsCount - clearedCounts.requestsCount : 0;
-  const displayChatCount = counts.chatCount > clearedCounts.chatCount ? counts.chatCount - clearedCounts.chatCount : 0;
 
   return (
     <div className="sidebar">
@@ -137,14 +96,14 @@ function Sidebar() {
           <FaUsers /> <span>Find Roommates</span>
         </NavLink>
 
-        <NavLink to="/dashboard/requests" className="menu-item" onClick={handleRequestsClick}>
+        <NavLink to="/dashboard/requests" className="menu-item">
           <FaEnvelope /> <span>Requests</span>
-          {displayRequestsCount > 0 && <span className="sidebar-badge">{displayRequestsCount}</span>}
+          {counts.requestsCount > 0 && <span className="sidebar-badge">{counts.requestsCount}</span>}
         </NavLink>
 
-        <NavLink to="/dashboard/chat" className="menu-item" onClick={handleChatClick}>
+        <NavLink to="/dashboard/chat" className="menu-item">
           <FaComments /> <span>Chat</span>
-          {displayChatCount > 0 && <span className="sidebar-badge">{displayChatCount}</span>}
+          {counts.chatCount > 0 && <span className="sidebar-badge">{counts.chatCount}</span>}
         </NavLink>
 
       </div>

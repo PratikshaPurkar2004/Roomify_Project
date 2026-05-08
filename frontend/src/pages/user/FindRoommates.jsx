@@ -241,7 +241,7 @@ export default function FindRoommates() {
 
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
   const isFinder = String(currentUser.user_type || "").toLowerCase() === "finder";
-  const showGate = !!userId && !hasInteracted && hostRooms.length === 0 && !isFinder;
+  const showGate = !!userId && hostRooms.length === 0;
 
   const handleAddRoom = async (e) => {
     e.preventDefault();
@@ -326,24 +326,6 @@ export default function FindRoommates() {
             <div className="rm2-gated-actions">
               <button className="rm2-primary-btn" onClick={() => setShowAddModal(true)}>
                 Add Your Property Now
-              </button>
-              <button 
-                onClick={() => setHasInteracted(true)}
-                style={{ 
-                  marginTop: '10px', 
-                  padding: '12px 24px', 
-                  borderRadius: '12px', 
-                  backgroundColor: 'transparent', 
-                  border: '2px solid #a855f7', 
-                  color: '#a855f7', 
-                  fontWeight: '600', 
-                  cursor: 'pointer',
-                  width: '100%',
-                  fontSize: '15px'
-                }}
-              >
-                Skip & Browse Roommates
-
               </button>
             </div>
             {hostRooms.length > 0 && (
@@ -446,12 +428,10 @@ export default function FindRoommates() {
                         <span className="rm2-card-label">Name</span>
                         <span className="rm2-card-value rm2-font-bold">{person.name}</span>
                       </div>
-                      {person.age != null && (
                         <div className="rm2-card-row">
                           <span className="rm2-card-label">Age</span>
-                          <span className="rm2-card-value">{person.age > 0 ? person.age : "–"}</span>
+                          <span className="rm2-card-value">{person.age != null ? person.age : "None"}</span>
                         </div>
-                      )}
                       {person.occupation && (
                         <div className="rm2-card-row">
                           <span className="rm2-card-label">Occupation</span>

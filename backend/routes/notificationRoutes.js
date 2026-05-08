@@ -106,14 +106,34 @@ router.get("/sidebar-counts/:userId", async (req, res) => {
     );
     const requestsCount = reqs[0].c;
 
-    // Count messages received (for chat badge) - now using is_read column
+    // Count messages received (for chat badge)
     const [chats] = await db.query(
       "SELECT COUNT(*) as c FROM messages WHERE receiver_id = ? AND is_read = 0",
       [userId]
     );
     const chatCount = chats[0].c;
 
-    res.json({ success: true, requestsCount, chatCount });
+    // Count messages sent by user (for free limit tracking)
+    const [sent] = await db.query(
+      "SELECT COUNT(*) as c FROM messages WHERE sender_id = ?",
+      [userId]
+    );
+    const sentMessagesCount = sent[0].c;
+
+    // Count pending requests sent by user
+    const [sentReqs] = await db.query(
+      "SELECT COUNT(*) as c FROM requests WHERE sender_id = ? AND status = 'pending'",
+      [userId]
+    );
+    const sentRequestsCount = sentReqs[0].c;
+
+    res.json({ 
+      success: true, 
+      requestsCount,      // Incoming
+      chatCount,          // Incoming (Unread)
+      sentMessagesCount,  // Outgoing Total
+      sentRequestsCount   // Outgoing Pending
+    });
   } catch (err) {
     console.error("Error fetching sidebar counts", err);
     res.status(500).json({ success: false, message: "Server Error" });

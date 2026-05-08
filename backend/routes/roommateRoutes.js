@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
       u.preferences,
       u.occupation,
       CASE 
-        WHEN u.DOB > CURDATE() THEN 0 
+        WHEN u.DOB IS NULL OR u.DOB > CURDATE() THEN NULL 
         ELSE TIMESTAMPDIFF(YEAR, u.DOB, CURDATE()) 
       END AS age,
       (SELECT rent FROM rooms WHERE host_id = u.user_id LIMIT 1) AS rent,
