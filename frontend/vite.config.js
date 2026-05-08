@@ -1,14 +1,11 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current working directory.
-  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
-  const env = loadEnv(mode, process.cwd(), '');
-  return {
-    plugins: [react()],
-    define: {
-      'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'https://roomify-project-production.up.railway.app')
-    }
+export default defineConfig({
+  plugins: [react()],
+  define: {
+    // Hardcode the production API URL to ensure the live site connects to the backend.
+    // This overrides any .env variables or missing environment settings on Vercel.
+    'import.meta.env.VITE_API_URL': JSON.stringify('https://roomify-project-production.up.railway.app')
   }
 })
