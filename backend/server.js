@@ -62,6 +62,10 @@ app.get("/", (req, res) => {
   res.send("Backend Running 🚀");
 });
 
+app.get("/api/ping", (req, res) => {
+  res.json({ status: "pong", time: Date.now() });
+});
+
 // Health check for database
 app.get("/health", async (req, res) => {
   try {
