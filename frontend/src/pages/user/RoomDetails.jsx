@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MapPin, Home, ArrowLeft, Users, Shield, CheckCircle2, ChevronLeft, ChevronRight, IndianRupee, BedDouble, Wifi, Star, X, Pencil } from "lucide-react";
+import { API_URL } from "../../api";
 
 export default function RoomDetails() {
   const { id } = useParams();
@@ -28,14 +29,14 @@ export default function RoomDetails() {
   useEffect(() => {
     window.scrollTo(0, 0);
     // Fetch room details
-    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/${id}`)
+    fetch(`${API_URL}/api/rooms/${id}`)
       .then(r => r.json())
       .then(data => { if (data.success) setRoom(data.room); else setError(data.message || "Not found"); })
       .catch(() => setError("Failed to load room"))
       .finally(() => setLoading(false));
 
     // Fetch reviews
-    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/${id}/reviews`)
+    fetch(`${API_URL}/api/rooms/${id}/reviews`)
       .then(r => r.json())
       .then(data => {
         if (data.success) {
@@ -51,7 +52,7 @@ export default function RoomDetails() {
 
     // Check if already sent a request to this host
     if (userId) {
-      fetch(`${import.meta.env.VITE_API_URL}/api/requests/sent/${userId}`)
+      fetch(`${API_URL}/api/requests/sent/${userId}`)
         .then(r => r.json())
         .then(d => {
           if (d.success && d.sentRequests) {
@@ -59,7 +60,7 @@ export default function RoomDetails() {
             window.__sentRequests = d.sentRequests;
           }
         }).catch(() => {});
-      fetch(`${import.meta.env.VITE_API_URL}/api/requests/accepted-ids/${userId}`)
+      fetch(`${API_URL}/api/requests/accepted-ids/${userId}`)
         .then(r => r.json())
         .then(d => {
           if (d.success && d.acceptedIds) {
@@ -69,7 +70,7 @@ export default function RoomDetails() {
     }
     // Log view
     if (userId) {
-      fetch(`${import.meta.env.VITE_API_URL}/api/rooms/${id}/view`, {
+      fetch(`${API_URL}/api/rooms/${id}/view`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ viewerId: userId }),
@@ -144,7 +145,7 @@ export default function RoomDetails() {
   };
 
   const fetchReviews = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/${id}/reviews`)
+    fetch(`${API_URL}/api/rooms/${id}/reviews`)
       .then(r => r.json())
       .then(data => {
         if (data.success) {
@@ -168,7 +169,7 @@ export default function RoomDetails() {
     if (String(room.host_id) === String(userId)) { setToast("This is your own listing!"); return; }
     setRequestStatus('sending');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requests`, {
+      const res = await fetch(`${API_URL}/api/requests`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sender_id: userId, receiver_id: room.host_id }),
@@ -193,8 +194,8 @@ export default function RoomDetails() {
     setSubmitting(true);
     try {
       const url = editReviewId 
-        ? `${import.meta.env.VITE_API_URL}/api/rooms/reviews/${editReviewId}` 
-        : `${import.meta.env.VITE_API_URL}/api/rooms/${id}/reviews`;
+        ? `${API_URL}/api/rooms/reviews/${editReviewId}` 
+        : `${API_URL}/api/rooms/${id}/reviews`;
       
       const method = editReviewId ? "PUT" : "POST";
 
@@ -225,7 +226,7 @@ export default function RoomDetails() {
   const deleteReview = async (reviewId) => {
     if (!window.confirm("Are you sure you want to delete this review?")) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/rooms/reviews/${reviewId}`, {
+      const res = await fetch(`${API_URL}/api/rooms/reviews/${reviewId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: userId }),
@@ -373,7 +374,7 @@ export default function RoomDetails() {
             <div className="rd-slider-track" style={{ transform: `translateX(-${curIdx * 100}%)` }}>
               {images.map((img, i) => (
                 <div key={i} className="rd-slide">
-                  <img src={`${import.meta.env.VITE_API_URL}${img}`} alt={`Room ${i+1}`} />
+                  <img src={`${API_URL}${img}`} alt={`Room ${i+1}`} />
                   <div className="rd-slide-overlay"></div>
                 </div>
               ))}

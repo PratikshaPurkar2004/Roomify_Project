@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Requests.css";
 import { User, MapPin, Wallet, CheckCircle, XCircle, Inbox, UserCheck, UserX, MessageCircle, Send } from "lucide-react";
+import { API_URL } from "../../api";
 
 export default function Requests() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function Requests() {
 
     setIsLoading(true);
     // Fetch incoming
-    fetch(`${import.meta.env.VITE_API_URL}/api/requests/${userId}`)
+    fetch(`${API_URL}/api/requests/${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -31,7 +32,7 @@ export default function Requests() {
       .catch(err => console.error("Error fetching incoming:", err));
 
     // Fetch sent
-    fetch(`${import.meta.env.VITE_API_URL}/api/requests/sent-details/${userId}`)
+    fetch(`${API_URL}/api/requests/sent-details/${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -44,7 +45,7 @@ export default function Requests() {
 
   const updateStatus = async (id, status) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/${id}/status`, {
+      const res = await fetch(`${API_URL}/api/requests/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status })
@@ -71,7 +72,7 @@ export default function Requests() {
 
   const unsendRequest = async (id) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/${id}`, {
+      const res = await fetch(`${API_URL}/api/requests/${id}`, {
         method: "DELETE"
       });
       const data = await res.json();

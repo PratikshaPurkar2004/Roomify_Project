@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Subscription.css";
 import { Check, ShieldCheck, CreditCard, Landmark, ArrowLeft, Loader2, CheckCircle2, Smartphone } from "lucide-react";
 import axios from "axios";
+import { API_URL } from "../api";
 
 export default function Subscription() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function Subscription() {
     if (!userId) { navigate("/login"); return; }
     const fetchStatus = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/status/${userId}`);
+        const res = await fetch(`${API_URL}/api/subscriptions/status/${userId}`);
         const data = await res.json();
         if (data.success) setStatus({ subscribed: data.subscribed, plan: data.plan_name });
       } catch (err) { console.error(err); } finally { setIsLoading(false); }
@@ -31,7 +32,7 @@ export default function Subscription() {
     setPaymentStatus('processing');
     setTimeout(async () => {
       try {
-        const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/subscriptions/subscribe`, {
+        const res = await axios.post(`${API_URL}/api/subscriptions/subscribe`, {
           user_id: userId, plan_name: selectedPlan.name, amount: selectedPlan.price, payment_method: selectedMethod
         });
         if (res.data.success) {

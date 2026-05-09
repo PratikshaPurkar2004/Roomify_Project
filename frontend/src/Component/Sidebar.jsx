@@ -24,6 +24,7 @@ import {
 } from "react-icons/fa";
 
 import "../styles/Sidebar.css";
+import { API_URL } from "../api";
 
 function Sidebar() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ function Sidebar() {
     if (!userId) return;
 
     const fetchCounts = () => {
-      axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/sidebar-counts/${userId}`)
+      axios.get(`${API_URL}/api/notifications/sidebar-counts/${userId}`)
         .then(res => {
           if (res.data.success) {
             setCounts({
@@ -64,7 +65,7 @@ function Sidebar() {
     const interval = setInterval(fetchCounts, 30000); // Poll less frequently as backup
 
     // REAL-TIME SOCKET UPDATES FOR BADGES
-    const socket = io(import.meta.env.VITE_API_URL);
+    const socket = io(API_URL);
     socket.emit("join_room", { userid: userId }); // Join personal global room
 
     socket.on("receive_message", (message) => {

@@ -4,6 +4,7 @@ import "../../styles/Dashboard.css";
 import { Users, Home, FileText, UserPlus, UserSearch, Plus, MapPin, DollarSign, X, TrendingUp, Activity, Search } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { calculateMatchPercentage } from "../../utils/matchUtils";
+import { API_URL } from "../../api";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -145,12 +146,12 @@ function Dashboard() {
     const userId = localStorage.getItem("userId");
     const userIdParams = userId ? `?userId=${userId}` : "";
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/stats${userIdParams}`)
+    fetch(`${API_URL}/api/dashboard/stats${userIdParams}`)
       .then((res) => res.json())
       .then((data) => setStats(data))
       .catch((err) => console.error(err));
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/users`)
+    fetch(`${API_URL}/api/dashboard/users`)
       .then((res) => res.json())
       .then((data) => setUsers(data.users || []))
       .catch((err) => console.error(err));

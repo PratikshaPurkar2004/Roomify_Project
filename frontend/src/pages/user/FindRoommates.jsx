@@ -5,6 +5,7 @@ import "../../styles/FindRoommates.css";
 import "../../styles/FindRooms.css";
 import { calculateMatchPercentage } from "../../utils/matchUtils";
 import { Search, MapPin, Wallet, User, MessageCircle, UserPlus, Star, Filter, Plus, Home, X, Mail, Briefcase, Calendar, Heart } from "lucide-react";
+import { API_URL } from "../../api";
 
 export default function FindRoommates() {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ export default function FindRoommates() {
   const fetchHostRooms = () => {
     if (!userId) return;
     setLoadingRooms(true);
-    fetch(`${import.meta.env.VITE_API_URL}/api/rooms/host/${userId}`)
+    fetch(`${API_URL}/api/rooms/host/${userId}`)
       .then(r => r.json())
       .then(d => {
         if (d.success) setHostRooms(d.rooms);
@@ -78,7 +79,7 @@ export default function FindRoommates() {
 
   const fetchRMReviews = (targetId) => {
     setLoadingRMReviews(true);
-    fetch(`${import.meta.env.VITE_API_URL}/api/roommates/${targetId}/reviews`)
+    fetch(`${API_URL}/api/roommates/${targetId}/reviews`)
       .then(r => r.json())
       .then(d => {
         if (d.success) setRmReviews(d.reviews);
@@ -101,8 +102,8 @@ export default function FindRoommates() {
     
     setSubmittingRM(true);
     const url = editRMReviewId 
-      ? `${import.meta.env.VITE_API_URL}/api/roommates/reviews/${editRMReviewId}`
-      : `${import.meta.env.VITE_API_URL}/api/roommates/${selectedRM.id}/reviews`;
+      ? `${API_URL}/api/roommates/reviews/${editRMReviewId}`
+      : `${API_URL}/api/roommates/${selectedRM.id}/reviews`;
     
     const method = editRMReviewId ? "PUT" : "POST";
 
@@ -120,7 +121,7 @@ export default function FindRoommates() {
           setEditRMReviewId(null);
           fetchRMReviews(selectedRM.id);
           // Refresh roommate list to update average rating
-          fetch(`${import.meta.env.VITE_API_URL}/api/roommates`)
+          fetch(`${API_URL}/api/roommates`)
             .then(r => r.json())
             .then(data => { 
               const othersList = data.filter(u => String(u.id) !== String(userId));
@@ -136,7 +137,7 @@ export default function FindRoommates() {
   const deleteRMReview = (reviewId) => {
     if (!window.confirm("Are you sure you want to delete this review?")) return;
     
-    fetch(`${import.meta.env.VITE_API_URL}/api/roommates/reviews/${reviewId}`, {
+    fetch(`${API_URL}/api/roommates/reviews/${reviewId}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user_id: userId })
@@ -147,7 +148,7 @@ export default function FindRoommates() {
           showToast("Review deleted! 🗑️");
           fetchRMReviews(selectedRM.id);
           // Refresh list
-          fetch(`${import.meta.env.VITE_API_URL}/api/roommates`)
+          fetch(`${API_URL}/api/roommates`)
             .then(r => r.json())
             .then(data => { 
               const othersList = data.filter(u => String(u.id) !== String(userId));
@@ -168,12 +169,12 @@ export default function FindRoommates() {
   useEffect(() => {
     if (!userId) return;
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/cities/all`)
+    fetch(`${API_URL}/api/cities/all`)
       .then(r => r.json())
       .then(d => { if (d.success) setAllCities(d.cities); });
 
     // Fetch full profile for matching (City, Budget, Prefs)
-    fetch(`${import.meta.env.VITE_API_URL}/api/profile/${userId}`)
+    fetch(`${API_URL}/api/profile/${userId}`)
       .then(r => r.json())
       .then(d => {
         if (d) {
@@ -184,33 +185,33 @@ export default function FindRoommates() {
         }
       });
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/requests/sent/${userId}`)
+    fetch(`${API_URL}/api/requests/sent/${userId}`)
       .then(r => r.json())
       .then(d => { if (d.success) setSentRequests(d.sentRequests); });
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/requests/accepted-ids/${userId}`)
+    fetch(`${API_URL}/api/requests/accepted-ids/${userId}`)
       .then(r => r.json())
       .then(d => { if (d.success) setAcceptedIds(d.acceptedIds); });
 
     fetchHostRooms();
 
     // Fetch cities/states/countries for the modal
-    fetch(`${import.meta.env.VITE_API_URL}/api/cities?all=true`)
+    fetch(`${API_URL}/api/cities?all=true`)
       .then(r => r.json())
       .then(d => { if (d.success) setDbCities(d.cities); });
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/cities/states`)
+    fetch(`${API_URL}/api/cities/states`)
       .then(r => r.json())
       .then(d => { if (d.success) setDbStates(d.states); });
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/cities/countries`)
+    fetch(`${API_URL}/api/cities/countries`)
       .then(r => r.json())
       .then(d => { if (d.success) setDbCountries(d.countries); });
   }, [userId]);
 
   // Fetch roommates
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/roommates`)
+    fetch(`${API_URL}/api/roommates`)
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -252,7 +253,7 @@ export default function FindRoommates() {
     });
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/rooms/add`, { method: "POST", body: formData });
+      const res = await fetch(`${API_URL}/api/rooms/add`, { method: "POST", body: formData });
       const data = await res.json();
       if (data.success) {
         showToast("Room added successfully! 🎉");
@@ -273,7 +274,7 @@ export default function FindRoommates() {
   const handleRequest = async (receiverId, name) => {
     if (!userId) { showToast("Please login first!"); return; }
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requests`, {
+      const res = await fetch(`${API_URL}/api/requests`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sender_id: userId, receiver_id: receiverId }),

@@ -1,5 +1,6 @@
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
+import { API_URL } from "../api";
 // import { useNavigate } from "react-router-dom";
 // import { useSelector } from "react-redux";
 // import "../styles/Home.css";
@@ -33,7 +34,7 @@
 //   useEffect(() => {
 //     const fetchCities = async () => {
 //       try {
-//         const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/cities`);
+//         const { data } = await axios.get(`${API_URL}/api/cities`);
 //         if (data.success && data.cities) {
 //           setCities(data.cities);
 //         }
@@ -45,7 +46,7 @@
 
 //     const fetchPopular = async () => {
 //       try {
-//         const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/rooms/popular`);
+//         const { data } = await axios.get(`${API_URL}/api/rooms/popular`);
 //         if (data.success && data.rooms && data.rooms.length > 0) {
 //           setDynamicPopular(data.rooms);
 //         }
@@ -160,7 +161,7 @@
 //         return (
 //           <div key={idx} className="sp-card" onClick={()=>navigate(`/dashboard/room-details/${prop.room_id}`)}>
 //             <div className="sp-img-wrapper">
-//               <img src={`${import.meta.env.VITE_API_URL}${images[0]}`} alt={prop.property_type} />
+//               <img src={`${API_URL}${images[0]}`} alt={prop.property_type} />
 //               <div className="sp-price">₹{Number(prop.rent).toLocaleString()}<span>/mo</span></div>
 //             </div>
 //             <div className="sp-info">
@@ -463,7 +464,7 @@
               <img
                 src={
                   images[0]
-                    ? `${import.meta.env.VITE_API_URL}${images[0].replace(/"/g, "")}`
+                    ? `${API_URL}${images[0].replace(/"/g, "")}`
                     : "https://via.placeholder.com/300"
                 }
                 alt={prop.property_type}

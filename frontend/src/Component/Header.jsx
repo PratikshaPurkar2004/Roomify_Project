@@ -7,6 +7,7 @@ import { logout } from "../redux/authSlice";
 import "../styles/Header.css";
 
 import axios from "axios";
+import { API_URL } from "../api";
 
 function Header() {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ function Header() {
     if (!activeUserId) return;
 
     const fetchNotifications = () => {
-      axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/${activeUserId}`)
+      axios.get(`${API_URL}/api/notifications/${activeUserId}`)
         .then(res => {
           if (res.data.success) {
             setNotifications(res.data.notifications);
@@ -110,7 +111,7 @@ function Header() {
   if (activeUser) {
     userName = activeUser.name || activeUser.fullname || activeUser.username || "User";
     if (activeUser.profile_image) {
-      profileImage = `${import.meta.env.VITE_API_URL}${activeUser.profile_image}`;
+      profileImage = `${API_URL}${activeUser.profile_image}`;
     } else if (activeUser.gender) {
       const gender = activeUser.gender.toLowerCase();
       if (gender === "male" || gender === "m") {

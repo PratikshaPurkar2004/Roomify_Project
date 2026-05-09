@@ -1,8 +1,9 @@
 import React from "react";
 import "../styles/RoomCard.css";
+import { API_URL } from "../api";
 
 function RoomCard({ room }) {
-  const imageUrl = room.image_url ? `${import.meta.env.VITE_API_URL}${room.image_url}` : room.image;
+  const imageUrl = room.image_url ? `${API_URL}${room.image_url}` : room.image;
   
   return (
     <div className="horizontal-card">

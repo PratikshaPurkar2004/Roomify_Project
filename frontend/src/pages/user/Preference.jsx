@@ -19,6 +19,7 @@ const preferences = [
 ];
 
 import { motion, AnimatePresence } from "framer-motion";
+import { API_URL } from "../../api";
 
 function Preference() {
 
@@ -72,7 +73,7 @@ function Preference() {
 
       const userId = localStorage.getItem("userId");
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/preferences/save-preferences`, {
+      const response = await fetch(`${API_URL}/api/preferences/save-preferences`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -125,7 +126,7 @@ function Preference() {
     try {
       const userId = localStorage.getItem("userId");
       const skipPref = "skipped";
-      await fetch(`${import.meta.env.VITE_API_URL}/api/preferences/save-preferences`, {
+      await fetch(`${API_URL}/api/preferences/save-preferences`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: userId, preferences: [skipPref] })

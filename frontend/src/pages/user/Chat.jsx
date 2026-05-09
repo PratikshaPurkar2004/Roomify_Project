@@ -4,6 +4,7 @@ import "../../styles/Chat.css";
 import { MessageCircle, Send, Search, User, CheckCheck, Trash2, AlertTriangle } from "lucide-react";
 import { io } from "socket.io-client";
 import axios from "axios";
+import { API_URL } from "../../api";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -38,9 +39,9 @@ export default function Chat() {
     const fetchData = async () => {
       try {
         const [eligRes, contactsRes, subRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/chat/eligibility/${userId}`),
-          fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/contacts/${userId}`),
-          fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/status/${userId}`)
+          fetch(`${API_URL}/api/chat/eligibility/${userId}`),
+          fetch(`${API_URL}/api/subscriptions/contacts/${userId}`),
+          fetch(`${API_URL}/api/subscriptions/status/${userId}`)
         ]);
         const eligData = await eligRes.json();
         setMessageCount(eligData.msgCount || 0);
@@ -59,7 +60,7 @@ export default function Chat() {
       } catch (err) { console.error(err); } finally { setIsLoading(false); }
     };
     fetchData();
-    socket.current = io(`${import.meta.env.VITE_API_URL}`);
+    socket.current = io(`${API_URL}`);
     socket.current.emit("join_room", { userid: userId }); // Join personal global room
     
     socket.current.on("receive_message", (message) => {
@@ -106,7 +107,7 @@ export default function Chat() {
 
   const fetchMessages = async (cid) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/${userId}/${cid}`);
+      const res = await fetch(`${API_URL}/api/chat/${userId}/${cid}`);
       const data = await res.json();
       if (data.success) {
         setMessages(data.messages.map(m => ({
@@ -118,7 +119,7 @@ export default function Chat() {
   };
 
   const markAsRead = async (cid) => {
-    try { await fetch(`${import.meta.env.VITE_API_URL}/api/chat/read/${userId}/${cid}`, { method: "PUT" }); } catch (err) { console.error(err); }
+    try { await fetch(`${API_URL}/api/chat/read/${userId}/${cid}`, { method: "PUT" }); } catch (err) { console.error(err); }
   };
 
   const handleSelectContact = (c) => {
@@ -145,7 +146,7 @@ export default function Chat() {
   const handleConfirmPayment = async () => {
     setPaymentLoading(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/subscriptions/subscribe`, { user_id: userId, plan_name: 'Roomify Pro', amount: 499, payment_method: 'UPI' });
+      const res = await axios.post(`${API_URL}/api/subscriptions/subscribe`, { user_id: userId, plan_name: 'Roomify Pro', amount: 499, payment_method: 'UPI' });
       if (res.data.success) { setIsSubscribed(true); setShowPaymentModal(false); }
     } catch (err) { console.error(err); }
     setPaymentLoading(false);
@@ -158,7 +159,7 @@ export default function Chat() {
 
   const confirmClearChat = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/clear/${userId}/${selectedContact.id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/chat/clear/${userId}/${selectedContact.id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         setMessages([]);

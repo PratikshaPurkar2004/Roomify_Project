@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, UserPlus, MessageCircle, Check, X, ArrowRight, Trash2, Clock } from "lucide-react";
 import "../../styles/Notifications.css";
+import { API_URL } from "../../api";
 
 export default function Notifications() {
   const navigate = useNavigate();
@@ -22,8 +23,8 @@ export default function Notifications() {
     try {
       // We'll fetch both requests and a summary of unread messages to build the notifications list
       const [reqRes, chatRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL}/api/requests/${userId}`),
-        fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/contacts/${userId}`)
+        fetch(`${API_URL}/api/requests/${userId}`),
+        fetch(`${API_URL}/api/subscriptions/contacts/${userId}`)
       ]);
 
       const reqData = await reqRes.json();
@@ -70,7 +71,7 @@ export default function Notifications() {
 
   const handleAccept = async (notif) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/${notif.originalId}/status`, {
+      const res = await fetch(`${API_URL}/api/requests/${notif.originalId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "accepted" })
@@ -87,7 +88,7 @@ export default function Notifications() {
 
   const handleDecline = async (notif) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/${notif.originalId}/status`, {
+      const res = await fetch(`${API_URL}/api/requests/${notif.originalId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "rejected" })

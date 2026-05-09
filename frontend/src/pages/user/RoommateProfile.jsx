@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import "../../styles/RoommateProfile.css";
 import { calculateMatchPercentage } from "../../utils/matchUtils";
+import { API_URL } from "../../api";
 
 export default function RoommateProfile() {
   const { id } = useParams();
@@ -32,21 +33,21 @@ export default function RoommateProfile() {
         setLoading(true);
         
         // Fetch target profile
-        const profRes = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/${id}?viewerId=${userId}`);
+        const profRes = await fetch(`${API_URL}/api/profile/${id}?viewerId=${userId}`);
         const profData = await profRes.json();
         
         if (profData.error) throw new Error(profData.error);
         
         // Fetch current user profile for matching
-        const myProfRes = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/${userId}`);
+        const myProfRes = await fetch(`${API_URL}/api/profile/${userId}`);
         const myProfData = await myProfRes.json();
         
         // Fetch sent requests
-        const sentRes = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/sent/${userId}`);
+        const sentRes = await fetch(`${API_URL}/api/requests/sent/${userId}`);
         const sentData = await sentRes.json();
         
         // Fetch accepted connections
-        const acceptedRes = await fetch(`${import.meta.env.VITE_API_URL}/api/requests/accepted-ids/${userId}`);
+        const acceptedRes = await fetch(`${API_URL}/api/requests/accepted-ids/${userId}`);
         const acceptedData = await acceptedRes.json();
         
         setProfile(profData);
@@ -67,7 +68,7 @@ export default function RoommateProfile() {
   const handleRequest = async () => {
     if (!userId) { showToast("Please login first!"); return; }
     try {
-      const res = await fetch("${import.meta.env.VITE_API_URL}/api/requests", {
+      const res = await fetch("${API_URL}/api/requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sender_id: userId, receiver_id: id }),

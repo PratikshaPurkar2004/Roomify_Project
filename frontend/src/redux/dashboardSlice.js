@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { API_URL } from "../api";
 
 // FETCH DASHBOARD STATS
 export const fetchDashboardStats = createAsyncThunk(
@@ -7,7 +8,7 @@ export const fetchDashboardStats = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/dashboard/stats`
+        `${API_URL}/api/dashboard/stats`
       );
       return res.data;
     } catch (error) {

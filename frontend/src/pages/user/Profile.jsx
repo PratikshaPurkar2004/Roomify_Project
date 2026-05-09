@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, X, Trash2 } from "lucide-react";
 import "../../styles/Profile.css";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../api";
 
 const allPreferences = [
   { id: 1, name: "Night Owl", icon: "🦉" },
@@ -60,7 +61,7 @@ export default function Profile() {
 
     // Fetch Profile
     axios
-    .get(`${import.meta.env.VITE_API_URL}/api/profile/${userId}`)
+    .get(`${API_URL}/api/profile/${userId}`)
       .then((res) => {
         if (res.data) {
           setForm({
@@ -78,7 +79,7 @@ export default function Profile() {
       });
 
     // Fetch Preferences
-    fetch(`${import.meta.env.VITE_API_URL}/api/preferences/${userId}`)
+    fetch(`${API_URL}/api/preferences/${userId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data && data.preferences) {
@@ -95,7 +96,7 @@ export default function Profile() {
       });
 
     // Fetch Subscription Status
-    fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/status/${userId}`)
+    fetch(`${API_URL}/api/subscriptions/status/${userId}`)
       .then(res => res.json())
       .then(data => {
         setSubscription({
@@ -129,7 +130,7 @@ export default function Profile() {
     const payload = { ...form };
     
     axios
-      .put(`${import.meta.env.VITE_API_URL}/api/profile/${userId}`, payload)
+      .put(`${API_URL}/api/profile/${userId}`, payload)
       .then(() => {
         showToast("Profile Updated Successfully ✅", "success");
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -147,7 +148,7 @@ export default function Profile() {
 
   const deleteProfile = () => {
     axios
-      .delete(`${import.meta.env.VITE_API_URL}/api/profile/${userId}`)
+      .delete(`${API_URL}/api/profile/${userId}`)
       .then(() => {
         localStorage.clear();
         window.location.href = "/";
@@ -182,7 +183,7 @@ export default function Profile() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/preferences/save-preferences`,
+        `${API_URL}/api/preferences/save-preferences`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
