@@ -54,13 +54,20 @@ const forgotPassword = async (req, res) => {
         socketTimeout: 5000,
       });
 
-      // ✅ SEND EMAIL
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "OTP for Password Reset",
-        text: `Your OTP is: ${otp}`
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("SMTP Timeout")), 3000);
       });
+
+      // ✅ SEND EMAIL
+      await Promise.race([
+        transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: "OTP for Password Reset",
+          text: `Your OTP is: ${otp}`
+        }),
+        timeoutPromise
+      ]);
 
       res.json({
         message: "OTP sent to email"

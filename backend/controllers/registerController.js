@@ -102,12 +102,19 @@ const sendRegisterOtp = async (req, res) => {
         socketTimeout: 5000,
       });
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: normalizedEmail,
-        subject: "Your Registration OTP for Roomify",
-        text: `Hello ${name},\n\nYour OTP for registration is: ${otp}\n\nIt is valid for 5 minutes.`
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("SMTP Timeout")), 3000);
       });
+
+      await Promise.race([
+        transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: normalizedEmail,
+          subject: "Your Registration OTP for Roomify",
+          text: `Hello ${name},\n\nYour OTP for registration is: ${otp}\n\nIt is valid for 5 minutes.`
+        }),
+        timeoutPromise
+      ]);
 
       return res.json({ message: "OTP sent to email" });
     } catch (mailError) {
